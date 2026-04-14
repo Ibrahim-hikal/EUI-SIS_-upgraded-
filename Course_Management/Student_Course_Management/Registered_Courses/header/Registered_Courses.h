@@ -1,0 +1,8 @@
+//
+// Created by ahmed on 4/14/2026.
+//
+
+#ifndef PROJECT_REGISTERED_COURSES_H
+#define PROJECT_REGISTERED_COURSES_H
+
+#endif //PROJECT_REGISTERED_COURSES_H
