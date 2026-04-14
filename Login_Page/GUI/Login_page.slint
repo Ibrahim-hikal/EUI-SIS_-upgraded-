@@ -65,7 +65,13 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Student"; color: white; font-size: 30px * root.ui-scale; }
             Student_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 1; Student_pressed = true; Teacher_pressed = false; Admin_pressed = false; }
+                clicked => { Selected_Login_Type = 1;
+                             Student_pressed = true;
+                             Teacher_pressed = false;
+                             Admin_pressed = false;
+                             user_text.text = ""; // Clear the username field when switching to Student
+                             pass_text.text = ""; // Clear the password field when switching to Student
+                             }
             }
         }
 
@@ -81,7 +87,14 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Teacher"; color: white; font-size: 30px * root.ui-scale; }
             Teacher_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 2; Student_pressed = false; Teacher_pressed = true; Admin_pressed = false; }
+                clicked => { Selected_Login_Type = 2;
+                             Student_pressed = false;
+                             Teacher_pressed = true;
+                             Admin_pressed = false;
+                                user_text.text = ""; // Clear the username field when switching to Teacher
+                                pass_text.text = ""; // Clear the password field when switching to Teacher
+
+                            }
             }
         }
 
@@ -97,7 +110,13 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Admin"; color: white; font-size: 30px * root.ui-scale; }
             Admin_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 3; Student_pressed = false; Teacher_pressed = false; Admin_pressed = true; }
+                clicked => { Selected_Login_Type = 3;
+                            Student_pressed = false;
+                            Teacher_pressed = false;
+                            Admin_pressed = true;
+                            user_text.text = ""; // Clear the username field when switching to Admin
+                            pass_text.text = ""; // Clear the password field when switching to Admin
+                }
             }
         }
     }
