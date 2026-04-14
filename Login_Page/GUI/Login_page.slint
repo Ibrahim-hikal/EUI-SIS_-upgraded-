@@ -1,183 +1,232 @@
 export component Login_Page inherits Rectangle {
+
     //properties
     property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
     property <bool> Student_pressed: false;
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
+    property <bool> show_password: false;
+    // Default to 1 (Student) if you want it pre-selected, or 0 for none
+    property <int> Selected_Login_Type: 1;
 
-
+    focus_anchor := FocusScope { }
 
     min-height: 600px;
     min-width: 1024px;
     preferred-height: 768px;
     preferred-width: 1024px;
-    max-height: 1080px;
-    max-width: 1920px;
-    background: #d0d2d6;
-
-
-        Title:=Rectangle{
-            width: 200px * root.ui-scale;
-            height: 55px * root.ui-scale;
-            x: (parent.width - self.width) / 2;
-            y: 100px * (root.height / 768px);
-            background: #007bff;
-            border-radius: 15px * root.ui-scale;
-            Text{
-
-                text: "Login Page";
-                color: white;
-                font-size: 28px * root.ui-scale;
-
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-        }
-
-    Login_Type:=Rectangle{
-    width: 1000px * root.ui-scale;
-    height: 90px * root.ui-scale;
-    x: (parent.width - self.width) / 2;
-    y: 200px * (root.height / 768px);
-    border-radius: 15px * root.ui-scale;
+    max-height: 840px;
+    max-width: 1300px;
     background: white;
 
-    Student_Button:=Rectangle{
-    width: Student_Touch.has-hover ? 240px * root.ui-scale:230px * root.ui-scale;
-    height: Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-    animate width, height { duration: 100ms;}
-    animate background { duration: 100ms; }
-
-
-    x: 60px * (parent.width / 1024px);
-    y: (parent.height - self.height) / 2;
-    background: Student_Touch.pressed ? #0056b3 : #007bff;
-    border-radius: 15px * root.ui-scale;
-        Text{
-        text: "Student";
-        color: white;
-        font-size: 30px * root.ui-scale;
-
-        horizontal-alignment: center;
-        vertical-alignment: center;
-        }
-        Student_Touch:=TouchArea {
-            width: 100%;
-            height: 100%;
-            clicked => {
-                Student_pressed = true;
-                Teacher_pressed = false;
-                Admin_pressed = false;
-
-            }
-        }
-    }
-    Teacher_Button:=Rectangle{
-        width: Teacher_Touch.has-hover ? 240px * root.ui-scale:230px * root.ui-scale;
-        height: Teacher_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-        animate width, height { duration: 100ms;}
-        animate background { duration: 100ms; }
-
-
-        x: 400px * (parent.width / 1024px);
-        y: (parent.height - self.height) / 2;
-        background: Teacher_Touch.pressed ? #0056b3 : #007bff;
-        border-radius: 15px * root.ui-scale;
-            Text{
-            text: "Teacher";
-            color: white;
-            font-size: 30px * root.ui-scale;
-
-            horizontal-alignment: center;
-            vertical-alignment: center;
-            }
-            Teacher_Touch:=TouchArea {
-                width: 100%;
-                height: 100%;
-                clicked => {
-                Student_pressed = false;
-                Teacher_pressed = true;
-                Admin_pressed = false;
-
-                }
-            }
-        }
-
-        Admin_Button:=Rectangle{
-                width: Admin_Touch.has-hover ? 240px * root.ui-scale:230px * root.ui-scale;
-                height: Admin_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-                animate width, height { duration: 100ms;}
-                animate background { duration: 100ms; }
-
-
-                x: 730px * (parent.width / 1024px);
-                y: (parent.height - self.height) / 2;
-                background: Admin_Touch.pressed ? #0056b3 : #007bff;
-                border-radius: 15px * root.ui-scale;
-                    Text{
-                    text: "Admin";
-                    color: white;
-                    font-size: 30px * root.ui-scale;
-
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                    }
-                    Admin_Touch:=TouchArea {
-                        width: 100%;
-                        height: 100%;
-                        clicked => {
-                        Student_pressed = false;
-                        Teacher_pressed = false;
-                        Admin_pressed = true;
-
-                        }
-                    }
-                }
-
-
-    }
-    Username_Input:=Rectangle{
-        width: 1000px * root.ui-scale;
-        height: 360px * root.ui-scale;
+    // --- TITLE SECTION ---
+    Rectangle {
+        width: 670px * root.ui-scale;
+        height: 65px * root.ui-scale;
         x: (parent.width - self.width) / 2;
-        y: 320px * (parent.height / 768px);
-        background: white;
+        y: 100px * (root.height / 768px);
+        background: #abaeb3;
         border-radius: 15px * root.ui-scale;
-        ID_Email:=Rectangle{
-            width: 880px * root.ui-scale;
-            height: 80px * root.ui-scale;
-            x: 60px * (parent.width / 1024px);
-            y: 130px * (parent.height / 768px);
+
+        Title := Rectangle {
+            width: 640px * root.ui-scale;
+            height: 55px * root.ui-scale;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
             background: #d0d2d6;
             border-radius: 15px * root.ui-scale;
-        Username:=Text{
-            text: Student_pressed ? "ID:" :
-                  Teacher_pressed ? "Email:" :
-                  Admin_pressed ? "Email:" : "ID:";
-            color: black;
-            font-size: 30px * root.ui-scale;
-            x: 60px * (parent.width / 1024px);
-            y: (parent.height - self.height) / 2;
+            Text {
+                text: "Egypt University of Informatics Login Platform";
+                color: black;
+                font-weight: 700;
+                font-size: 28px * root.ui-scale;
             }
         }
-        Password:=Rectangle{
-                    width: 880px * root.ui-scale;
-                    height: 80px * root.ui-scale;
-                    x: 60px * (parent.width / 1024px);
-                    y: 430px * (parent.height / 768px);
-                    background: #d0d2d6;
-                    border-radius: 15px * root.ui-scale;
-                Password_text:=Text{
-                    text: "Password:";
-                    color: black;
-                    font-size: 30px * root.ui-scale;
-                    x: 60px * (parent.width / 1024px);
-                    y: (parent.height - self.height) / 2;
-                    }
-                }
     }
 
+    // --- TAB BUTTONS SECTION ---
+    Login_Type := Rectangle {
+        width: 950px * root.ui-scale;
+        height: 90px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        y: 200px * (root.height / 768px);
+        border-radius: 15px * root.ui-scale;
+        background: #d0d2d6;
+
+        // Student Button
+        Student_Button := Rectangle {
+            width: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
+            height: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
+            x: 60px * (parent.width / 1024px);
+            y: (parent.height - self.height) / 2;
+            background: Student_Touch.pressed ? #003d80 : (Selected_Login_Type == 1 ? #007bff : #586273);
+            border-radius: 15px * root.ui-scale;
+            animate width, height, background { duration: 150ms; }
+
+            Text { text: "Student"; color: white; font-size: 30px * root.ui-scale; }
+            Student_Touch := TouchArea {
+                clicked => { Selected_Login_Type = 1; Student_pressed = true; Teacher_pressed = false; Admin_pressed = false; }
+            }
+        }
+
+        // Teacher Button
+        Teacher_Button := Rectangle {
+            width: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
+            height: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
+            x: 400px * (parent.width / 1024px);
+            y: (parent.height - self.height) / 2;
+            background: Teacher_Touch.pressed ? #003d80 : (Selected_Login_Type == 2 ? #007bff : #586273);
+            border-radius: 15px * root.ui-scale;
+            animate width, height, background { duration: 150ms; }
+
+            Text { text: "Teacher"; color: white; font-size: 30px * root.ui-scale; }
+            Teacher_Touch := TouchArea {
+                clicked => { Selected_Login_Type = 2; Student_pressed = false; Teacher_pressed = true; Admin_pressed = false; }
+            }
+        }
+
+        // Admin Button
+        Admin_Button := Rectangle {
+            width: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
+            height: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
+            x: 730px * (parent.width / 1024px);
+            y: (parent.height - self.height) / 2;
+            background: Admin_Touch.pressed ? #003d80 : (Selected_Login_Type == 3 ? #007bff : #586273);
+            border-radius: 15px * root.ui-scale;
+            animate width, height, background { duration: 150ms; }
+
+            Text { text: "Admin"; color: white; font-size: 30px * root.ui-scale; }
+            Admin_Touch := TouchArea {
+                clicked => { Selected_Login_Type = 3; Student_pressed = false; Teacher_pressed = false; Admin_pressed = true; }
+            }
+        }
+    }
+
+    // --- INPUT FIELDS SECTION ---
+    Username_Input := Rectangle {
+        width: 950px * root.ui-scale;
+        height: 280px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        y: 320px * (parent.height / 768px);
+        background: #e9ebf0;
+        border-radius: 15px * root.ui-scale;
+
+        // ID / Email Field
+        ID_Email := Rectangle {
+            width: 880px * root.ui-scale; height: 80px * root.ui-scale;
+            x: (parent.width - self.width) / 2; y: 30px * root.ui-scale;
+            background: #d0d2d6;
+            border-radius: 15px * root.ui-scale;
+
+            Username_Label := Text {
+                text: Selected_Login_Type == 1 ? "ID:" : "Email:";
+                color: black; font-size: 30px * root.ui-scale; font-weight: 700;
+                x: 40px * root.ui-scale; vertical-alignment: center; height: 100%;
+            }
+
+            User_Input_Container := Rectangle {
+                width: 640px * root.ui-scale; height: 60px * root.ui-scale;
+                x: 210px * root.ui-scale; y: (parent.height - self.height) / 2;
+                background: white; border-radius: 10px * root.ui-scale;
+                border-width: user_text.has-focus ? 2px : 0px;
+                border-color: #007bff;
+
+                // Placeholder
+                if (user_text.text == "" && !user_text.has-focus) : Text {
+                    text: Selected_Login_Type == 1 ? "Enter your ID" : "Enter your Email";
+                    color: #aaa; x: 15px;
+                    vertical-alignment: center;
+                    height: 100%;
+                    font-size: 18px * root.ui-scale;
+                }
+
+                user_text := TextInput {
+                    width: 100%; height: 100%; x: 15px;
+                    vertical-alignment: center;
+                    font-size: 22px * root.ui-scale;
+                    color: black;
+                }
+            }
+        }
+
+        // Password Field
+        Password_Field := Rectangle {
+            width: 880px * root.ui-scale; height: 80px * root.ui-scale;
+            x: (parent.width - self.width) / 2; y: 170px * root.ui-scale;
+            background: #d0d2d6; border-radius: 15px * root.ui-scale;
+
+            Text {
+                text: "Password:";
+                color: black; font-size: 30px * root.ui-scale; font-weight: 700;
+                x: 40px * root.ui-scale; vertical-alignment: center; height: 100%;
+            }
+
+            Pass_Input_Container := Rectangle {
+                width: 640px * root.ui-scale;
+                height: 60px * root.ui-scale;
+                x: 210px * root.ui-scale;
+                y: (parent.height - self.height) / 2;
+                background: white; border-radius: 10px * root.ui-scale;
+                border-width: pass_text.has-focus ? 2px : 0px;
+                border-color: #007bff;
+
+                if (pass_text.text == "" && !pass_text.has-focus) : Text {
+                    text: "Enter your Password";
+                    font-size: 18px * root.ui-scale;
+                    color: #aaa; x: 15px; vertical-alignment: center; height: 100%;
+                }
+
+                pass_text := TextInput {
+                    width: 100%; height: 100%; x: 15px;
+                    vertical-alignment: center;
+                    font-size: 22px * root.ui-scale;
+                    color: black;
+                    input-type: root.show_password ? text : password;
+                }
+                Image {
+                        x: parent.width - 65px; // Positioned at the right end
+                        width: 25px * root.ui-scale;
+                        height: 25px * root.ui-scale;
 
 
+                        // Switch between "Eye" and "Eye-Off" SVGs
+                        source: root.show_password ? @image-url("eye-show.svg") : @image-url("eye-hide.svg");
+
+                        TouchArea {
+                            clicked => { root.show_password = !root.show_password; }
+                        }
+                    }
+            }
+        }
+    }
+        Login_Button := Rectangle {
+            width: Login_touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+            height: Login_touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+            x: (parent.width - self.width) / 2;
+            y: 620px * (parent.height / 768px);
+            background: Login_touch.pressed? #003d80 : #007bff;
+            border-radius: 15px * root.ui-scale;
+            animate width, height, background { duration: 150ms; easing: ease-in; }
+                 
+            
+            Text { text: "Login";
+                   color: white;
+                   font-size: 30px * root.ui-scale;
+                 }
+            Login_touch:= TouchArea {
+
+            }
+
+        }
+        Exit_Button := Image {
+            width: 30px * root.ui-scale;
+            height: 30px * root.ui-scale;
+            colorize: Exit_touch.has-hover ? red : black;
+            x: parent.width - self.width - 20px;
+            y: 20px;
+            source: @image-url("Exit-icon.svg");
+            Exit_touch:=TouchArea {
+                clicked => { }
+            }
+        }
 }
-
