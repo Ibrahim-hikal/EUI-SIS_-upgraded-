@@ -228,5 +228,13 @@ export component Login_Page inherits Rectangle {
             Exit_touch:=TouchArea {
                 clicked => { }
             }
-        }
+
+    }
+    University_Logo := Image{
+                width: 200px * root.ui-scale;
+                height: 70px * root.ui-scale;
+                x: 20px;
+                y: 20px;
+                source: @image-url("Uni-Logo.png");
+                }
 }
