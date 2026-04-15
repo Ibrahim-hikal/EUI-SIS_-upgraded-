@@ -1,3 +1,4 @@
+import { TabWidget } from "std-widgets.slint";
 export component Accept_and_Refuse_Courses inherits Rectangle {
 
     //properties
@@ -5,6 +6,7 @@ export component Accept_and_Refuse_Courses inherits Rectangle {
     property <string> student_id;
     property <string> student_name;
     property <string> faculty;
+
 
     callback next_student();
     callback previous_student();
@@ -22,7 +24,7 @@ export component Accept_and_Refuse_Courses inherits Rectangle {
         width: Previous_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
         height: Previous_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
         x: (parent.width - self.width) / 3;
-        y: 620px * (parent.height / 768px);
+        y: 670px * (parent.height / 768px);
         background: Previous_Student_Touch.pressed? #003d80 : #007bff;
         border-radius: 15px * root.ui-scale;
         animate width, height, background { duration: 150ms; easing: ease-in; }
@@ -40,7 +42,7 @@ export component Accept_and_Refuse_Courses inherits Rectangle {
         width: Next_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
         height: Next_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
         x: (parent.width - self.width) / 1.5;
-        y: 620px * (parent.height / 768px);
+        y: 670px * (parent.height / 768px);
         background: Next_Student_Touch.pressed? #003d80 : #007bff;
         border-radius: 15px * root.ui-scale;
         animate width, height, background { duration: 150ms; easing: ease-in; }
@@ -54,30 +56,322 @@ export component Accept_and_Refuse_Courses inherits Rectangle {
         }
     }
 
-    Text {
+    Student_ID_Label:= Text {
         text: "Student ID: " + root.student_id;
         font-size: 24px * root.ui-scale;
         color: black;
         x: 30px * (parent.width / 1024px);
-        y: 40px * (parent.height / 768px);
+        y: 110px * (parent.height / 768px);
         font-weight: 550;
     }
 
-    Text {
+    Student_Name_Label:= Text {
         text: "Student Name: " + root.student_name;
         font-size: 24px * root.ui-scale;
         color: black;
         x: 30px * (parent.width / 1024px);
-        y: 80px * (parent.height / 768px);
+        y: 150px * (parent.height / 768px);
         font-weight: 550;
     }
 
-    Text {
+    Student_Faculty_Label:= Text {
         text: "Faculty: " + root.faculty;
         font-size: 24px * root.ui-scale;
         color: black;
         x: 30px * (parent.width / 1024px);
-        y: 120px * (parent.height / 768px);
+        y: 190px * (parent.height / 768px);
         font-weight: 550;
+    }
+
+
+    Course_List_Table:= Rectangle {
+        width: 870px * root.ui-scale;
+        height: 350px * root.ui-scale;
+        x: ((parent.width - self.width) / 2)- 50px * root.ui-scale;
+        y: 270px * (root.height / 768px);
+        border-radius: 15px * root.ui-scale;
+        border-width: 2px;
+        border-color: #c2c2c2;
+
+        Table_Line1 := Rectangle {
+            width: parent.width;
+            height: 2px;
+            y: 50px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Line2 := Rectangle {
+            width: parent.width;
+            height: 2px;
+            y: 110px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Line3 := Rectangle {
+            width: parent.width;
+            height: 2px;
+            y: 170px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Line4 := Rectangle {
+            width: parent.width;
+            height: 2px;
+            y: 230px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Line5 := Rectangle {
+            width: parent.width;
+            height: 2px;
+            y: 290px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Column1 := Rectangle {
+            width: 2px * root.ui-scale;
+            height: parent.height;
+            x: 100px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Column2 := Rectangle {
+            width: 2px * root.ui-scale;
+            height: parent.height;
+            x: 320px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Column3 := Rectangle {
+            width: 2px * root.ui-scale;
+            height: parent.height;
+            x: 430px * root.ui-scale;
+            background: #c2c2c2;
+        }
+        Table_Column4 := Rectangle {
+                    width: 2px * root.ui-scale;
+                    height: parent.height;
+                    x: 600px * root.ui-scale;
+                    background: #c2c2c2;
+        }
+        Table_Column5 := Rectangle {
+                    width: 2px * root.ui-scale;
+                    height: parent.height;
+                    x: 710px * root.ui-scale;
+                    background: #c2c2c2;
+        }
+        Table_Course_Code_Header := Text {
+            text: "Code";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 30px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+        Table_Course_Name_Header := Text {
+            text: "Course Name";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 165px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+        Table_Course_Lecture_Day_Header := Text {
+            text: "Day";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 420px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+        Table_Lecture_Combiner:=
+        Text{
+            text: "{";
+            font-size: 62px * root.ui-scale;
+            color: #c7c7c7;
+            x: 500px * (parent.width / 1024px);
+            y: -44px;
+            font-weight: 0;
+            transform-rotation: 90deg;
+            Text {
+                text: "Lectures";
+                font-size: 20px * root.ui-scale;
+                color: #979797;
+                x: -50px;
+                y: 30px;
+                font-weight: 600;
+                transform-rotation: -90deg;
+            }
+        }
+        Table_Course_Lecture_Slot_Header := Text {
+            text: "Slot";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 580px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+
+        Table_Course_Tutorial_Day_Header := Text {
+            text: "Day";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 750px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+        Table_Tutorial_Combiner:=
+        Text{
+            text: "{";
+            font-size: 62px * root.ui-scale;
+            color: #c7c7c7;
+            x: 830px * (parent.width / 1024px);
+            y: -44px;
+            font-weight: 0;
+            transform-rotation: 90deg;
+            Text {
+                text: "Tutorials";
+                font-size: 20px * root.ui-scale;
+                color: #979797;
+                x: -50px;
+                y: 30px;
+                font-weight: 600;
+                transform-rotation: -90deg;
+            }
+        }
+        Table_Course_Tutorial_Slot_Header := Text {
+            text: "Slot";
+            font-size: 22px * root.ui-scale;
+            color: black;
+            x: 905px * (parent.width / 1024px);
+            y: 30px * (parent.height / 768px);
+            font-weight: 550;
+        }
+
+
+
+    }
+    Exit_Button := Image {
+            width: 30px * root.ui-scale;
+            height: 30px * root.ui-scale;
+            colorize: Exit_touch.has-hover ? red : black;
+            x: parent.width - self.width - 20px;
+            y: 20px;
+            source: @image-url("Exit-icon.svg");
+            Exit_touch:=TouchArea {
+                clicked => { }
+            }
+
+    }
+    University_Logo := Image{
+                width: 200px * root.ui-scale;
+                height: 70px * root.ui-scale;
+                x: 20px;
+                y: 20px;
+                source: @image-url("Uni-Logo.png");
+    }
+    Accept_Button1:= Image{
+        width: 40px * root.ui-scale;
+        height: 40px * root.ui-scale;
+        colorize: Accept_touch1.has-hover ? #00ff44 : #218838;
+        x: Course_List_Table.x + Course_List_Table.width + 10px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 290px * root.ui-scale;
+        source: @image-url("Accept-icon.svg");
+        Accept_touch1:=TouchArea {
+            clicked => { }
+        }
+    }
+    Accept_Button2:= Image{
+            width: 40px * root.ui-scale;
+            height: 40px * root.ui-scale;
+            colorize: Accept_touch2.has-hover ? #00ff44 : #218838;
+            x: Course_List_Table.x + Course_List_Table.width + 10px * root.ui-scale;
+            y: Course_List_Table.y + Course_List_Table.height - 228px * root.ui-scale;
+            source: @image-url("Accept-icon.svg");
+            Accept_touch2:=TouchArea {
+                clicked => { }
+            }
+        }
+            Accept_Button3:= Image{
+                    width: 40px * root.ui-scale;
+                    height: 40px * root.ui-scale;
+                    colorize: Accept_touch3.has-hover ? #00ff44 : #218838;
+                    x: Course_List_Table.x + Course_List_Table.width + 10px * root.ui-scale;
+                    y: Course_List_Table.y + Course_List_Table.height - 170px * root.ui-scale;
+                    source: @image-url("Accept-icon.svg");
+                    Accept_touch3:=TouchArea {
+                        clicked => { }
+                    }
+                }
+            Accept_Button4:= Image{
+                    width: 40px * root.ui-scale;
+                    height: 40px * root.ui-scale;
+                    colorize: Accept_touch4.has-hover ? #00ff44 : #218838;
+                    x: Course_List_Table.x + Course_List_Table.width + 10px * root.ui-scale;
+                    y: Course_List_Table.y + Course_List_Table.height - 110px * root.ui-scale;
+                    source: @image-url("Accept-icon.svg");
+                    Accept_touch4:=TouchArea {
+                        clicked => { }
+                    }
+                }
+                Accept_Button5:= Image{
+                        width: 40px * root.ui-scale;
+                        height: 40px * root.ui-scale;
+                        colorize: Accept_touch5.has-hover ? #00ff44 : #218838;
+                        x: Course_List_Table.x + Course_List_Table.width + 10px * root.ui-scale;
+                        y: Course_List_Table.y + Course_List_Table.height - 50px * root.ui-scale;
+                        source: @image-url("Accept-icon.svg");
+                        Accept_touch5:=TouchArea {
+                            clicked => { }
+                        }
+                    }
+
+    Decline_Button1:= Image{
+        width: 35px * root.ui-scale;
+        height: 35px * root.ui-scale;
+        colorize: Decline_touch1.has-hover ? #ff0000 : #ff7777;
+        x: Course_List_Table.x + Course_List_Table.width + 60px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 288px * root.ui-scale;
+        source: @image-url("Decline-icon.svg");
+        Decline_touch1:=TouchArea {
+            clicked => { }
+        }
+    }
+    Decline_Button2:= Image{
+        width: 35px * root.ui-scale;
+        height: 35px * root.ui-scale;
+        colorize: Decline_touch2.has-hover ? #ff0000 : #ff7777;
+        x: Course_List_Table.x + Course_List_Table.width + 60px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 225px * root.ui-scale;
+        source: @image-url("Decline-icon.svg");
+        Decline_touch2:=TouchArea {
+            clicked => { }
+        }
+    }
+    Decline_Button3:= Image{
+        width: 35px * root.ui-scale;
+        height: 35px * root.ui-scale;
+        colorize: Decline_touch3.has-hover ? #ff0000 : #ff7777;
+        x: Course_List_Table.x + Course_List_Table.width + 60px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 168px * root.ui-scale;
+        source: @image-url("Decline-icon.svg");
+        Decline_touch3:=TouchArea {
+            clicked => { }
+        }
+    }
+    Decline_Button4:= Image{
+        width: 35px * root.ui-scale;
+        height: 35px * root.ui-scale;
+        colorize: Decline_touch4.has-hover ? #ff0000 : #ff7777;
+        x: Course_List_Table.x + Course_List_Table.width + 60px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 108px * root.ui-scale;
+        source: @image-url("Decline-icon.svg");
+        Decline_touch4:=TouchArea {
+            clicked => { }
+        }
+    }
+    Decline_Button5:= Image{
+        width: 35px * root.ui-scale;
+        height: 35px * root.ui-scale;
+        colorize: Decline_touch5.has-hover ? #ff0000 : #ff7777;
+        x: Course_List_Table.x + Course_List_Table.width + 60px * root.ui-scale;
+        y: Course_List_Table.y + Course_List_Table.height - 47px * root.ui-scale;
+        source: @image-url("Decline-icon.svg");
+        Decline_touch5:=TouchArea {
+            clicked => { }
+        }
     }
 }

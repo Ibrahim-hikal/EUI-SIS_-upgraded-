@@ -9,7 +9,6 @@ export component Login_Page inherits Rectangle {
     // Default to 1 (Student) if you want it pre-selected, or 0 for none
     property <int> Selected_Login_Type: 1;
 
-    focus_anchor := FocusScope { }
 
     min-height: 600px;
     min-width: 1024px;
@@ -119,7 +118,8 @@ export component Login_Page inherits Rectangle {
                 }
             }
         }
-    }
+        focus_anchor := FocusScope { }
+}
 
     // --- INPUT FIELDS SECTION ---
     Username_Input := Rectangle {

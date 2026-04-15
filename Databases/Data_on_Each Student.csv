@@ -1,3 +1,2 @@
-ID,Name,Passed Courses,Failed Courses,Registered Courses,Requested Courses,Excuse Requested?,Total Excuses Accepted,Withdrawal Requests
-24-101229,Ahmed Samy,PHM011,PHM012,CSE021\\Tuesday 09:00-11:00//Wednesday 09:00-11:00,ECE231\\Tuesday 11:00-13:00//Wednesday 11:00-13:00_HUM012\\Monday 09:00-11:00//Sunday 11:00-13:00,"26/4 Sport ""Tournament on 26th of April""",2,CSE021
-
+ID,Name,Passed Courses,Failed Courses,Registered Courses,Requested Courses,Excuse Requested?,Total Excuses Accepted,Withdrawal Requests,Faculty
+24-101229,Ahmed Samy,PHM011,PHM012,CSE021\\Tuesday 09:00-11:00//Wednesday 09:00-11:00,ECE231\\Tuesday 11:00-13:00//Wednesday 11:00-13:00_HUM012\\Monday 09:00-11:00//Sunday 11:00-13:00,"26/4 Sport ""Tournament on 26th of April""",2,CSE021,Engineering
