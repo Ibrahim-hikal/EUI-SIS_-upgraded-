@@ -1,0 +1,83 @@
+export component Accept_and_Refuse_Courses inherits Rectangle {
+
+    //properties
+    property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
+    property <string> student_id;
+    property <string> student_name;
+    property <string> faculty;
+
+    callback next_student();
+    callback previous_student();
+
+    focus_anchor := FocusScope { }
+    min-height: 600px;
+    min-width: 1024px;
+    preferred-height: 768px;
+    preferred-width: 1024px;
+    max-height: 840px;
+    max-width: 1300px;
+    background: white;
+
+    Previous_Student_Button := Rectangle {
+        width: Previous_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+        height: Previous_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+        x: (parent.width - self.width) / 3;
+        y: 620px * (parent.height / 768px);
+        background: Previous_Student_Touch.pressed? #003d80 : #007bff;
+        border-radius: 15px * root.ui-scale;
+        animate width, height, background { duration: 150ms; easing: ease-in; }
+
+        Text { text: "Previous Student";
+               color: white;
+               font-size: 22px * root.ui-scale;
+             }
+        Previous_Student_Touch:= TouchArea {
+            clicked => { root.previous_student(); }
+        }
+    }
+
+    Next_Student_Button := Rectangle {
+        width: Next_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+        height: Next_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+        x: (parent.width - self.width) / 1.5;
+        y: 620px * (parent.height / 768px);
+        background: Next_Student_Touch.pressed? #003d80 : #007bff;
+        border-radius: 15px * root.ui-scale;
+        animate width, height, background { duration: 150ms; easing: ease-in; }
+
+        Text { text: "Next Student";
+               color: white;
+               font-size: 27px * root.ui-scale;
+             }
+        Next_Student_Touch:= TouchArea {
+            clicked => { root.next_student(); }
+        }
+    }
+
+    Text {
+        text: "Student ID: " + root.student_id;
+        font-size: 24px * root.ui-scale;
+        color: black;
+        x: 30px * (parent.width / 1024px);
+        y: 40px * (parent.height / 768px);
+        font-weight: 550;
+    }
+
+    Text {
+        text: "Student Name: " + root.student_name;
+        font-size: 24px * root.ui-scale;
+        color: black;
+        x: 30px * (parent.width / 1024px);
+        y: 80px * (parent.height / 768px);
+        font-weight: 550;
+    }
+
+    Text {
+        text: "Faculty: " + root.faculty;
+        font-size: 24px * root.ui-scale;
+        color: black;
+        x: 30px * (parent.width / 1024px);
+        y: 120px * (parent.height / 768px);
+        font-weight: 550;
+    }
+}
