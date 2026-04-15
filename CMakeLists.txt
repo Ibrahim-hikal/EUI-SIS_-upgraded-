@@ -3,7 +3,15 @@ project(Project)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable (main.cpp
+# 1. Point to where the installer put Slint
+# Change this path if you installed it elsewhere!
+
+# 2. Find the package locally
+find_package(Slint REQUIRED)
+
+# 2. Define the app and ALL source files
+add_executable(main_app
+        main.cpp
         Features_and_Functions/Login_Page/src/Login_page.cpp
         Features_and_Functions/Login_Page/header/Login_Page.h
         Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h
@@ -28,7 +36,14 @@ add_executable (main.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/src/Admin_Attendance_Excuses.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/src/Student_Attendance_Excuses.cpp
-        Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/header/Admin_Course_Withdrawal.h
-        Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/src/Admin_Course_Withdrawal.cpp
-        Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/header/Student_Course_Withdrawal.h
-        Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/src/Student_Course_Withdrawal.cpp)
+        # Note: Make sure there is a closing parenthesis here after the last .cpp file
+)
+
+# 3. Add Slint files (removed the extra indentation)
+slint_target_sources(main_app
+        Features_and_Functions/Login_Page/GUI/Login_page.slint
+
+)
+
+# 4. Link everything
+target_link_libraries(main_app PRIVATE Slint::Slint)
