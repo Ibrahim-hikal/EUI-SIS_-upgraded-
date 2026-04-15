@@ -1,4 +1,4 @@
-export component Login_Page inherits Rectangle {
+export component Login_Page inherits Window {
 
     //properties
     property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
@@ -6,8 +6,14 @@ export component Login_Page inherits Rectangle {
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
     property <bool> show_password: false;
-    // Default to 1 (Student) if you want it pre-selected, or 0 for none
-    property <int> Selected_Login_Type: 1;
+    
+    //in-out properties to link with backend logic
+    in-out property <int> Selected_Login_Type: 1; // 1 for Student, 2 for Teacher, 3 for Admin
+    in-out property <string> id_email_input;
+    in-out property <string> password_input;
+
+    //callbacks to trigger backend functions on login attempt
+    callback login_attempted(string, string, int);
 
 
     min-height: 600px;
@@ -164,6 +170,7 @@ export component Login_Page inherits Rectangle {
                     vertical-alignment: center;
                     font-size: 22px * root.ui-scale;
                     color: black;
+                    text <=> id_email_input; // Two-way binding with backend property
                 }
             }
         }
@@ -201,6 +208,7 @@ export component Login_Page inherits Rectangle {
                     font-size: 22px * root.ui-scale;
                     color: black;
                     input-type: root.show_password ? text : password;
+                    text <=> password_input; // Two-way binding with backend property
                 }
                 Image {
                         x: parent.width - 65px; // Positioned at the right end
@@ -233,6 +241,7 @@ export component Login_Page inherits Rectangle {
                    font-size: 30px * root.ui-scale;
                  }
             Login_touch:= TouchArea {
+                clicked => { login_attempted(id_email_input,password_input,Selected_Login_Type); }
 
             }
 
