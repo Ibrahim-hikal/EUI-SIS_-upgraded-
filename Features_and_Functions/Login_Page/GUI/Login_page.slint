@@ -6,20 +6,14 @@ export component Login_Page inherits Window {
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
     property <bool> show_password: false;
-
     
     //in-out properties to link with backend logic
     in-out property <int> Selected_Login_Type: 1; // 1 for Student, 2 for Teacher, 3 for Admin
     in-out property <string> id_email_input;
     in-out property <string> password_input;
-    in-out property <bool> Error_State: false; // To indicate if there was an error during login
-    in-out property <string> Error_Message; // To hold the error message to be displayed on the UI
-    in-out property <int> Error_Type: 0; // 0 for no error, 1 for invalid password,
-                                        //2 for user not found, 3 for role mismatch.
 
     //callbacks to trigger backend functions on login attempt
     callback login_attempted(string, string, int);
-    callback edited();
 
 
     min-height: 600px;
@@ -82,7 +76,6 @@ export component Login_Page inherits Window {
                              Admin_pressed = false;
                              user_text.text = ""; // Clear the username field when switching to Student
                              pass_text.text = ""; // Clear the password field when switching to Student
-                             Error_State = false; // Clear error state when switching user types
                              }
             }
         }
@@ -105,7 +98,7 @@ export component Login_Page inherits Window {
                              Admin_pressed = false;
                                 user_text.text = ""; // Clear the username field when switching to Teacher
                                 pass_text.text = ""; // Clear the password field when switching to Teacher
-                                Error_State = false; // Clear error state when switching user types
+
                             }
             }
         }
@@ -127,8 +120,7 @@ export component Login_Page inherits Window {
                             Teacher_pressed = false;
                             Admin_pressed = true;
                             user_text.text = ""; // Clear the username field when switching to Admin
-                            pass_text.text = ""; // Clear the password field when switching to Admin\
-                            Error_State = false; // Clear error state when switching user types
+                            pass_text.text = ""; // Clear the password field when switching to Admin
                 }
             }
         }
@@ -138,9 +130,9 @@ export component Login_Page inherits Window {
     // --- INPUT FIELDS SECTION ---
     Username_Input := Rectangle {
         width: 950px * root.ui-scale;
-        height: 300px * root.ui-scale;
+        height: 280px * root.ui-scale;
         x: (parent.width - self.width) / 2;
-        y: 340px * (parent.height / 768px);
+        y: 320px * (parent.height / 768px);
         background: #e9ebf0;
         border-radius: 15px * root.ui-scale;
 
@@ -162,7 +154,7 @@ export component Login_Page inherits Window {
                 x: 210px * root.ui-scale; y: (parent.height - self.height) / 2;
                 background: white; border-radius: 10px * root.ui-scale;
                 border-width: user_text.has-focus ? 2px : 0px;
-                border-color: Error_State? red :#007bff;
+                border-color: #007bff;
 
                 // Placeholder
                 if (user_text.text == "" && !user_text.has-focus) : Text {
@@ -179,15 +171,6 @@ export component Login_Page inherits Window {
                     font-size: 22px * root.ui-scale;
                     color: black;
                     text <=> id_email_input; // Two-way binding with backend property
-                    edited => {
-                        if (Error_State) {
-                            // Clear error state and message when user starts editing
-                            root.Error_State = false;
-                            root.Error_Message = "";
-                            root.Error_Type = 0;
-                            }
-                    }
-
                 }
             }
         }
@@ -211,7 +194,7 @@ export component Login_Page inherits Window {
                 y: (parent.height - self.height) / 2;
                 background: white; border-radius: 10px * root.ui-scale;
                 border-width: pass_text.has-focus ? 2px : 0px;
-                border-color: Error_State? red :#007bff;
+                border-color: #007bff;
 
                 if (pass_text.text == "" && !pass_text.has-focus) : Text {
                     text: "Enter your Password";
@@ -226,14 +209,6 @@ export component Login_Page inherits Window {
                     color: black;
                     input-type: root.show_password ? text : password;
                     text <=> password_input; // Two-way binding with backend property
-                    edited => {
-                        if (Error_State) {
-                        // Clear error state and message when user starts editing
-                        root.Error_State = false;
-                        root.Error_Message = "";
-                        root.Error_Type = 0;
-                        }
-                    }
                 }
                 Image {
                         x: parent.width - 65px; // Positioned at the right end
@@ -250,26 +225,17 @@ export component Login_Page inherits Window {
                     }
             }
         }
-                    Error_Message_Display := Text {
-                        text: root.Error_State ? root.Error_Message : "";
-                        color: red;
-                        font-size: 20px * root.ui-scale;
-                        font-weight: 700;
-                        x: (parent.width - self.width) / 2;
-                        y: 680px * (parent.height / 768px);
-                    }
-
     }
         Login_Button := Rectangle {
             width: Login_touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
             height: Login_touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
             x: (parent.width - self.width) / 2;
-            y: 660px * (parent.height / 768px);
+            y: 620px * (parent.height / 768px);
             background: Login_touch.pressed? #003d80 : #007bff;
             border-radius: 15px * root.ui-scale;
             animate width, height, background { duration: 150ms; easing: ease-in; }
-
-
+                 
+            
             Text { text: "Login";
                    color: white;
                    font-size: 30px * root.ui-scale;
@@ -289,8 +255,7 @@ export component Login_Page inherits Window {
             source: @image-url("Exit-icon.svg");
             Exit_touch:=TouchArea {
                 clicked => { }
-        }
-
+            }
 
     }
     University_Logo := Image{
