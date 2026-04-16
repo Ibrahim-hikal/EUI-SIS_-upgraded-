@@ -11,6 +11,8 @@ export component Login_Page inherits Rectangle {
     in-out property <int> Selected_Login_Type: 1; // 1 for Student, 2 for Teacher, 3 for Admin
     in-out property <string> id_email_input;
     in-out property <string> password_input;
+    in-out property <bool> Error_State: false;
+    in-out property <string> Error_Message: "";
 
     //callbacks to trigger backend functions on login attempt
     callback login_attempted(string, string, int);
@@ -155,7 +157,7 @@ export component Login_Page inherits Rectangle {
                 background: white;
                 border-radius: 10px * root.ui-scale;
                 border-width: user_text.has-focus ? 2px : 0px;
-                border-color: #007bff;
+                border-color: root.Error_State ? red : #007bff;
 
                 // Placeholder
                 if (user_text.text == "" && !user_text.has-focus) : Text {
@@ -195,7 +197,7 @@ export component Login_Page inherits Rectangle {
                 y: (parent.height - self.height) / 2;
                 background: white; border-radius: 10px * root.ui-scale;
                 border-width: pass_text.has-focus ? 2px : 0px;
-                border-color: #007bff;
+                border-color: root.Error_State ? red : #007bff;
 
                 if (pass_text.text == "" && !pass_text.has-focus) : Text {
                     text: "Enter your Password";
@@ -223,6 +225,14 @@ export component Login_Page inherits Rectangle {
                         TouchArea {
                             clicked => { root.show_password = !root.show_password; }
                         }
+                    }
+                Error_Message_Display := Text {
+                    text: root.Error_State ? root.Error_Message : "";
+                    color: red;
+                    font-size: 16px * root.ui-scale;
+                    font-weight: 700;
+                    x: 60px * root.ui-scale;
+                    y: 75px * root.ui-scale; // Positioned below the password field
                     }
             }
         }
