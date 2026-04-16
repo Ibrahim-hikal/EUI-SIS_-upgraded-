@@ -6,10 +6,10 @@
 using namespace std;
 
 int main() {
-    auto ui = Login_Page::create(); // Verify this matches your 'export component' name
+    auto ui = Login_Page::create();
     Login_Manager& auth_system = Login_Manager::get_instance();
 
-    // Ensure 'login_attempted' matches your .slint callback name exactly
+
     ui->on_login_attempted([&](slint::SharedString id_email, slint::SharedString password, int role_index) {
 
         User_Role selected_role = static_cast<User_Role>(role_index);
