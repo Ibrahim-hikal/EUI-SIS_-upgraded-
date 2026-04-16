@@ -26,6 +26,8 @@ export component Login_Page inherits Rectangle {
     max-width: 1300px;
     background: white;
 
+
+
     // --- TITLE SECTION ---
     Rectangle {
         width: 670px * root.ui-scale;
@@ -174,6 +176,13 @@ export component Login_Page inherits Rectangle {
                     font-size: 22px * root.ui-scale;
                     color: black;
                     text <=> id_email_input; // Two-way binding with backend property
+                    edited => {
+                        // Clear error state when user starts editing
+                        if (root.Error_State) {
+                            root.Error_State = false;
+                            root.Error_Message = "";
+                        }
+                    }
                 }
             }
         }
@@ -212,6 +221,13 @@ export component Login_Page inherits Rectangle {
                     color: black;
                     input-type: root.show_password ? text : password;
                     text <=> password_input; // Two-way binding with backend property
+                    edited => {
+                        // Clear error state when user starts editing
+                        if (root.Error_State) {
+                            root.Error_State = false;
+                            root.Error_Message = "";
+                        }
+                    }
                 }
                 Image {
                         x: parent.width - 65px; // Positioned at the right end
@@ -252,7 +268,9 @@ export component Login_Page inherits Rectangle {
                    font-size: 30px * root.ui-scale;
                  }
             Login_touch:= TouchArea {
-                clicked => { login_attempted(id_email_input,password_input,Selected_Login_Type); }
+                clicked => { login_attempted(id_email_input,password_input,Selected_Login_Type);
+
+                }
 
             }
 

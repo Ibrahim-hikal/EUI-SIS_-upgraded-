@@ -24,8 +24,8 @@ export component Main_App inherits Window {
 
             ui-scale: root.global_scale;
                 // Pass the top-level properties DOWN into the component
-                Error_State: root.login_error_state;
-                Error_Message: root.login_error_msg;
+                Error_State <=> root.login_error_state;
+                Error_Message <=> root.login_error_msg;
 
                 login_attempted(id, pass, role) => {
                     root.check_credentials(id, pass, role);
