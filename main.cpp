@@ -1,39 +1,39 @@
 #include <iostream>
 #include <string>
 #include "Features_and_Functions/Login_Page/header/Login_Page.h"
-#include "Login_page.h" // Matches the lowercase 'p' from your build log
+#include "main.h"
+
+
 
 using namespace std;
 
 int main() {
-    auto ui = Login_Page::create();
-    Login_Manager& auth_system = Login_Manager::get_instance();
+    auto ui = Main_App::create();
+    Login_Manager& db = Login_Manager::get_instance();
 
+    ui->on_check_credentials([&](slint::SharedString id, slint::SharedString pass, int role) {
 
-    ui->on_login_attempted([&](slint::SharedString id_email, slint::SharedString password, int role_index) {
+            Login_Status status = db.login(
+                std::string(id),
+                std::string(pass),
+                static_cast<User_Role>(role)
+            );
 
-        User_Role selected_role = static_cast<User_Role>(role_index);
-
-        // Explicitly convert Slint strings to std::string
-        Login_Status status = auth_system.login(
-            std::string(id_email),
-            std::string(password),
-            selected_role
-        );
-
-        if (status == Login_Status::SUCCESS) {
-        ui->set_Error_State(false);
-        std::cout << "Login Success. Navigating..." << std::endl;
-        // logic to switch windows would go here
-    } else {
-        ui->set_Error_State(true);
+            if (status == Login_Status::SUCCESS) {
+                // This is the "Magic Switch"
+                // It stays in the same window but swaps the Rectangles
+                ui->set_active_panel(1);
+                ui->set_login_error_state(false);
+                std::cout << "Switched to Student Profile" << std::endl;
+            } else {
+                ui->set_login_error_state(true);
         // Map the backend status to your Slint strings
         if (status == Login_Status::PASSWORD_INCORRECT) {
-            ui->set_Error_Message("The password you entered is incorrect.");
+            ui->set_login_error_msg("The password you entered is incorrect.");
         } else if (status == Login_Status::USER_NOT_FOUND) {
-            ui->set_Error_Message("Account not found. Check your ID/Email.");
+            ui->set_login_error_msg("Account not found. Check your ID/Email.");
         } else if (status == Login_Status::ROLE_MISMATCH) {
-            ui->set_Error_Message("Incorrect portal selected for this account.");
+            ui->set_login_error_msg("Incorrect portal selected for this account.");
         }
     }
     });

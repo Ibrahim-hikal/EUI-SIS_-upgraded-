@@ -1,0 +1,42 @@
+import { Login_Page } from "../Features_and_Functions/Login_Page/GUI/Login_page.slint";
+import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
+
+export component Main_App inherits Window {
+    // 0: Login, 1: Student Dashboard, 2: Admin, etc.
+    in-out property <int> active_panel: 0;
+    in-out property <bool> login_error_state: false;
+    in-out property <string> login_error_msg: "";
+    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
+
+    callback check_credentials(string, string, int);
+
+       min-height: 600px;
+       min-width: 1024px;
+       preferred-height: 768px;
+       preferred-width: 1024px;
+       max-height: 840px;
+       max-width: 1300px;
+    title: "EUI - SIS";
+
+    background: #f0f0f0;
+
+        if (active_panel == 0) : Login_Page {
+
+            ui-scale: root.global_scale;
+                // Pass the top-level properties DOWN into the component
+                Error_State: root.login_error_state;
+                Error_Message: root.login_error_msg;
+
+                login_attempted(id, pass, role) => {
+                    root.check_credentials(id, pass, role);
+                }
+            }
+
+    if (active_panel == 1) : Student_Profile {
+            width: parent.width;
+            height: parent.height;
+        // Link the logout back to the login screen
+        Logout => { root.active_panel = 0; }
+        assigned_scale: root.global_scale;
+        }
+    }

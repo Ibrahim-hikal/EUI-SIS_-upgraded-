@@ -42,6 +42,9 @@ add_executable(main_app
 # 3. Add Slint files (removed the extra indentation)
 slint_target_sources(main_app
         Features_and_Functions/Login_Page/GUI/Login_page.slint
+        Features_and_Functions/main.slint
+        Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint
+        Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint
 
 )
 

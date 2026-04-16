@@ -1,7 +1,7 @@
-export component Login_Page inherits Window {
+export component Login_Page inherits Rectangle {
 
     //properties
-    property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
+    in property <float> ui-scale: 1.0;
     property <bool> Student_pressed: false;
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
@@ -160,7 +160,8 @@ export component Login_Page inherits Window {
             User_Input_Container := Rectangle {
                 width: 640px * root.ui-scale; height: 60px * root.ui-scale;
                 x: 210px * root.ui-scale; y: (parent.height - self.height) / 2;
-                background: white; border-radius: 10px * root.ui-scale;
+                background: white;
+                border-radius: 10px * root.ui-scale;
                 border-width: user_text.has-focus ? 2px : 0px;
                 border-color: Error_State? red :#007bff;
 
