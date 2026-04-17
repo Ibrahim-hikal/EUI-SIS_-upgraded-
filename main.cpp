@@ -20,11 +20,10 @@ int main() {
             );
 
             if (status == Login_Status::SUCCESS) {
-                // This is the "Magic Switch"
-                // It stays in the same window but swaps the Rectangles
-                ui->set_active_panel(1);
                 ui->set_login_error_state(false);
-                std::cout << "Switched to Student Profile" << std::endl;
+                std::cout << "Success! Setting active_panel to: " << role << std::endl;
+                ui->set_active_panel(role);
+
             } else {
                 ui->set_login_error_state(true);
         // Map the backend status to your Slint strings

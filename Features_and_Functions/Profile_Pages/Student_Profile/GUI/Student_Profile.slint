@@ -2,7 +2,7 @@ export component Student_Profile inherits Rectangle {
 
 
     //properties
-    property <float> ui-scale: assigned_scale;
+    in property <float> ui-scale: assigned_scale;
     property <int> selected-menu-item: 0; // 0: Profile, 1: Manage Courses, etc.
 
     in property <float> assigned_scale: 1.0;
@@ -289,4 +289,5 @@ export component Student_Profile inherits Rectangle {
 
                 }
         }
+        Profile := Rectangle{}
 }
