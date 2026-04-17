@@ -3,7 +3,7 @@ import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
 export component Main_App inherits Window {
-    // 0: Login, 1: Student Dashboard, 2: Admin, 3: Teacher
+    // 0: Login, 1: Student Dashboard, 2: Teacher, 3: Admin
     in-out property <int> active_panel: 0;
     in-out property <bool> login_error_state: false;
     in-out property <string> login_error_msg: "";
