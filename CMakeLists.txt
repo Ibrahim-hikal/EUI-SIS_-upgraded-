@@ -36,6 +36,8 @@ add_executable(main_app
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/src/Admin_Attendance_Excuses.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/src/Student_Attendance_Excuses.cpp
+        Features_and_Functions/Profile_Pages/ImageManager.cpp
+        Features_and_Functions/Profile_Pages/ImageManager.h
         # Note: Make sure there is a closing parenthesis here after the last .cpp file
 )
 

@@ -1,4 +1,4 @@
-
+import { ST_Profile } from "Student_Profile_sub.slint";
 
 
 
@@ -14,9 +14,19 @@ export component Student_Profile inherits Rectangle {
 
     //in-out properties
     in-out property <int> Logout_value: 0; // 0: default, 1: confirmation, 2: finalized
+    in-out property <string> user_name;
+    in-out property <string> user_id;
+    in-out property <string> user_Faculty;
+    in-out property <string> student_gpa;
+    in-out property <string> user_email;
+    in-out property <image> user_profile_pic;
+
+    //out properties
+    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
 
     //callbacks
     callback Logout;
+    callback change_picture();
 
 
         min-height: 600px;
@@ -216,15 +226,36 @@ export component Student_Profile inherits Rectangle {
                     }
                 }
             }
+        }
+        Rectangle {
+                    background: white;
+                    width: parent.width - Selection_menu.width;
+                    x: Selection_menu.width;
+
+                    if (selected-menu-item == 0) : ST_Profile {
+                        ui-scale: root.ui-scale;
+                        User_name: root.user_name;
+                        User_id: root.user_id;
+                        User_Faculty: root.user_Faculty;
+                        Student_gpa: root.student_gpa;
+                        User_email: root.user_email;
+                        User_profile_pic: root.user_profile_pic;
+
+                        change_picture => { root.change_picture(); }
+                    }
+                } // <--- THIS BRACE CLOSES THE MAIN CONTENT AREA
+
+                // --- PUT THE POPUP HERE AT THE VERY END ---
                 if (root.Logout_value == 1) : Rectangle {
                     width: 400px * root.ui-scale;
                     height: 200px * root.ui-scale;
-                    x: (root.width - self.width) / 2;
-                    y: (root.height - self.height) / 2;
+                    x: (parent.width - self.width) / 2; // Centers it on the whole window
+                    y: (parent.height - self.height) / 2;
                     background: #d0d2d6;
                     border-radius: 15px;
                     border-color: #727275;
                     border-width: 2px;
+                    z: 100; // Forces it to the very front layer
 
                     Confirmation_text := Text {
                         text: "Are you sure you want to logout?";
@@ -235,6 +266,7 @@ export component Student_Profile inherits Rectangle {
                         vertical-alignment: center;
                         y: 40px * root.ui-scale;
                     }
+
                     Yes_button := Rectangle {
                         width: 100px * root.ui-scale;
                         height: 40px * root.ui-scale;
@@ -242,27 +274,18 @@ export component Student_Profile inherits Rectangle {
                         y: 120px * root.ui-scale;
                         border-radius: 10px;
                         background: Yes_button_touch_area.pressed ? darkred :(Yes_button_touch_area.has-hover ? red :#007bff);
-                        animate background {
-                            duration: 200ms;
-                            easing: ease-in-out;
-                        }
+                        animate background { duration: 200ms; easing: ease-in-out; }
 
-                        Text {
-                            text: "Yes";
-                            font-size: 18px * root.ui-scale;
-                            font-weight: 600;
-                            color: white;
-                            horizontal-alignment: center;
-                            vertical-alignment: center;
-                        }
+                        Text { text: "Yes"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; }
 
                         Yes_button_touch_area := TouchArea {
                             clicked => {
-                                root.Logout_value = 2; // Finalize logout
-                                root.Logout(); // Call the Logout callback
+                                root.Logout_value = 2;
+                                root.Logout();
                             }
                         }
                     }
+
                     No_button := Rectangle {
                         width: 100px * root.ui-scale;
                         height: 40px * root.ui-scale;
@@ -270,29 +293,15 @@ export component Student_Profile inherits Rectangle {
                         y: 120px * root.ui-scale;
                         border-radius: 10px;
                         background: No_button_touch_area.pressed ? #003d80 :(No_button_touch_area.has-hover ? #104682 :#007bff);
-                        animate background {
-                            duration: 200ms;
-                            easing: ease-in-out;
-                        }
+                        animate background { duration: 200ms; easing: ease-in-out; }
 
-                        Text {
-                            text: "No";
-                            font-size: 18px * root.ui-scale;
-                            font-weight: 600;
-                            color: white;
-                            horizontal-alignment: center;
-                            vertical-alignment: center;
-                        }
+                        Text { text: "No"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; }
 
                         No_button_touch_area := TouchArea {
                             clicked => {
-                                root.Logout_value = 0; // Cancel logout
+                                root.Logout_value = 0;
                             }
                         }
                     }
-
-
                 }
         }
-        Profile := Rectangle{}
-}

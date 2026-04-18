@@ -8,10 +8,19 @@ export component Main_App inherits Window {
     in-out property <bool> login_error_state: false;
     in-out property <string> login_error_msg: "";
 
+        in-out property <string> user_name;
+        in-out property <string> user_id;
+        in-out property <string> user_Faculty;
+        in-out property <string> student_gpa;
+        in-out property <string> user_email;
+        in-out property <image> user_profile_pic;
+
     // Global scale calculation
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
 
     callback check_credentials(string, string, int);
+    callback change_picture();
+    callback logout();
 
     min-height: 600px;
     min-width: 1024px;
@@ -28,7 +37,6 @@ export component Main_App inherits Window {
         height: 100%;
 
         if (active_panel == 0) : Login_Page {
-            // Ensure these property names match exactly what is in Login_page.slint
             ui-scale: root.global_scale;
             Error_State <=> root.login_error_state;
             Error_Message <=> root.login_error_msg;
@@ -43,6 +51,13 @@ export component Main_App inherits Window {
             height: 100%;
             ui-scale: root.global_scale;
             Logout => { root.active_panel = 0; }
+            user_name: root.user_name;
+            user_id: root.user_id;
+            user_email: root.user_email;
+            user_Faculty: root.user_Faculty;
+            user_profile_pic: root.user_profile_pic;
+            student_gpa: root.student_gpa;
+            change_picture => {root.change_picture(); }
         }
             if (active_panel == 2) : Teacher_Profile {
                 width: 100%;
