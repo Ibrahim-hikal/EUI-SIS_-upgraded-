@@ -1,0 +1,114 @@
+export component ST_Profile inherits Rectangle {
+    // Properties
+    in-out property <float> ui-scale: 1.0;
+    in-out property <string> User_name: "";
+    in-out property <string> User_id: "";
+    in-out property <string> User_email: "";
+    in-out property <string> User_Faculty: "";
+    in-out property <string> Student_gpa: "";
+    in-out property <image> User_profile_pic;
+
+    callback change_picture();
+
+    background: white;
+
+    Profile_Window := Rectangle {
+        width: 100%;
+        height: 100%;
+        background: white;
+
+        Pfp_container := Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: 30px * ui-scale;
+            border-color : black;
+            border-width: 3px * ui-scale;
+            width: 300px * ui-scale;
+            height: 300px * ui-scale;
+            background: black;
+            border-radius: self.width / 2;
+            clip: true;
+
+            Profile_Pic := Image {
+                source: root.User_profile_pic;
+                width: parent.width * 1.5;
+                height: parent.height * 1.5;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                image-fit: cover;
+                opacity: picture_hover.has-hover ? 0.9 : 1.0;
+                animate opacity { duration: 200ms; easing: ease-in-out; }
+                picture_hover := TouchArea {
+                clicked => {
+                    root.change_picture();
+                }
+                }
+            }
+
+            edit_icon := Image {
+                source: @image-url("../../../../Databases/Profile_Pics/edit_icon.svg");
+                width: 100px * ui-scale;
+                colorize: picture_hover.pressed ? #262626 : #383838;
+                x: parent.width - self.width - 30px;
+                y: parent.height - self.height - 5px;
+                opacity: picture_hover.has-hover ? 1 : 0.0;
+                animate opacity { duration: 200ms; easing: ease-in-out; }
+            }
+        }
+
+        Text_container := Rectangle {
+            width: 700px * ui-scale;
+            height: 500px * ui-scale;
+            y: 380px * ui-scale;
+            x: (parent.width - self.width) / 2;
+
+            // --- 1. NAME BOX (Full Width) ---
+            Rectangle {
+                width: 100%; height: 70px * ui-scale;
+                y: 0px; // Top of the container
+                background: #abaeb3; border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                Text { x: 20px * ui-scale; text: "Name: " + User_name; font-size: 22px * ui-scale; font-weight: 700; vertical-alignment: center; }
+            }
+
+            // --- 2. ID BOX (Row 1, Left) ---
+            Rectangle {
+                width: 320px * ui-scale; height: 70px * ui-scale;
+                x: 0px;
+                y: 120px * ui-scale; // 70px (name box) + 15px gap
+                background: #abaeb3; border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                Text { x: 20px * ui-scale; text: "ID: " + User_id; font-size: 18px * ui-scale; font-weight: 700; vertical-alignment: center; }
+            }
+
+            // --- 3. EMAIL BOX (Row 1, Right) ---
+            Rectangle {
+                width: 320px * ui-scale; height: 70px * ui-scale;
+                x: 380px * ui-scale;
+                y: 120px * ui-scale;
+                background: #abaeb3; border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                Text { x: 20px * ui-scale; text: "Email: " + User_email; font-size: 16px * ui-scale; font-weight: 700; vertical-alignment: center; }
+            }
+
+            // --- 4. FACULTY BOX (Row 2, Left) ---
+            Rectangle {
+                width: 320px * ui-scale; height: 70px * ui-scale;
+                x: 0px;
+                y: 250px * ui-scale; // 85px + 70px + 15px gap
+                background: #abaeb3; border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                Text { x: 20px * ui-scale; text: "Faculty: " + User_Faculty; font-size: 18px * ui-scale; font-weight: 700; vertical-alignment: center; }
+            }
+
+            // --- 5. GPA BOX (Row 2, Right) ---
+            Rectangle {
+                width: 320px * ui-scale; height: 70px * ui-scale;
+                x: 380px * ui-scale;
+                y: 250px * ui-scale;
+                background: #abaeb3; border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                Text { x: 20px * ui-scale; text: "GPA: " + Student_gpa; font-size: 18px * ui-scale; font-weight: 700; vertical-alignment: center; }
+            }
+        }
+    }
+}

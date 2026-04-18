@@ -15,7 +15,7 @@ Login_Manager& Login_Manager::get_instance() {
 }
 
 Login_Status Login_Manager::login(const string& input_field, const string& password, User_Role expected_role) {
-    ifstream file("../Databases/Login_Credentials.csv");
+    ifstream file("Databases/Login_Credentials.csv");
 
     if (!file.is_open()) {
         cerr << "Error: Could not open Login_Credentials.csv" << endl;
