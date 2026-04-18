@@ -38,6 +38,12 @@ public:
         if (id.empty() || id == "Loading...") return "Loading...";
         return id + "@students.eui.edu.eg";
     }
+    void reset() {
+        id = "";
+        name = "Loading...";
+        faculty = "";
+        gpa = "";
+    }
 };
 
 #endif

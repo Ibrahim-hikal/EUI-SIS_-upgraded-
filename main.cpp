@@ -76,6 +76,11 @@ int main() {
     });
 
     ui->on_logout([&]() {
+        Student_Profile::get_instance().reset(); // Clear the loaded student data
+        // Clear all user-related UI fields
+        ui->set_user_name("");
+        ui->set_user_id("");
+        ui->set_user_profile_pic(slint::Image());
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
         cout << "User logged out successfully." << endl;

@@ -32,18 +32,9 @@ vector<string> parse_csv_line(const string& line) {
 }
 
 void Student_Profile::load_profile(const string& target_id) {
-    cout << "\n============== DATABASE RADAR ==============" << endl;
-    cout << "1. Target ID from Login: [" << target_id << "]" << endl;
-    cout << "2. Trying to open path: " << STUDENT_DB << endl;
-
     ifstream file(STUDENT_DB);
 
     if (!file.is_open()) {
-        cout << "❌ CRITICAL ERROR: Cannot open the database file!" << endl;
-        cout << "Reason 1: The path above is misspelled." << endl;
-        cout << "Reason 2: You have the CSV open in Excel right now. Close it!" << endl;
-        cout << "============================================" << endl;
-
         // Push error text to the UI so you know it failed
         this->name = "DATABASE ERROR";
         this->id = "FILE NOT FOUND";
@@ -52,7 +43,7 @@ void Student_Profile::load_profile(const string& target_id) {
         return;
     }
 
-    cout << "✅ SUCCESS: File opened successfully!" << endl;
+    cout << "SUCCESS: File opened successfully!" << endl;
 
     string line;
     getline(file, line); // Skip the Header row
@@ -76,7 +67,7 @@ void Student_Profile::load_profile(const string& target_id) {
             this->faculty = cols[9];
             this->gpa = cols[10];
 
-            cout << "⭐ MATCH FOUND! Loaded data for: " << this->name << endl;
+            cout << "MATCH FOUND! Loaded data for: " << this->name << endl;
             found = true;
             break;
         }
@@ -84,7 +75,7 @@ void Student_Profile::load_profile(const string& target_id) {
     file.close();
 
     if (!found) {
-        cout << "❌ ERROR: File was read, but ID [" << target_id << "] was not found inside." << endl;
+        cout << "ERROR: File was read, but ID [" << target_id << "] was not found inside." << endl;
     }
     cout << "============================================\n" << endl;
 }
