@@ -1,9 +1,27 @@
-#include "../header/Accept_and_Refuse_Courses.h"
 #include <iostream>
+#include <vector>
+#include <map>
+#include "accept_and_refuse_courses.h"
+#include "../header/Accept_and_Refuse_Courses.h"
 
 using namespace std;
 
-// Helper to remove extra spaces/newlines from CSV data
+
+
+void updateStudentCSV(string filename, const vector<Student>& students) {
+    ofstream file(filename);
+    if (!file.is_open()) return;
+
+    // Write header
+    file << "ID,Name,Passed Courses,Failed Courses,Registered Courses,Requested Courses,Excuse Requested?,Total Excuses Accepted,Withdrawal Requests,Faculty,GPA\n";
+
+    for (const auto& s : students) {
+        file << s.id << "," << s.name << ",,,,"; // Keeping existing gaps for simplicity
+
+        // Logic to format Registered and Requested strings goes here based on the modifications made during the 'Submit' callback.
+    }
+}
+
 string trim(const string& s) {
     size_t first = s.find_first_not_of(" \t\r\n");
     if (string::npos == first) return s;
@@ -17,7 +35,7 @@ vector<string> parseCSVLine(string line) {
     bool inQuotes = false;
     for (size_t i = 0; i < line.length(); ++i) {
         char c = line[i];
-        if (c == '"') inQuotes = !inQuotes;
+        if (c == '\"') inQuotes = !inQuotes;
         else if (c == ',' && !inQuotes) {
             result.push_back(trim(cell));
             cell.clear();
@@ -30,19 +48,13 @@ vector<string> parseCSVLine(string line) {
 map<string, string> loadCourseNames(string filename) {
     map<string, string> names;
     ifstream file(filename);
+    if (!file.is_open()) return names;
     string line;
-    if (!file.is_open()) {
-        cerr << "Error: Could not open Offered_Courses.csv" << endl;
-        return names;
-    }
-    getline(file, line); // Skip header
+    getline(file, line); // header
     while (getline(file, line)) {
         if (line.empty()) continue;
         vector<string> cols = parseCSVLine(line);
-        if (cols.size() >= 4) {
-            // Code is index 0, Name is index 3 in your CSV
-            names[cols[0]] = cols[3];
-        }
+        if (cols.size() >= 4) names[cols[0]] = cols[3];
     }
     return names;
 }
@@ -50,52 +62,35 @@ map<string, string> loadCourseNames(string filename) {
 vector<Student> parseStudentData(string filename, const map<string, string>& courseNames) {
     vector<Student> students;
     ifstream file(filename);
-    string line;
     if (!file.is_open()) return students;
-
-    getline(file, line); // Skip header row
-
+    string line;
+    getline(file, line); // header
     while (getline(file, line)) {
         if (line.empty()) continue;
         vector<string> columns = parseCSVLine(line);
-        if (columns.size() < 10) continue;
-
+        if (columns.size() < 11) continue;
         Student s;
-        s.id = columns[0];
-        s.name = columns[1];
-        s.faculty = columns[9];
+        s.id = columns[0]; s.name = columns[1]; s.passedCourses = columns[2];
+        s.failedCourses = columns[3]; s.registeredCourses = columns[4];
+        s.excuseRequested = columns[6]; s.totalExcuses = columns[7];
+        s.withdrawalRequests = columns[8]; s.faculty = columns[9]; s.gpa = columns[10];
 
-        stringstream ss(columns[5]); // Requested Courses
+        stringstream ss(columns[5]); // Requested Courses column
         string segment;
         while (getline(ss, segment, '_')) {
             if (segment.empty()) continue;
-            size_t backslashPos = segment.find("\\\\");
-            size_t slashPos = segment.find("//");
-
-            if (backslashPos != string::npos && slashPos != string::npos) {
+            size_t bPos = segment.find("\\\\");
+            size_t sPos = segment.find("//");
+            if (bPos != string::npos && sPos != string::npos) {
                 Course c;
-                c.code = segment.substr(0, backslashPos);
-
-                // LOOKUP: Get name from map based on code
-                if (courseNames.count(c.code)) {
-                    c.name = courseNames.at(c.code);
-                } else {
-                    c.name = "Unknown Course";
-                }
-
-                string fullLec = segment.substr(backslashPos + 2, slashPos - (backslashPos + 2));
-                string fullTut = segment.substr(slashPos + 2);
-
-                size_t lecSpace = fullLec.find(' ');
-                if (lecSpace != string::npos) {
-                    c.lectureDay = fullLec.substr(0, lecSpace);
-                    c.lectureTime = fullLec.substr(lecSpace + 1);
-                }
-                size_t tutSpace = fullTut.find(' ');
-                if (tutSpace != string::npos) {
-                    c.tutorialDay = fullTut.substr(0, tutSpace);
-                    c.tutorialTime = fullTut.substr(tutSpace + 1);
-                }
+                c.code = segment.substr(0, bPos);
+                c.name = courseNames.count(c.code) ? courseNames.at(c.code) : "Unknown";
+                string fLec = segment.substr(bPos + 2, sPos - (bPos + 2));
+                string fTut = segment.substr(sPos + 2);
+                size_t lS = fLec.find(' ');
+                if (lS != string::npos) { c.lectureDay = fLec.substr(0, lS); c.lectureTime = fLec.substr(lS + 1); }
+                size_t tS = fTut.find(' ');
+                if (tS != string::npos) { c.tutorialDay = fTut.substr(0, tS); c.tutorialTime = fTut.substr(tS + 1); }
                 s.requestedCourses.push_back(c);
             }
         }
@@ -103,3 +98,22 @@ vector<Student> parseStudentData(string filename, const map<string, string>& cou
     }
     return students;
 }
+
+void saveAllToCSV(string filename, const vector<Student>& students) {
+    ofstream file(filename);
+    // Write header exactly as requested
+    file << "ID,Name,Passed Courses,Failed Courses,Registered Courses,Requested Courses,Excuse Requested?,Total Excuses Accepted,Withdrawal Requests,Faculty,GPA\n";
+
+    for (const auto& s : students) {
+        string reqStr = "";
+        for (const auto& c : s.requestedCourses) {
+            reqStr += "_" + c.code + "\\\\" + c.lectureDay + " " + c.lectureTime + "//" + c.tutorialDay + " " + c.tutorialTime;
+        }
+
+        // Ensure s.registeredCourses (Column 5) is included
+        file << s.id << "," << s.name << "," << s.passedCourses << "," << s.failedCourses << ","
+             << s.registeredCourses << "," << reqStr << "," << s.excuseRequested << ","
+             << s.totalExcuses << "," << s.withdrawalRequests << "," << s.faculty << "," << s.gpa << "\n";
+    }
+}
+

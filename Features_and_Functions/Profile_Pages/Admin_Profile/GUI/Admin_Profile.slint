@@ -1,7 +1,32 @@
+import {Accept_and_Refuse_Courses} from "../../../Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/GUI/Accept_and_Refuse_Courses.slint";
 export component Admin_Profile inherits Rectangle {
 
 
     //properties
+
+    //...................Start Accept and refuse courses admin properties
+        in-out property <string> student_id;
+        in-out property <string> student_name;
+        in-out property <string> faculty;
+        in-out property <bool> course1_accept_button_pressed: false;
+        in-out property <bool> course2_accept_button_pressed: false;
+        in-out property <bool> course3_accept_button_pressed: false;
+        in-out property <bool> course4_accept_button_pressed: false;
+        in-out property <bool> course5_accept_button_pressed: false;
+        in-out property <bool> course1_decline_button_pressed: false;
+        in-out property <bool> course2_decline_button_pressed: false;
+        in-out property <bool> course3_decline_button_pressed: false;
+        in-out property <bool> course4_decline_button_pressed: false;
+        in-out property <bool> course5_decline_button_pressed: false;
+        in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day; in-out property <string> c1_t_slot;
+        in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot; in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
+        in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day; in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
+        in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
+        in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
+        in-out property <bool> Submit_Button_Pressed: false;
+        in-out property <bool> show_warning: false;
+    //...................end of Accept and refuse courses admin properties
+
     in property <float> ui-scale: assigned_scale;
     property <int> selected-menu-item: 0; // 0: Profile, 1: Manage Courses, etc.
 

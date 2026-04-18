@@ -1,5 +1,5 @@
 import { TabWidget } from "std-widgets.slint";
-export component Accept_and_Refuse_Courses inherits Window {
+export component Accept_and_Refuse_Courses inherits Rectangle {
 
     //properties
     in-out property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
@@ -22,7 +22,9 @@ export component Accept_and_Refuse_Courses inherits Window {
     in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
     in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
     in-out property <bool> Submit_Button_Pressed: false;
+    in-out property <bool> show_warning: false;
 
+    callback submit_decisions();
     callback next_student();
     callback previous_student();
 
@@ -36,6 +38,16 @@ export component Accept_and_Refuse_Courses inherits Window {
     background: white;
 Rectangle {
 y:-50px*root.ui-scale;
+
+    Warning_Message:= Text {
+        text: "Please submit your decisions before proceeding!";
+        color: red;
+        font-size: 18px;
+        font-weight: 700;
+        x: (parent.width - self.width) / 2;
+        y: 630px * root.ui-scale;
+        visible: root.show_warning; // Only shows if true
+    }
     Previous_Student_Button := Rectangle {
         width: Previous_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
         height: Previous_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
@@ -68,12 +80,18 @@ y:-50px*root.ui-scale;
                font-size: 22px * root.ui-scale;
              }
         Next_Student_Touch:= TouchArea {
-            clicked => { root.next_student(); }
+            clicked => {if (root.Submit_Button_Pressed) {
+                                            root.show_warning = false; // Clear warning if allowed
+                                            root.next_student();
+                                        } else {
+                                            root.show_warning = true; // Show warning if locked
+                                        }
+            }
         }
     }
 
     Student_ID_Label:= Text {
-        text: "Student ID: " + root.student_id;
+        text: root.student_id == "" ? "No Pending Course Requests" : "Student ID: " + root.student_id;
         font-size: 24px * root.ui-scale;
         color: black;
         x: 30px * (parent.width / 1024px);
@@ -101,6 +119,7 @@ y:-50px*root.ui-scale;
 
 
     Course_List_Table:= Rectangle {
+        visible: root.student_id != ""; // Hide table if no student loaded
         width: 870px * root.ui-scale;
         height: 350px * root.ui-scale;
         x: ((parent.width - self.width) / 2)- 50px * root.ui-scale;
@@ -198,7 +217,7 @@ y:-50px*root.ui-scale;
             text: "{";
             font-size: 62px * root.ui-scale;
             color: #c7c7c7;
-            x: 500px*root.ui-scale;
+            x: 425px*root.ui-scale;
             y: -44px*root.ui-scale;
             font-weight: 0;
             transform-rotation: 90deg;
@@ -230,14 +249,14 @@ y:-50px*root.ui-scale;
             font-weight: 550;
         }
         Table_Tutorial_Combiner:=
-        Text{
-            text: "{";
-            font-size: 62px * root.ui-scale;
-            color: #c7c7c7;
-            x: 830px*root.ui-scale;
-            y: -44px*root.ui-scale;
-            font-weight: 0;
-            transform-rotation: 90deg;
+            Text{
+                text: "{";
+                font-size: 62px * root.ui-scale;
+                color: #c7c7c7;
+                x: 705px*root.ui-scale;
+                y: -44px*root.ui-scale;
+                font-weight: 0;
+                transform-rotation: 90deg;
             Text {
                 text: "Tutorials";
                 font-size: 20px * root.ui-scale;
@@ -419,7 +438,11 @@ y:-50px*root.ui-scale;
                font-size: 22px * root.ui-scale;
              }
         Submit_Button_Touch:= TouchArea {
-            clicked => {Submit_Button_Pressed = true;}
+            clicked => {
+                        Submit_Button_Pressed = true;
+                        root.show_warning = false;
+                        root.submit_decisions();
+            }
         }
     }
 }

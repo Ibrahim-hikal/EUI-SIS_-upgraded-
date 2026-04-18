@@ -12,7 +12,7 @@ using namespace std;
 class Course {
 public:
     string code;
-    string name; // The "Subject Name" from Offered_Courses.csv
+    string name;
     string lectureDay;
     string tutorialDay;
     string lectureTime;
@@ -23,13 +23,21 @@ class Student {
 public:
     string id;
     string name;
-    string faculty;
+    string passedCourses;
+    string failedCourses;
+    string registeredCourses;
     vector<Course> requestedCourses;
+    string excuseRequested;
+    string totalExcuses;
+    string withdrawalRequests;
+    string faculty;
+    string gpa;
 };
 
-// Function declarations
 vector<string> parseCSVLine(string line);
 map<string, string> loadCourseNames(string filename);
 vector<Student> parseStudentData(string filename, const map<string, string>& courseNames);
+void updateStudentCSV(string filename, const vector<Student>& students);
+void saveAllToCSV(string filename, const vector<Student>& students);
 
 #endif
