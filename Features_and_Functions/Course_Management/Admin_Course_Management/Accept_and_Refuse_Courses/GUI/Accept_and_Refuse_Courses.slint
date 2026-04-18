@@ -2,11 +2,26 @@ import { TabWidget } from "std-widgets.slint";
 export component Accept_and_Refuse_Courses inherits Window {
 
     //properties
-    property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
-    property <string> student_id;
-    property <string> student_name;
-    property <string> faculty;
-
+    in-out property <float> ui-scale: min(root.width / 1024px, root.height / 768px);
+    in-out property <string> student_id;
+    in-out property <string> student_name;
+    in-out property <string> faculty;
+    in-out property <bool> course1_accept_button_pressed: false;
+    in-out property <bool> course2_accept_button_pressed: false;
+    in-out property <bool> course3_accept_button_pressed: false;
+    in-out property <bool> course4_accept_button_pressed: false;
+    in-out property <bool> course5_accept_button_pressed: false;
+    in-out property <bool> course1_decline_button_pressed: false;
+    in-out property <bool> course2_decline_button_pressed: false;
+    in-out property <bool> course3_decline_button_pressed: false;
+    in-out property <bool> course4_decline_button_pressed: false;
+    in-out property <bool> course5_decline_button_pressed: false;
+    in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day; in-out property <string> c1_t_slot;
+    in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot; in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
+    in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day; in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
+    in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
+    in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
+    in-out property <bool> Submit_Button_Pressed: false;
 
     callback next_student();
     callback previous_student();
@@ -19,7 +34,8 @@ export component Accept_and_Refuse_Courses inherits Window {
     max-height: 840px;
     max-width: 1300px;
     background: white;
-
+Rectangle {
+y:-50px*root.ui-scale;
     Previous_Student_Button := Rectangle {
         width: Previous_Student_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
         height: Previous_Student_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
@@ -182,16 +198,16 @@ export component Accept_and_Refuse_Courses inherits Window {
             text: "{";
             font-size: 62px * root.ui-scale;
             color: #c7c7c7;
-            x: 500px * (parent.width / 1024px);
-            y: -44px;
+            x: 500px*root.ui-scale;
+            y: -44px*root.ui-scale;
             font-weight: 0;
             transform-rotation: 90deg;
             Text {
                 text: "Lectures";
                 font-size: 20px * root.ui-scale;
                 color: #979797;
-                x: -50px;
-                y: 30px;
+                x: -50px*root.ui-scale;
+                y: 30px*root.ui-scale;
                 font-weight: 600;
                 transform-rotation: -90deg;
             }
@@ -218,16 +234,16 @@ export component Accept_and_Refuse_Courses inherits Window {
             text: "{";
             font-size: 62px * root.ui-scale;
             color: #c7c7c7;
-            x: 830px * (parent.width / 1024px);
-            y: -44px;
+            x: 830px*root.ui-scale;
+            y: -44px*root.ui-scale;
             font-weight: 0;
             transform-rotation: 90deg;
             Text {
                 text: "Tutorials";
                 font-size: 20px * root.ui-scale;
                 color: #979797;
-                x: -50px;
-                y: 30px;
+                x: -50px*root.ui-scale;
+                y: 30px*root.ui-scale;
                 font-weight: 600;
                 transform-rotation: -90deg;
             }
@@ -240,29 +256,43 @@ export component Accept_and_Refuse_Courses inherits Window {
             y: 30px * (parent.height / 768px);
             font-weight: 550;
         }
-
-
-
+        Course_1_Row :=
+            Text { text: root.c1_code; x: 20px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c1_name; width: 220px*root.ui-scale; wrap:word-wrap; x: 120px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c1_l_day; x: 340px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c1_l_slot; x: 470px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c1_t_day; x: 620px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c1_t_slot; x: 750px*root.ui-scale; y: 75px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course1_accept_button_pressed ? #00ff44 : root.course1_decline_button_pressed ? #ff0000 : black; }
+        Course_2_Row :=
+            Text { text: root.c2_code; x: 20px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c2_name; width: 220px*root.ui-scale; wrap:word-wrap; x: 120px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c2_l_day; x: 340px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c2_l_slot; x: 470px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c2_t_day; x: 620px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c2_t_slot; x: 750px*root.ui-scale; y: 135px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course2_accept_button_pressed ? #00ff44 : root.course2_decline_button_pressed ? #ff0000 : black; }
+        Course_3_Row :=
+            Text { text: root.c3_code; x: 20px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c3_name; width: 220px*root.ui-scale; wrap:word-wrap; x: 120px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c3_l_day; x: 340px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c3_l_slot; x: 470px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c3_t_day; x: 620px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c3_t_slot; x: 750px*root.ui-scale; y: 195px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course3_accept_button_pressed ? #00ff44 : root.course3_decline_button_pressed ? #ff0000 : black; }
+        Course_4_Row :=
+            Text { text: root.c4_code; x: 20px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c4_name; width: 220px*root.ui-scale; wrap:word-wrap; x: 120px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c4_l_day; x: 340px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c4_l_slot; x: 470px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c4_t_day; x: 620px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c4_t_slot; x: 750px*root.ui-scale; y: 255px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course4_accept_button_pressed ? #00ff44 : root.course4_decline_button_pressed ? #ff0000 : black; }
+        Course_5_Row :=
+            Text { text: root.c5_code; x: 20px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c5_name; width: 220px*root.ui-scale; wrap:word-wrap; x: 120px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c5_l_day; x: 340px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c5_l_slot; x: 470px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c5_t_day; x: 620px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
+            Text { text: root.c5_t_slot; x: 750px*root.ui-scale; y: 315px*root.ui-scale; font-size: 16px*root.ui-scale; font-weight: 600; color: root.course5_accept_button_pressed ? #00ff44 : root.course5_decline_button_pressed ? #ff0000 : black; }
     }
-    Exit_Button := Image {
-            width: 30px * root.ui-scale;
-            height: 30px * root.ui-scale;
-            colorize: Exit_touch.has-hover ? red : black;
-            x: parent.width - self.width - 20px;
-            y: 20px;
-            source: @image-url("Exit-icon.svg");
-            Exit_touch:=TouchArea {
-                clicked => { }
-            }
 
-    }
-    University_Logo := Image{
-                width: 200px * root.ui-scale;
-                height: 60px * root.ui-scale;
-                x: 400px;
-                y: 20px;
-                source: @image-url("Uni-Logo.png");
-    }
     Accept_Button1:= Image{
         width: 40px * root.ui-scale;
         height: 40px * root.ui-scale;
@@ -271,7 +301,7 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 290px * root.ui-scale;
         source: @image-url("Accept-icon.svg");
         Accept_touch1:=TouchArea {
-            clicked => { }
+            clicked => {course1_accept_button_pressed= true; course1_decline_button_pressed= false; }
         }
     }
     Accept_Button2:= Image{
@@ -282,7 +312,7 @@ export component Accept_and_Refuse_Courses inherits Window {
             y: Course_List_Table.y + Course_List_Table.height - 228px * root.ui-scale;
             source: @image-url("Accept-icon.svg");
             Accept_touch2:=TouchArea {
-                clicked => { }
+                clicked => {course2_accept_button_pressed= true; course2_decline_button_pressed= false; }
             }
         }
             Accept_Button3:= Image{
@@ -293,7 +323,7 @@ export component Accept_and_Refuse_Courses inherits Window {
                     y: Course_List_Table.y + Course_List_Table.height - 170px * root.ui-scale;
                     source: @image-url("Accept-icon.svg");
                     Accept_touch3:=TouchArea {
-                        clicked => { }
+                        clicked => {course3_accept_button_pressed= true; course3_decline_button_pressed= false;}
                     }
                 }
             Accept_Button4:= Image{
@@ -304,7 +334,7 @@ export component Accept_and_Refuse_Courses inherits Window {
                     y: Course_List_Table.y + Course_List_Table.height - 110px * root.ui-scale;
                     source: @image-url("Accept-icon.svg");
                     Accept_touch4:=TouchArea {
-                        clicked => { }
+                        clicked => {course4_accept_button_pressed= true; course4_decline_button_pressed= false;}
                     }
                 }
                 Accept_Button5:= Image{
@@ -315,7 +345,7 @@ export component Accept_and_Refuse_Courses inherits Window {
                         y: Course_List_Table.y + Course_List_Table.height - 50px * root.ui-scale;
                         source: @image-url("Accept-icon.svg");
                         Accept_touch5:=TouchArea {
-                            clicked => { }
+                            clicked => {course5_accept_button_pressed= true; course5_decline_button_pressed= false;}
                         }
                     }
 
@@ -327,7 +357,7 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 288px * root.ui-scale;
         source: @image-url("Decline-icon.svg");
         Decline_touch1:=TouchArea {
-            clicked => { }
+            clicked => {course1_decline_button_pressed= true; course1_accept_button_pressed= false;}
         }
     }
     Decline_Button2:= Image{
@@ -338,7 +368,7 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 225px * root.ui-scale;
         source: @image-url("Decline-icon.svg");
         Decline_touch2:=TouchArea {
-            clicked => { }
+            clicked => {course2_decline_button_pressed= true; course2_accept_button_pressed= false;}
         }
     }
     Decline_Button3:= Image{
@@ -349,7 +379,7 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 168px * root.ui-scale;
         source: @image-url("Decline-icon.svg");
         Decline_touch3:=TouchArea {
-            clicked => { }
+            clicked => {course3_decline_button_pressed= true; course3_accept_button_pressed= false;}
         }
     }
     Decline_Button4:= Image{
@@ -360,7 +390,7 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 108px * root.ui-scale;
         source: @image-url("Decline-icon.svg");
         Decline_touch4:=TouchArea {
-            clicked => { }
+            clicked => {course4_decline_button_pressed= true; course4_accept_button_pressed= false;}
         }
     }
     Decline_Button5:= Image{
@@ -371,25 +401,25 @@ export component Accept_and_Refuse_Courses inherits Window {
         y: Course_List_Table.y + Course_List_Table.height - 47px * root.ui-scale;
         source: @image-url("Decline-icon.svg");
         Decline_touch5:=TouchArea {
-            clicked => { }
+            clicked => {course5_decline_button_pressed= true; course5_accept_button_pressed= false;}
         }
     }
-
-    Main_Menu_Button := Rectangle {
-        width: Main_Menu_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
-        height: Main_Menu_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-        x: (parent.width - self.width) / 2 - 387px * root.ui-scale;
-        y: 30px * (parent.height / 768px);
-        background: Main_Menu_Touch.pressed? #003d80 : #007bff;
+}
+    Submit_Button := Rectangle {
+        width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+        height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        y: 700px * (parent.height / 768px);
+        background: Submit_Button_Touch.pressed? #00ff44 : #218838;
         border-radius: 15px * root.ui-scale;
         animate width, height, background { duration: 150ms; easing: ease-in; }
 
-        Text { text: "Main Menu";
-               color: white;
+        Text { text: "Submit";
+               color: black;
                font-size: 22px * root.ui-scale;
              }
-        Main_Menu_Touch:= TouchArea {
-            clicked => { }
+        Submit_Button_Touch:= TouchArea {
+            clicked => {Submit_Button_Pressed = true;}
         }
     }
 }
