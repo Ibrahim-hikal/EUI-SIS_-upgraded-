@@ -41,7 +41,7 @@ add_executable(main_app
         # Note: Make sure there is a closing parenthesis here after the last .cpp file
 )
 
-# 3. Add Slint files (removed the extra indentation)
+# 3. Add Slint files
 slint_target_sources(main_app
         Features_and_Functions/main.slint
 
