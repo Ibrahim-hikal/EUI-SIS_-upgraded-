@@ -14,14 +14,6 @@ int main() {
 
     ui->on_check_credentials([&](const slint::SharedString& id, const slint::SharedString& pass, int role) {
 
-        // ==========================================
-        // 1. IS THE BUTTON EVEN WORKING?
-        // ==========================================
-        cout << "\n=============================================" << endl;
-        cout << "🔘 LOGIN BUTTON CLICKED!" << endl;
-        cout << "   -> ID Entered: " << id << endl;
-        cout << "   -> Role Selected: " << role << endl;
-        cout << "=============================================\n" << endl;
 
         string string_id = string(id);
 
