@@ -3,8 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
-#include <fstream>
 #include <map>
 
 using namespace std;
@@ -34,10 +32,34 @@ public:
     string gpa;
 };
 
-vector<string> parseCSVLine(string line);
-map<string, string> loadCourseNames(string filename);
-vector<Student> parseStudentData(string filename, const map<string, string>& courseNames);
-void updateStudentCSV(string filename, const vector<Student>& students);
-void saveAllToCSV(string filename, const vector<Student>& students);
+// Encapsulated Manager Class
+class AdminCourseManager {
+private:
+    vector<Student> students;
+    map<string, string> courseNames;
+    int currentStudentIdx;
+    string dbBasePath;
+
+    // Internal Utility Methods
+    string trim(const string& s);
+    vector<string> parseCSVLine(string line);
+    void loadCourseNames(const string& filename);
+    void parseStudentData(const string& filename);
+    void saveAllToCSV(const string& filename);
+
+    // Internal UI State Handlers
+    void resetUI(void* ui_ptr);
+    void loadStudentToUI(void* ui_ptr);
+
+public:
+    // Constructor
+    AdminCourseManager(const string& basePath);
+
+    // Public UI Hooks (void* prevents circular dependencies with main.h)
+    void initUI(void* ui_ptr);
+    void nextStudent(void* ui_ptr);
+    void prevStudent(void* ui_ptr);
+    void submitDecisions(void* ui_ptr);
+};
 
 #endif

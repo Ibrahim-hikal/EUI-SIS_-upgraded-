@@ -25,6 +25,9 @@ export component Admin_Profile inherits Rectangle {
         in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
         in-out property <bool> Submit_Button_Pressed: false;
         in-out property <bool> show_warning: false;
+        callback admin_next_student();
+        callback admin_previous_student();
+        callback admin_submit_decisions();
     //...................end of Accept and refuse courses admin properties
 
     in property <float> ui-scale: assigned_scale;
@@ -176,7 +179,7 @@ export component Admin_Profile inherits Rectangle {
 
 
                 Text{
-                    text: "Requesting courses";
+                    text: "Course Requests";
                     font-size: 23px * root.ui-scale;
                     font-weight: 700;
                     color: white;
@@ -314,5 +317,39 @@ export component Admin_Profile inherits Rectangle {
 
                 }
         }
-        Profile := Rectangle{}
+
+        if (selected-menu-item == 3) : Accept_and_Refuse_Courses {
+                    x: Selection_menu.width;
+                    width: root.width - Selection_menu.width;
+                    height: root.height;
+                    ui-scale: root.ui-scale;
+
+                    student_id <=> root.student_id;
+                    student_name <=> root.student_name;
+                    faculty <=> root.faculty;
+                    Submit_Button_Pressed <=> root.Submit_Button_Pressed;
+                    show_warning <=> root.show_warning;
+
+                    course1_accept_button_pressed <=> root.course1_accept_button_pressed;
+                    course2_accept_button_pressed <=> root.course2_accept_button_pressed;
+                    course3_accept_button_pressed <=> root.course3_accept_button_pressed;
+                    course4_accept_button_pressed <=> root.course4_accept_button_pressed;
+                    course5_accept_button_pressed <=> root.course5_accept_button_pressed;
+                    course1_decline_button_pressed <=> root.course1_decline_button_pressed;
+                    course2_decline_button_pressed <=> root.course2_decline_button_pressed;
+                    course3_decline_button_pressed <=> root.course3_decline_button_pressed;
+                    course4_decline_button_pressed <=> root.course4_decline_button_pressed;
+                    course5_decline_button_pressed <=> root.course5_decline_button_pressed;
+
+                    c1_code <=> root.c1_code; c1_name <=> root.c1_name; c1_l_day <=> root.c1_l_day; c1_l_slot <=> root.c1_l_slot; c1_t_day <=> root.c1_t_day; c1_t_slot <=> root.c1_t_slot;
+                    c2_code <=> root.c2_code; c2_name <=> root.c2_name; c2_l_day <=> root.c2_l_day; c2_l_slot <=> root.c2_l_slot; c2_t_day <=> root.c2_t_day; c2_t_slot <=> root.c2_t_slot;
+                    c3_code <=> root.c3_code; c3_name <=> root.c3_name; c3_l_day <=> root.c3_l_day; c3_l_slot <=> root.c3_l_slot; c3_t_day <=> root.c3_t_day; c3_t_slot <=> root.c3_t_slot;
+                    c4_code <=> root.c4_code; c4_name <=> root.c4_name; c4_l_day <=> root.c4_l_day; c4_l_slot <=> root.c4_l_slot; c4_t_day <=> root.c4_t_day; c4_t_slot <=> root.c4_t_slot;
+                    c5_code <=> root.c5_code; c5_name <=> root.c5_name; c5_l_day <=> root.c5_l_day; c5_l_slot <=> root.c5_l_slot; c5_t_day <=> root.c5_t_day; c5_t_slot <=> root.c5_t_slot;
+
+                    next_student => { root.admin_next_student(); }
+                    previous_student => { root.admin_previous_student(); }
+                    submit_decisions => { root.admin_submit_decisions(); }
+
+        }
 }
