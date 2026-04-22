@@ -5,7 +5,7 @@
 #include <vector>
 #include <slint.h>
 
-struct CourseInfo; // From Slint
+class CourseInfo; // From Slint
 
 class RegisteredCoursesManager {
 private:
