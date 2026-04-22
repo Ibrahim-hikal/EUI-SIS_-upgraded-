@@ -21,7 +21,7 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(std_courses);
     ui->set_available_courses(courses_model);
 
-    // 2. Auto-load the first course's students if available
+    // 2. Autoload the first course's students if available
     if (!std_courses.empty()) {
         ui->invoke_load_students(std_courses[0], 1);
     }

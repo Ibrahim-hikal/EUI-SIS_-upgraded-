@@ -1,0 +1,68 @@
+import { TabWidget, ScrollView } from "std-widgets.slint";
+import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+
+export component Request_Courses inherits Rectangle {
+    //==================== INPUT PROPERTIES ====================
+    in property <float> ui-scale: assigned_scale;
+    in property <float> assigned_scale: 1.0;
+
+    //==================== IN-OUT PROPERTIES ====================
+    // Student Information
+    in-out property <string> student_id;
+    in-out property <string> student_name;
+    in-out property <string> faculty;
+
+    // Available Courses Data
+    in-out property <[CourseInfo]> available_courses;
+    in-out property <[CourseInfo]> requested_courses;
+    in-out property <[CourseInfo]> course_code;
+
+    // UI State
+    in-out property <int> selected_course_index: -1; // -1 means no selection
+    in-out property <bool> is_loading: false;
+    in-out property <string> status_message: "";
+    in-out property <bool> request_submitted: false;
+
+    //==================== OUTPUT PROPERTIES ====================
+    out property <int> available_courses_count: available_courses.length;
+    out property <int> requested_courses_count: requested_courses.length;
+    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
+
+    //==================== CALLBACKS ====================
+    // Load available courses from backend
+    callback load_available_courses();
+
+    // Request a specific course (with course code parameter)
+    callback request_course(string);
+
+    // Remove a requested course
+    callback remove_requested_course(string);
+
+    // Submit all course requests
+    callback submit_course_requests();
+
+    // Clear all selections
+    callback clear_selections();
+
+    // Course selection changed
+    callback course_selected(string);
+
+    // Original callback for backward compatibility
+    callback request_courses_clicked(string,string,string);
+    //==================== SPECIFICATIONS ====================
+    focus_anchor := FocusScope { }
+    min-height: 600px;
+    min-width: 1024px;
+    preferred-height: 768px;
+    preferred-width: 1024px;
+    max-height: 840px;
+    max-width: 1300px;
+    background: white;
+
+    // Main layout placeholder
+    Rectangle {
+        y: -50px * root.ui-scale;
+
+    }
+}
+
