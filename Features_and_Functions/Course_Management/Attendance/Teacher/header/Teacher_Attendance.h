@@ -4,17 +4,20 @@
 #include <string>
 #include <vector>
 #include <slint.h>
+#include "main.h" // Required to access Main_App UI methods
 
-// Forward declaration matching the Slint struct
 struct StudentAttendanceData;
 
 class TeacherAttendanceManager {
 private:
-    std::string teacher_email;
+    std::string teacher_name;
     std::vector<std::string> parse_csv_line(const std::string& line) const;
 
 public:
-    explicit TeacherAttendanceManager(std::string email);
+    TeacherAttendanceManager() = default; // Default constructor
+
+    // New method to encapsulate all UI logic
+    void initUI(Main_App* ui, const std::string& name);
 
     slint::SharedVector<slint::SharedString> get_available_courses() const;
     slint::SharedVector<StudentAttendanceData> get_students_for_week(const std::string& course_code, int week) const;

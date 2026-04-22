@@ -11,7 +11,11 @@ export component Registered_Courses_Panel inherits Rectangle {
     VerticalLayout {
         padding: 20px * root.ui-scale;
         spacing: 20px * root.ui-scale;
-        Text { text: "My Registered Courses & Attendance"; font-size: 24px * root.ui-scale; font-weight: 700; }
+        Text { text: "My Registered Courses & Attendance";
+            font-size: 24px * root.ui-scale;
+            font-weight: 700;
+            color: black;
+        }
 
         ScrollView {
             VerticalLayout {
@@ -24,7 +28,7 @@ export component Registered_Courses_Panel inherits Rectangle {
                     HorizontalLayout {
                         VerticalLayout {
                             spacing: 8px * root.ui-scale;
-                            Text { text: course.course_code + " - " + course.course_name; font-size: 18px * root.ui-scale; font-weight: 700; }
+                            Text { text: course.course_code + " - " + course.course_name; color:black; font-size: 18px * root.ui-scale; font-weight: 700; }
                             Text { text: "Instructor: " + course.instructor_name; font-size: 16px * root.ui-scale; color: #555; }
                         }
 

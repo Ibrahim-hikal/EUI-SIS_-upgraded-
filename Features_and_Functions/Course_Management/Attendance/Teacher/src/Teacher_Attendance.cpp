@@ -1,5 +1,5 @@
 #include "../header/Teacher_Attendance.h"
-#include "main.h" // Replace with your actual compiled Slint header
+#include "main.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -7,7 +7,52 @@
 
 using namespace std;
 
-TeacherAttendanceManager::TeacherAttendanceManager(string email) : teacher_email(move(email)) {}
+// The new UI Initialization method
+void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
+    this->teacher_name = name;
+
+    // 1. Fetch available courses and pass to UI
+    auto courses_vec = get_available_courses();
+    std::vector<slint::SharedString> std_courses;
+    for (int i = 0; i < courses_vec.size(); ++i) {
+        std_courses.push_back(courses_vec[i]);
+    }
+
+    auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(std_courses);
+    ui->set_available_courses(courses_model);
+
+    // 2. Auto-load the first course's students if available
+    if (!std_courses.empty()) {
+        ui->invoke_load_students(std_courses[0], 1);
+    }
+
+    // 3. Register the load students callback
+    ui->on_load_students([this, ui](slint::SharedString course, int week) {
+        auto vec = this->get_students_for_week(course.data(), week);
+        std::vector<StudentAttendanceData> std_vec;
+        for (int i = 0; i < vec.size(); ++i) {
+            std_vec.push_back(vec[i]);
+        }
+        auto model = std::make_shared<slint::VectorModel<StudentAttendanceData>>(std_vec);
+        ui->set_students_data(model);
+    });
+
+    // 4. Register the save attendance callback
+    ui->on_save_attendance([this](std::shared_ptr<slint::Model<StudentAttendanceData>> data, slint::SharedString course, int week) {
+        slint::SharedVector<StudentAttendanceData> vec;
+        for (int i = 0; i < data->row_count(); ++i) {
+            if (auto row = data->row_data(i)) {
+                vec.push_back(*row);
+            }
+        }
+        bool success = this->save_attendance(course.data(), week, vec);
+        if(success) {
+            cout << "Attendance for " << course << " Week " << week << " saved successfully!" << endl;
+        } else {
+            cout << "Failed to save attendance." << endl;
+        }
+    });
+}
 
 vector<string> TeacherAttendanceManager::parse_csv_line(const string& line) const {
     vector<string> result;
@@ -32,8 +77,8 @@ slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available
     while (getline(file, line)) {
         if (line.empty()) continue;
         vector<string> cols = parse_csv_line(line);
-        // Assuming Instructor Email is column 4. Adjust if needed.
-        if (cols.size() > 4 && cols[4] == teacher_email) {
+        // Instructor Name is column 4. Matches against the name saved in initUI
+        if (cols.size() > 4 && cols[4] == teacher_name) {
             courses.push_back(slint::SharedString(cols[0]));
         }
     }
@@ -78,7 +123,6 @@ bool TeacherAttendanceManager::save_attendance(const string& course_code, int we
         if (csv_data[i].empty()) continue;
         string id = csv_data[i][0];
 
-        // Changed records->size() to records.size()
         for (size_t j = 0; j < records.size(); ++j) {
             if (string(records[j].id) == id) {
                 while (csv_data[i].size() <= target_col) csv_data[i].push_back("");

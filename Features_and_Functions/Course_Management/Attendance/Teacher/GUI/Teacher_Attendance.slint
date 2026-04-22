@@ -19,7 +19,7 @@ export component Teacher_Attendance_Panel inherits Rectangle {
         padding: 20px * root.ui-scale;
         spacing: 20px * root.ui-scale;
 
-        Text { text: "Manage Course Attendance"; font-size: 24px * root.ui-scale; font-weight: 700; }
+        Text { text: "Manage Course Attendance"; color:black; font-size: 24px * root.ui-scale; font-weight: 700; }
 
         HorizontalLayout {
             spacing: 20px * root.ui-scale;
@@ -45,10 +45,34 @@ export component Teacher_Attendance_Panel inherits Rectangle {
                     HorizontalLayout {
                         padding: 10px * root.ui-scale;
                         spacing: 20px * root.ui-scale;
-                        Text { text: student.id; vertical-alignment: center; width: 120px * root.ui-scale; font-weight: 600;}
-                        Text { text: student.name; vertical-alignment: center; width: 250px * root.ui-scale; }
+
+                        Text {
+                            text: student.id;
+                            color:black;
+                            width: 100px * root.ui-scale;
+                            vertical-alignment: center;
+                            font-weight: 600;
+                        }
+
+                        Text {
+                            text: student.name;
+                            color:black;
+                            width: 200px * root.ui-scale;
+                            vertical-alignment: center;
+                        }
+
+                        // This empty Rectangle acts as a spring,
+                        // pushing everything after it to the far right.
+                        Rectangle { }
+
+                        // Optional: Smaller label right next to the box
+                        Text {
+                            text: "Present:";
+                            vertical-alignment: center;
+                            color: #666;
+                        }
+
                         CheckBox {
-                            text: "Present";
                             checked: student.present;
                             toggled => { student.present = !student.present; }
                         }
@@ -57,9 +81,22 @@ export component Teacher_Attendance_Panel inherits Rectangle {
             }
         }
 
-        Button {
-            text: "Save Attendance to Database"; height: 50px * root.ui-scale;
-            clicked => { root.save_attendance(root.students_data, root.selected_course, root.selected_week); }
-        }
+        Submit_Button := Rectangle {
+        width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+        height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        background: Submit_Button_Touch.pressed? #00ff44 : #218838;
+        border-radius: 15px * root.ui-scale;
+        animate width, height, background { duration: 150ms; easing: ease-in; }
+
+        Text { text: "Submit";
+               color: black;
+               font-size: 22px * root.ui-scale;
+             }
+             Submit_Button_Touch:= TouchArea {
+                         clicked=>{root.save_attendance(root.students_data,root.selected_course,root.selected_week);}
+
+                     }
+    }
     }
 }
