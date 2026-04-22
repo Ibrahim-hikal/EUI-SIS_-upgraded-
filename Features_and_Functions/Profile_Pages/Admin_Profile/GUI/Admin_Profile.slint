@@ -27,9 +27,18 @@ export component Admin_Profile inherits Rectangle {
 
     in-out property <bool> Submit_Button_Pressed: false;
     in-out property <bool> show_warning: false;
-    in-out property <bool> no_course_requests : false;
+    in-out property <bool> no_course_requests: false;
     in-out property <bool> is_next_student_available: false;
     in-out property <bool> is_previous_student_available: false;
+
+    // Changed to in-out so it resets cleanly
+    in-out property <bool> is_submitted: false;
+
+    callback submit_decisions();
+    callback next_student();
+    callback previous_student();
+    callback Accept_button_clicked();
+    callback Refuse_button_clicked();
 
     callback admin_next_student();
     callback admin_previous_student();
