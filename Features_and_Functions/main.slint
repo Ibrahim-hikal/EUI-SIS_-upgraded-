@@ -2,8 +2,11 @@ import { Login_Page } from "../Features_and_Functions/Login_Page/GUI/Login_page.
 import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
+
+// === CUSTOM STRUCT IMPORTS ===
 import { StudentAttendanceData } from "../Features_and_Functions/Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { CourseInfo } from "../Features_and_Functions/Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+
 export component Main_App inherits Window {
     // 0: Login, 1: Student Dashboard, 2: Teacher, 3: Admin
     in-out property <int> active_panel: 0;
@@ -43,12 +46,11 @@ export component Main_App inherits Window {
     in-out property <bool> is_previous_student_available: false;
     //...................end of Accept and refuse courses admin properties
 
-        in-out property <[StudentAttendanceData]> students_data;
-        callback load_students(string, int);
-        callback save_attendance([StudentAttendanceData], string, int);
-
-        // --- MISSING REGISTERED COURSES PROPERTIES ---
-        in-out property <[CourseInfo]> my_courses;
+    // --- NEW PROPERTIES DECLARED HERE ---
+    in-out property <[StudentAttendanceData]> students_data;
+    callback load_students(string, int);
+    callback save_attendance([StudentAttendanceData], string, int);
+    in-out property <[CourseInfo]> my_courses;
 
     // Global scale calculation
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
@@ -96,6 +98,9 @@ export component Main_App inherits Window {
             user_profile_pic: root.user_profile_pic;
             student_gpa: root.student_gpa;
             change_picture => {root.change_picture(); }
+
+            // THE MISSING STUDENT LINK!
+            my_courses <=> root.my_courses;
         }
 
         if (active_panel == 2) : Teacher_Profile {
@@ -103,6 +108,11 @@ export component Main_App inherits Window {
             height: 100%;
             ui-scale: root.global_scale;
             Logout => { root.active_panel = 0; }
+
+            // THE MISSING TEACHER LINKS!
+            students_data <=> root.students_data;
+            load_students(course, week) => { root.load_students(course, week); }
+            save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
         }
 
         if (active_panel == 3) : Admin_Profile {
