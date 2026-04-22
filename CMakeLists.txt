@@ -28,16 +28,14 @@ add_executable(main_app
         Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/src/Registered_Courses.cpp
         Features_and_Functions/Course_Management/Student_Course_Management/Request_Courses/header/Request_Courses.h
         Features_and_Functions/Course_Management/Student_Course_Management/Request_Courses/src/Request_Courses.cpp
-        Features_and_Functions/Course_Management/Teacher_Course_Management/Main_Panel_For_All_Courses/header/Main_Panel_For_All_Courses.h
-        Features_and_Functions/Course_Management/Teacher_Course_Management/Main_Panel_For_All_Courses/src/Main_Panel_For_All_Courses.cpp
-        Features_and_Functions/Course_Management/Teacher_Course_Management/Sub_Panel_Per_Chosen_Course/header/Sub_Panel_Per_Chosen_Course.h
-        Features_and_Functions/Course_Management/Teacher_Course_Management/Sub_Panel_Per_Chosen_Course/src/Sub_Panel_Per_Chosen_Course.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/header/Admin_Attendance_Excuses.h
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/src/Admin_Attendance_Excuses.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/src/Student_Attendance_Excuses.cpp
         Features_and_Functions/Profile_Pages/ImageManager.cpp
         Features_and_Functions/Profile_Pages/ImageManager.h
+        Features_and_Functions/Course_Management/Attendance/Teacher/header/Teacher_Attendance.h
+        Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
         # Note: Make sure there is a closing parenthesis here after the last .cpp file
 )
 

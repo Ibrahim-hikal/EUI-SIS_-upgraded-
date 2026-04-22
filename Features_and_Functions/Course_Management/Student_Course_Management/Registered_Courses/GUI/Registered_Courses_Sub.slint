@@ -1,0 +1,50 @@
+import { ScrollView } from "std-widgets.slint";
+import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+
+export component Registered_Courses_Panel inherits Rectangle {
+    in-out property <float> ui-scale: 1.0;
+    in property <[CourseInfo]> my_courses;
+
+    callback load_registered_courses();
+    background: white;
+
+    VerticalLayout {
+        padding: 20px * root.ui-scale;
+        spacing: 20px * root.ui-scale;
+        Text { text: "My Registered Courses & Attendance"; font-size: 24px * root.ui-scale; font-weight: 700; }
+
+        ScrollView {
+            VerticalLayout {
+                spacing: 15px * root.ui-scale;
+                for course in my_courses: Rectangle {
+                    background: #f4f6f9;
+                    border-radius: 10px * root.ui-scale;
+                    padding: 15px * root.ui-scale;
+
+                    HorizontalLayout {
+                        VerticalLayout {
+                            spacing: 8px * root.ui-scale;
+                            Text { text: course.course_code + " - " + course.course_name; font-size: 18px * root.ui-scale; font-weight: 700; }
+                            Text { text: "Instructor: " + course.instructor_name; font-size: 16px * root.ui-scale; color: #555; }
+                        }
+
+                        // Attendance Badge Box on the right side
+                        Rectangle {
+                            width: 200px * root.ui-scale;
+                            background: #e0f2f1;
+                            border-radius: 8px * root.ui-scale;
+                            border-width: 1px;
+                            border-color: #00796b;
+
+                            VerticalLayout {
+                                alignment: center;
+                                Text { text: "Total Attendance"; horizontal-alignment: center; font-size: 14px * root.ui-scale; color: #004d40; }
+                                Text { text: course.attendance_summary; horizontal-alignment: center; font-size: 16px * root.ui-scale; font-weight: 700; color: #00695c; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

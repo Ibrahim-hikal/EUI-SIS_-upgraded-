@@ -1,14 +1,14 @@
 Code,Prerequesite 1,Prerequesite 2,Name,Instructor,Offered Lecture Slots,Offered Tutorial Slots,Credit Hours
 ENG011,-1,-1,Innovation I,Ahmed Mahmoud,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,2
-PHM011 ,-1,-1,Calculus I,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
-PHM031 ,-1,-1,Modern Mechanics,Mohamed Ali,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
-HUM011 ,-1,-1,English Language,Hadeer Momen,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
+PHM011,-1,-1,Calculus I,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
+PHM031,-1,-1,Modern Mechanics,Mohamed Ali,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
+HUM011,-1,-1,English Language,Hadeer Momen,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
 CSE021,-1,-1,Intro To Computer Programming,Fatma Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
 ENG012,ENG011,-1,Innovation II,Ahmed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,2
 PHM012,PHM011,-1,Calculus II,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
-PHM041 ,-1,-1,General Chemistry,Ali Ali,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
-HUM012 ,HUM011 ,-1,Fundamentals Of Speech Communication,Salma Elshabrawy,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
+PHM041,-1,-1,General Chemistry,Ali Ali,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
+HUM012,HUM011,-1,Fundamentals Of Speech Communication,Salma Elshabrawy,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
 PHM111,PHM012,-1,Multivariate Calculus,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
-PHM112 ,PHM012,-1,Ordinary Differential Equations,Ahmed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
-ECE101,PHM031 ,-1,Electrical Engineering Fundamentals I,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
-ECE231 ,ECE101,PHM112 ,Signals And Systems,Islam Tawkeel,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
+PHM112,PHM012,-1,Ordinary Differential Equations,Ahmed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3
+ECE101,PHM031,-1,Electrical Engineering Fundamentals I,Mohamed Ahmed,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,4
+ECE231,ECE101,PHM112,Signals And Systems,Islam Tawkeel,Tuesday 09:00-11:00 Thursday 11:00-13:00,Tuesday 11:00-13:00 Wednesday 09:00-11:00 Wednesday 11:00-13:00 Wednesday 14:00-16:00,3

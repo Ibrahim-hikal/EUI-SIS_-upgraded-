@@ -1,5 +1,7 @@
-export component Teacher_Profile inherits Rectangle {
+import { Teacher_Attendance_Panel } from "../../../Course_Management/Attendance/Teacher/GUI/Teacher_Attendance.slint";
+import { StudentAttendanceData } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
+export component Teacher_Profile inherits Rectangle {
 
     //properties
     in property <float> ui-scale: assigned_scale;
@@ -9,285 +11,253 @@ export component Teacher_Profile inherits Rectangle {
 
     //in-out properties
     in-out property <int> Logout_value: 0; // 0: default, 1: confirmation, 2: finalized
+    in-out property <[StudentAttendanceData]> students_data;
 
     //callbacks
     callback Logout;
+    callback load_students(string, int);
+    callback save_attendance([StudentAttendanceData], string, int);
 
+    min-height: 600px;
+    min-width: 1024px;
+    preferred-height: 768px;
+    preferred-width: 1024px;
+    max-height: 840px;
+    max-width: 1300px;
+    background: white;
 
-        min-height: 600px;
-        min-width: 1024px;
-        preferred-height: 768px;
-        preferred-width: 1024px;
-        max-height: 840px;
-        max-width: 1300px;
-        background: white;
+    //Selection menu on the left side of the screen
+    Selection_menu := Rectangle{
+        width: 270px * root.ui-scale;
+        x: 0;
+        border-bottom-right-radius:15px;
+        border-top-right-radius:15px;
+        border-color: #727275;
+        border-width: 2px;
+        background: #d0d2d6;
 
-        //Selection menu on the left side of the screen
-        Selection_menu := Rectangle{
-            width: 270px * root.ui-scale;
-            x: 0;
-            border-bottom-right-radius:15px;
-            border-top-right-radius:15px;
-            border-color: #727275;
-            border-width: 2px;
-            background: #d0d2d6;
-            //Selection menu items
-            //University logo
-            University_logo := Image{
-                source: @image-url("Uni-Logo.png");
-                width: 200px * root.ui-scale;
-                height: 75px * root.ui-scale;
-                x: 30px * root.ui-scale;
-                y: 20px * root.ui-scale;
+        //University logo
+        University_logo := Image{
+            source: @image-url("Uni-Logo.png");
+            width: 200px * root.ui-scale;
+            height: 75px * root.ui-scale;
+            x: 30px * root.ui-scale;
+            y: 20px * root.ui-scale;
+        }
+        //seperator line
+        Seperator_line := Rectangle{
+            width: 220px * root.ui-scale;
+            height: 2px * root.ui-scale;
+            x: 20px * root.ui-scale;
+            y: 110px * root.ui-scale;
+            background: #727275;
+        }
 
+        //Profile button
+        Profile_button := Rectangle{
+            width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
+            height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+            x: 10px * root.ui-scale;
+            y: 150px * root.ui-scale;
+            border-radius: 10px;
+            background: Profile_Button_touch_area.pressed? #003d80:(selected-menu-item == 0 ? #007bff:#64647a);
+            animate background,width,height{ duration: 200ms; easing: ease-in-out; }
+
+            Text{
+                text: "Profile";
+                font-size: 23px * root.ui-scale;
+                font-weight: 700;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
             }
-            //seperator line
-            Seperator_line := Rectangle{
-                width: 220px * root.ui-scale;
-                height: 2px * root.ui-scale;
-                x: 20px * root.ui-scale;
-                y: 110px * root.ui-scale;
-                background: #727275;
+            Profile_Button_touch_area := TouchArea{
+                clicked => { root.selected-menu-item = 0; }
             }
-            //Menu items
-            //Profile button
-            Profile_button := Rectangle{
-                width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+        }
+        //Manage courses button
+        Manage_courses_button := Rectangle{
+            width: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
+            height: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+            x: 10px * root.ui-scale;
+            y: 250px * root.ui-scale;
+            border-radius: 10px;
+            background: Manage_courses_button_touch_area.pressed? #003d80:(selected-menu-item == 1 ? #007bff:#64647a);
+            animate background,width,height{ duration: 200ms; easing: ease-in-out; }
 
-                x: 10px * root.ui-scale;
-                y: 150px * root.ui-scale;
-                border-radius: 10px;
-                background: Profile_Button_touch_area.pressed? #003d80:(selected-menu-item == 0 ? #007bff:#64647a);
-                animate background,width,height{
-                    duration: 200ms;
-                    easing: ease-in-out;
-                }
-
-
-                Text{
-                    text: "Profile";
-                    font-size: 23px * root.ui-scale;
-                    font-weight: 700;
-                    color: white;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                }
-                Profile_Button_touch_area := TouchArea{
-
-                clicked => {
-                    root.selected-menu-item = 0;
-                }
-
-                }
+            Text{
+                text: "Manage Courses";
+                font-size: 23px * root.ui-scale;
+                font-weight: 700;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
             }
-            //Manage courses button
-            Manage_courses_button := Rectangle{
-                width: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale;
-                y: 250px * root.ui-scale;
-                border-radius: 10px;
-                background: Manage_courses_button_touch_area.pressed? #003d80:(selected-menu-item == 1 ? #007bff:#64647a);
-                animate background,width,height{
-                    duration: 200ms;
-                    easing: ease-in-out;
-                }
-
-
-                Text{
-                    text: "Manage Courses";
-                    font-size: 23px * root.ui-scale;
-                    font-weight: 700;
-                    color: white;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                }
-                Manage_courses_button_touch_area := TouchArea{
-                    clicked => {
-                        root.selected-menu-item = 1;
-                    }
-                }
+            Manage_courses_button_touch_area := TouchArea{
+                clicked => { root.selected-menu-item = 1; }
             }
-            //Manage courses button
-            Attendance_button := Rectangle{
-                width: (selected-menu-item == 2 || Attendance_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 2 || Attendance_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale;
-                y: 350px * root.ui-scale;
-                border-radius: 10px;
-                background: Attendance_button_touch_area.pressed ?#003d80:(selected-menu-item == 2 ? #007bff:#64647a);
-                animate background,width,height{
-                    duration: 200ms;
-                    easing: ease-in-out;
-                }
+        }
+        //Attendance button
+        Attendance_button := Rectangle{
+            width: (selected-menu-item == 2 || Attendance_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
+            height: (selected-menu-item == 2 || Attendance_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+            x: 10px * root.ui-scale;
+            y: 350px * root.ui-scale;
+            border-radius: 10px;
+            background: Attendance_button_touch_area.pressed ?#003d80:(selected-menu-item == 2 ? #007bff:#64647a);
+            animate background,width,height{ duration: 200ms; easing: ease-in-out; }
 
-
-                Text{
-                    text: "Attendance";
-                    font-size: 23px * root.ui-scale;
-                    font-weight: 700;
-                    color: white;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                }
-                Attendance_button_touch_area := TouchArea{
-                    clicked => {
-                        root.selected-menu-item = 2;
-                    }
-                }
+            Text{
+                text: "Attendance";
+                font-size: 23px * root.ui-scale;
+                font-weight: 700;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
             }
-            Schedule_button := Rectangle{
-                width: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale;
-                y: 450px * root.ui-scale;
-                border-radius: 10px;
-                background: Schedule_button_touch_area.pressed ? #003d80:(selected-menu-item == 3 ? #007bff:#64647a);
-                animate background,width,height{
-                    duration: 200ms;
-                    easing: ease-in-out;
-                }
-
-
-                Text{
-                    text: "Schedule";
-                    font-size: 23px * root.ui-scale;
-                    font-weight: 700;
-                    color: white;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                }
-                Schedule_button_touch_area := TouchArea{
-                    clicked => {
-                        root.selected-menu-item = 3;
-                    }
-                }
+            Attendance_button_touch_area := TouchArea{
+                clicked => { root.selected-menu-item = 2; }
             }
-            Notifications_button := Rectangle{
-                width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale;
-                y: 550px * root.ui-scale;
-                border-radius: 10px;
-                background: Notifications_button_touch_area.pressed ? #003d80:(selected-menu-item == 4 ? #007bff:#64647a);
-                animate background,width,height{
-                    duration: 200ms;
-                    easing: ease-in-out;
-                }
+        }
+        Schedule_button := Rectangle{
+            width: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
+            height: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+            x: 10px * root.ui-scale;
+            y: 450px * root.ui-scale;
+            border-radius: 10px;
+            background: Schedule_button_touch_area.pressed ? #003d80:(selected-menu-item == 3 ? #007bff:#64647a);
+            animate background,width,height{ duration: 200ms; easing: ease-in-out; }
 
-
-                Text{
-                    text: "Notifications";
-                    font-size: 23px * root.ui-scale;
-                    font-weight: 700;
-                    color: white;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                }
-                Notifications_button_touch_area := TouchArea{
-                    clicked => {
-                        root.selected-menu-item = 4;
-                    }
-                }
+            Text{
+                text: "Schedule";
+                font-size: 23px * root.ui-scale;
+                font-weight: 700;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
             }
-            Logout_icon := Image{
-                source: @image-url("exit.svg");
+            Schedule_button_touch_area := TouchArea{
+                clicked => { root.selected-menu-item = 3; }
+            }
+        }
+        Notifications_button := Rectangle{
+            width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
+            height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
+            x: 10px * root.ui-scale;
+            y: 550px * root.ui-scale;
+            border-radius: 10px;
+            background: Notifications_button_touch_area.pressed ? #003d80:(selected-menu-item == 4 ? #007bff:#64647a);
+            animate background,width,height{ duration: 200ms; easing: ease-in-out; }
+
+            Text{
+                text: "Notifications";
+                font-size: 23px * root.ui-scale;
+                font-weight: 700;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            Notifications_button_touch_area := TouchArea{
+                clicked => { root.selected-menu-item = 4; }
+            }
+        }
+        Logout_icon := Image{
+            source: @image-url("exit.svg");
+            width: 50px * root.ui-scale;
+            height: 50px * root.ui-scale;
+            x: 20px * root.ui-scale;
+            y: 680px * root.ui-scale;
+            colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000);
+            animate colorize{ duration: 200ms; easing: ease-in-out; }
+
+            Logout_touch_area := TouchArea{
                 width: 50px * root.ui-scale;
                 height: 50px * root.ui-scale;
-                x: 20px * root.ui-scale;
-                y: 680px * root.ui-scale;
-                colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000);
-                animate colorize{
-                    duration: 200ms;
-                    easing: ease-in-out;
+                clicked => { root.Logout_value = 1; }
+            }
+        }
+
+        if (root.Logout_value == 1) : Rectangle {
+            width: 400px * root.ui-scale;
+            height: 200px * root.ui-scale;
+            x: (root.width - self.width) / 2;
+            y: (root.height - self.height) / 2;
+            background: #d0d2d6;
+            border-radius: 15px;
+            border-color: #727275;
+            border-width: 2px;
+
+            Confirmation_text := Text {
+                text: "Are you sure you want to logout?";
+                font-size: 20px * root.ui-scale;
+                font-weight: 600;
+                color: #000000;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                y: 40px * root.ui-scale;
+            }
+            Yes_button := Rectangle {
+                width: 100px * root.ui-scale;
+                height: 40px * root.ui-scale;
+                x: 80px * root.ui-scale;
+                y: 120px * root.ui-scale;
+                border-radius: 10px;
+                background: Yes_button_touch_area.pressed ? darkred :(Yes_button_touch_area.has-hover ? red :#007bff);
+                animate background { duration: 200ms; easing: ease-in-out; }
+
+                Text {
+                    text: "Yes";
+                    font-size: 18px * root.ui-scale;
+                    font-weight: 600;
+                    color: white;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
                 }
 
-                Logout_touch_area := TouchArea{
-                    width: 50px * root.ui-scale;
-                    height: 50px * root.ui-scale;
+                Yes_button_touch_area := TouchArea {
                     clicked => {
-                        root.Logout_value = 1; // Trigger logout confirmation
+                        root.Logout_value = 2;
+                        root.Logout();
                     }
                 }
             }
-                if (root.Logout_value == 1) : Rectangle {
-                    width: 400px * root.ui-scale;
-                    height: 200px * root.ui-scale;
-                    x: (root.width - self.width) / 2;
-                    y: (root.height - self.height) / 2;
-                    background: #d0d2d6;
-                    border-radius: 15px;
-                    border-color: #727275;
-                    border-width: 2px;
+            No_button := Rectangle {
+                width: 100px * root.ui-scale;
+                height: 40px * root.ui-scale;
+                x: 220px * root.ui-scale;
+                y: 120px * root.ui-scale;
+                border-radius: 10px;
+                background: No_button_touch_area.pressed ? #003d80 :(No_button_touch_area.has-hover ? #104682 :#007bff);
+                animate background { duration: 200ms; easing: ease-in-out; }
 
-                    Confirmation_text := Text {
-                        text: "Are you sure you want to logout?";
-                        font-size: 20px * root.ui-scale;
-                        font-weight: 600;
-                        color: #000000;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                        y: 40px * root.ui-scale;
-                    }
-                    Yes_button := Rectangle {
-                        width: 100px * root.ui-scale;
-                        height: 40px * root.ui-scale;
-                        x: 80px * root.ui-scale;
-                        y: 120px * root.ui-scale;
-                        border-radius: 10px;
-                        background: Yes_button_touch_area.pressed ? darkred :(Yes_button_touch_area.has-hover ? red :#007bff);
-                        animate background {
-                            duration: 200ms;
-                            easing: ease-in-out;
-                        }
-
-                        Text {
-                            text: "Yes";
-                            font-size: 18px * root.ui-scale;
-                            font-weight: 600;
-                            color: white;
-                            horizontal-alignment: center;
-                            vertical-alignment: center;
-                        }
-
-                        Yes_button_touch_area := TouchArea {
-                            clicked => {
-                                root.Logout_value = 2; // Finalize logout
-                                root.Logout(); // Call the Logout callback
-                            }
-                        }
-                    }
-                    No_button := Rectangle {
-                        width: 100px * root.ui-scale;
-                        height: 40px * root.ui-scale;
-                        x: 220px * root.ui-scale;
-                        y: 120px * root.ui-scale;
-                        border-radius: 10px;
-                        background: No_button_touch_area.pressed ? #003d80 :(No_button_touch_area.has-hover ? #104682 :#007bff);
-                        animate background {
-                            duration: 200ms;
-                            easing: ease-in-out;
-                        }
-
-                        Text {
-                            text: "No";
-                            font-size: 18px * root.ui-scale;
-                            font-weight: 600;
-                            color: white;
-                            horizontal-alignment: center;
-                            vertical-alignment: center;
-                        }
-
-                        No_button_touch_area := TouchArea {
-                            clicked => {
-                                root.Logout_value = 0; // Cancel logout
-                            }
-                        }
-                    }
-
-
+                Text {
+                    text: "No";
+                    font-size: 18px * root.ui-scale;
+                    font-weight: 600;
+                    color: white;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
                 }
+
+                No_button_touch_area := TouchArea {
+                    clicked => { root.Logout_value = 0; }
+                }
+            }
         }
-        Profile := Rectangle{}
+    }
+
+    Rectangle {
+        background: white;
+        width: parent.width - Selection_menu.width;
+        x: Selection_menu.width;
+
+        if (selected-menu-item == 2) : Teacher_Attendance_Panel {
+            ui-scale: root.ui-scale;
+
+            // Link directly to the root exposed variables
+            students_data: root.students_data;
+            load_students(course, week) => { root.load_students(course, week); }
+            save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
+        }
+    }
 }

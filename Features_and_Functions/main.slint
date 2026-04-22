@@ -51,7 +51,6 @@ export component Main_App inherits Window {
     callback admin_previous_student();
     callback admin_submit_decisions();
 
-
     min-height: 600px;
     min-width: 1024px;
     preferred-height: 768px;
@@ -97,17 +96,17 @@ export component Main_App inherits Window {
             }
 
         if (active_panel == 3) : Admin_Profile {
-                    width: 100%;
-                    height: 100%;
-                    assigned_scale: root.global_scale;
-                    Logout => { root.active_panel = 0; }
+            width: 100%;
+            height: 100%;
+            assigned_scale: root.global_scale;
+            Logout => { root.active_panel = 0; }
 
-                    // Link all Admin variables to root Main_App
-                    student_id <=> root.student_id;
-                    student_name <=> root.student_name;
-                    faculty <=> root.faculty;
-                    Submit_Button_Pressed <=> root.Submit_Button_Pressed;
-                    show_warning <=> root.show_warning;
+            // Link all Admin variables to root Main_App
+            student_id <=> root.student_id;
+            student_name <=> root.student_name;
+            faculty <=> root.faculty;
+            Submit_Button_Pressed <=> root.Submit_Button_Pressed;
+            show_warning <=> root.show_warning;
                     no_course_requests <=> root.no_course_requests;
 
                     course1_accept_button_pressed <=> root.course1_accept_button_pressed;

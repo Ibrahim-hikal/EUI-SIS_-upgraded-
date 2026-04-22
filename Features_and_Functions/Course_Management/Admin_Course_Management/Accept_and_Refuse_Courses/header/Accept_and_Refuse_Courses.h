@@ -30,6 +30,29 @@ public:
     string withdrawalRequests;
     string faculty;
     string gpa;
+
+    // Constructor
+    Student() = default;
+    explicit Student(std::string student_id) : id(std::move(student_id)) {}
+
+    static void load_offered_courses() {
+        // TODO: implement loading offered courses
+    }
+
+    void load_data() {
+        // TODO: load student data from CSV
+    }
+
+    static const std::vector<Course>& get_eligible_courses() {
+        // TODO: compute eligible courses
+        static std::vector<Course> eligible;
+        return eligible;
+    }
+
+    static bool register_course(const std::string& course_code) {
+        // TODO: register the course
+        return true;
+    }
 };
 
 // Encapsulated Manager Class
@@ -54,7 +77,7 @@ private:
     void saveCurrentDecisions(void* ui_ptr);
 public:
     // Constructor
-    AdminCourseManager(const string& basePath);
+    explicit AdminCourseManager(const string& basePath);
 
     // Public UI Hooks (void* prevents circular dependencies with main.h)
     void initUI(void* ui_ptr);

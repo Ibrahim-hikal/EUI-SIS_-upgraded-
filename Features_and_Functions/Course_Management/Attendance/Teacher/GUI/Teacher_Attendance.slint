@@ -1,0 +1,65 @@
+import { ComboBox, ScrollView, CheckBox, Button } from "std-widgets.slint";
+import { StudentAttendanceData } from "../../Shared/GUI/Shared_Structs.slint";
+
+export component Teacher_Attendance_Panel inherits Rectangle {
+    in-out property <float> ui-scale: 1.0;
+    in property <[string]> available_courses;
+    in property <[string]> available_weeks: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"];
+    in property <[StudentAttendanceData]> students_data;
+
+    out property <string> selected_course: available_courses[0];
+    out property <int> selected_week: 1;
+
+    callback load_students(string, int);
+    callback save_attendance([StudentAttendanceData], string, int);
+
+    background: white;
+
+    VerticalLayout {
+        padding: 20px * root.ui-scale;
+        spacing: 20px * root.ui-scale;
+
+        Text { text: "Manage Course Attendance"; font-size: 24px * root.ui-scale; font-weight: 700; }
+
+        HorizontalLayout {
+            spacing: 20px * root.ui-scale;
+            height: 40px * root.ui-scale;
+            ComboBox {
+                model: available_courses;
+                current-value <=> selected_course;
+                selected => { root.load_students(root.selected_course, root.selected_week); }
+            }
+            ComboBox {
+                model: available_weeks;
+                current-value: "1";
+                selected(val) => { root.selected_week = val.to-float(); root.load_students(root.selected_course, root.selected_week); }
+            }
+        }
+
+        ScrollView {
+            VerticalLayout {
+                spacing: 10px * root.ui-scale;
+                for student[i] in students_data: Rectangle {
+                    height: 50px * root.ui-scale;
+                    background: #f4f6f9; border-radius: 8px * root.ui-scale;
+                    HorizontalLayout {
+                        padding: 10px * root.ui-scale;
+                        spacing: 20px * root.ui-scale;
+                        Text { text: student.id; vertical-alignment: center; width: 120px * root.ui-scale; font-weight: 600;}
+                        Text { text: student.name; vertical-alignment: center; width: 250px * root.ui-scale; }
+                        CheckBox {
+                            text: "Present";
+                            checked: student.present;
+                            toggled => { student.present = !student.present; }
+                        }
+                    }
+                }
+            }
+        }
+
+        Button {
+            text: "Save Attendance to Database"; height: 50px * root.ui-scale;
+            clicked => { root.save_attendance(root.students_data, root.selected_course, root.selected_week); }
+        }
+    }
+}
