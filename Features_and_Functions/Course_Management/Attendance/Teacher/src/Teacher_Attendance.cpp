@@ -25,7 +25,6 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     if (!std_courses.empty()) {
         ui->invoke_load_students(std_courses[0], 1);
     }
-
     // 3. Register the load students callback
     ui->on_load_students([this, ui](slint::SharedString course, int week) {
         auto vec = this->get_students_for_week(course.data(), week);
