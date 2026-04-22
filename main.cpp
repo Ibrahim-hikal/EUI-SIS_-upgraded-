@@ -13,7 +13,7 @@
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
 
 using namespace std;
-
+// Note: The main function is intentionally kept clean and delegates responsibilities to the respective Managers and Profiles. This promotes separation of concerns and makes the codebase more maintainable.
 int main() {
     auto ui = Main_App::create();
     Login_Manager& db = Login_Manager::get_instance();
