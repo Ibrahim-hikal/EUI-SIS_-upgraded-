@@ -36,6 +36,9 @@ export component Main_App inherits Window {
         in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
         in-out property <bool> Submit_Button_Pressed: false;
         in-out property <bool> show_warning: false;
+        in-out property <bool> no_course_requests: false;
+        in-out property <bool> is_next_student_available: false;
+        in-out property <bool> is_previous_student_available: false;
     //...................end of Accept and refuse courses admin properties
 
     // Global scale calculation
@@ -47,6 +50,7 @@ export component Main_App inherits Window {
     callback admin_next_student();
     callback admin_previous_student();
     callback admin_submit_decisions();
+
 
     min-height: 600px;
     min-width: 1024px;
@@ -95,7 +99,7 @@ export component Main_App inherits Window {
         if (active_panel == 3) : Admin_Profile {
                     width: 100%;
                     height: 100%;
-                    ui-scale: root.global_scale;
+                    assigned_scale: root.global_scale;
                     Logout => { root.active_panel = 0; }
 
                     // Link all Admin variables to root Main_App
@@ -104,6 +108,7 @@ export component Main_App inherits Window {
                     faculty <=> root.faculty;
                     Submit_Button_Pressed <=> root.Submit_Button_Pressed;
                     show_warning <=> root.show_warning;
+                    no_course_requests <=> root.no_course_requests;
 
                     course1_accept_button_pressed <=> root.course1_accept_button_pressed;
                     course2_accept_button_pressed <=> root.course2_accept_button_pressed;
