@@ -1,4 +1,5 @@
 import {Accept_and_Refuse_Courses} from "../../../Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/GUI/Accept_and_Refuse_Courses.slint";
+
 export component Admin_Profile inherits Rectangle {
 
     //...................Start Accept and refuse courses admin properties
@@ -50,9 +51,7 @@ export component Admin_Profile inherits Rectangle {
     max-width: 1300px;
     background: white;
 
-    // --- THE LAYOUT FIX ---
     HorizontalLayout {
-
         // --- 1. THE MENU (Left Side) ---
         Selection_menu := Rectangle {
             width: 270px * root.ui-scale;
@@ -130,7 +129,7 @@ export component Admin_Profile inherits Rectangle {
             if (selected-menu-item == 3) : Accept_and_Refuse_Courses {
                 width: 100%;
                 height: 100%;
-                ui-scale:   min(root.ui-scale, self.width / 1020px);
+                ui-scale: min(root.ui-scale, self.width / 1020px);
 
                 student_id <=> root.student_id;
                 student_name <=> root.student_name;
@@ -146,6 +145,7 @@ export component Admin_Profile inherits Rectangle {
                 course3_accept_button_pressed <=> root.course3_accept_button_pressed;
                 course4_accept_button_pressed <=> root.course4_accept_button_pressed;
                 course5_accept_button_pressed <=> root.course5_accept_button_pressed;
+
                 course1_decline_button_pressed <=> root.course1_decline_button_pressed;
                 course2_decline_button_pressed <=> root.course2_decline_button_pressed;
                 course3_decline_button_pressed <=> root.course3_decline_button_pressed;

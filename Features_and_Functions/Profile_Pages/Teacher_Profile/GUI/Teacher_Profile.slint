@@ -1,5 +1,6 @@
 import { Teacher_Attendance_Panel } from "../../../Course_Management/Attendance/Teacher/GUI/Teacher_Attendance.slint";
 import { StudentAttendanceData } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
 export component Teacher_Profile inherits Rectangle {
 
@@ -12,6 +13,7 @@ export component Teacher_Profile inherits Rectangle {
     //in-out properties
     in-out property <int> Logout_value: 0; // 0: default, 1: confirmation, 2: finalized
     in-out property <[StudentAttendanceData]> students_data;
+    in-out property <[CourseInfo]> my_courses;
 
     //callbacks
     callback Logout;
@@ -255,7 +257,7 @@ export component Teacher_Profile inherits Rectangle {
             ui-scale: root.ui-scale;
 
             // Link directly to the root exposed variables
-            students_data: root.students_data;
+            students_data <=> root.students_data;
             load_students(course, week) => { root.load_students(course, week); }
             save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
         }

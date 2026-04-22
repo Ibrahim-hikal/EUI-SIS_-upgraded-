@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "../header/Accept_and_Refuse_Courses.h"
-#include "main.h" // Include Slint generated header to cast void* to Main_App*
+#include "main.h"
 
 using namespace std;
 
@@ -310,7 +310,7 @@ void AdminCourseManager::submitDecisions(void* ui_ptr) {
     ui->set_Submit_Button_Pressed(true);
     ui->set_show_warning(false);
 
-    // --- SMART UI REFRESH (Auto-advances or stays on current student if incomplete) ---
+    // --- SMART UI REFRESH ---
     bool found_next = false;
     for (int i = currentStudentIdx; i < (int)students.size(); ++i) {
         if (!students[i].requestedCourses.empty()) {
@@ -334,6 +334,5 @@ void AdminCourseManager::submitDecisions(void* ui_ptr) {
         currentStudentIdx = -1;
     }
 
-    // Force the screen to update with the newly calculated data!
     loadStudentToUI(ui_ptr);
 }
