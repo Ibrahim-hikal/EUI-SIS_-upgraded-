@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "../header/Accept_and_Refuse_Courses.h"
-#include "main.h" // Include Slint generated header to cast void* to Main_App*
+#include "main.h"
 
 using namespace std;
 
@@ -10,7 +10,6 @@ using namespace std;
 AdminCourseManager::AdminCourseManager(const string& basePath) : dbBasePath(basePath), currentStudentIdx(-1) {}
 
 // --- Private Utility Methods ---
-
 string AdminCourseManager::trim(const string& s) {
     size_t first = s.find_first_not_of(" \t\r\n");
     if (string::npos == first) return s;
@@ -101,7 +100,6 @@ void AdminCourseManager::saveAllToCSV(const string& filename) {
 }
 
 // --- Internal UI Handlers ---
-
 void AdminCourseManager::resetUI(void* ui_ptr) {
     auto ui = static_cast<Main_App*>(ui_ptr);
     ui->set_Submit_Button_Pressed(false);
@@ -118,23 +116,56 @@ void AdminCourseManager::resetUI(void* ui_ptr) {
     ui->set_course5_accept_button_pressed(false); ui->set_course5_decline_button_pressed(false);
 }
 
+void AdminCourseManager::saveCurrentDecisions(void* ui_ptr) {
+    if (currentStudentIdx < 0 || currentStudentIdx >= (int)students.size()) return;
+
+    auto ui = static_cast<Main_App*>(ui_ptr);
+    std::vector<int> decisions(5, 0);
+
+    if (ui->get_course1_accept_button_pressed()) decisions[0] = 1;
+    else if (ui->get_course1_decline_button_pressed()) decisions[0] = -1;
+
+    if (ui->get_course2_accept_button_pressed()) decisions[1] = 1;
+    else if (ui->get_course2_decline_button_pressed()) decisions[1] = -1;
+
+    if (ui->get_course3_accept_button_pressed()) decisions[2] = 1;
+    else if (ui->get_course3_decline_button_pressed()) decisions[2] = -1;
+
+    if (ui->get_course4_accept_button_pressed()) decisions[3] = 1;
+    else if (ui->get_course4_decline_button_pressed()) decisions[3] = -1;
+
+    if (ui->get_course5_accept_button_pressed()) decisions[4] = 1;
+    else if (ui->get_course5_decline_button_pressed()) decisions[4] = -1;
+
+    sessionDecisions[students[currentStudentIdx].id] = decisions;
+}
+
 void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
     auto ui = static_cast<Main_App*>(ui_ptr);
+
+    // --- 1. EMPTY STATE CHECK ---
     if (currentStudentIdx < 0 || currentStudentIdx >= (int)students.size()) {
         resetUI(ui);
-        ui->set_student_id("No Students Pending");
+        ui->set_no_course_requests(true);
+        ui->set_student_id("");
         ui->set_student_name("");
         ui->set_faculty("");
+        ui->set_is_next_student_available(false);
+        ui->set_is_previous_student_available(false);
         return;
     }
 
+    // --- 2. ACTIVE STATE SETUP ---
+    ui->set_no_course_requests(false);
     resetUI(ui);
     ui->set_show_warning(false);
+
     const Student& s = students[currentStudentIdx];
     ui->set_student_id(s.id.c_str());
     ui->set_student_name(s.name.c_str());
     ui->set_faculty(s.faculty.c_str());
 
+    // Load course text
     if (s.requestedCourses.size() >= 1) {
         ui->set_c1_code(s.requestedCourses[0].code.c_str()); ui->set_c1_name(s.requestedCourses[0].name.c_str());
         ui->set_c1_l_day(s.requestedCourses[0].lectureDay.c_str()); ui->set_c1_l_slot(s.requestedCourses[0].lectureTime.c_str());
@@ -160,13 +191,42 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
         ui->set_c5_l_day(s.requestedCourses[4].lectureDay.c_str()); ui->set_c5_l_slot(s.requestedCourses[4].lectureTime.c_str());
         ui->set_c5_t_day(s.requestedCourses[4].tutorialDay.c_str()); ui->set_c5_t_slot(s.requestedCourses[4].tutorialTime.c_str());
     }
+
+    // --- 3. RE-APPLY MEMORY ---
+    if (sessionDecisions.count(s.id)) {
+        const auto& d = sessionDecisions[s.id];
+        if (s.requestedCourses.size() >= 1) { ui->set_course1_accept_button_pressed(d[0] == 1); ui->set_course1_decline_button_pressed(d[0] == -1); }
+        if (s.requestedCourses.size() >= 2) { ui->set_course2_accept_button_pressed(d[1] == 1); ui->set_course2_decline_button_pressed(d[1] == -1); }
+        if (s.requestedCourses.size() >= 3) { ui->set_course3_accept_button_pressed(d[2] == 1); ui->set_course3_decline_button_pressed(d[2] == -1); }
+        if (s.requestedCourses.size() >= 4) { ui->set_course4_accept_button_pressed(d[3] == 1); ui->set_course4_decline_button_pressed(d[3] == -1); }
+        if (s.requestedCourses.size() >= 5) { ui->set_course5_accept_button_pressed(d[4] == 1); ui->set_course5_decline_button_pressed(d[4] == -1); }
+    }
+
+    // --- 4. CALCULATE PREVIOUS/NEXT BUTTON VISIBILITY ---
+    bool has_next = false;
+    for (int i = currentStudentIdx + 1; i < (int)students.size(); ++i) {
+        if (!students[i].requestedCourses.empty()) {
+            has_next = true;
+            break;
+        }
+    }
+    ui->set_is_next_student_available(has_next);
+
+    bool has_prev = false;
+    for (int i = currentStudentIdx - 1; i >= 0; --i) {
+        if (!students[i].requestedCourses.empty()) {
+            has_prev = true;
+            break;
+        }
+    }
+    ui->set_is_previous_student_available(has_prev);
 }
 
 // --- Public Interface ---
-
 void AdminCourseManager::initUI(void* ui_ptr) {
     loadCourseNames(dbBasePath + "Offered_Courses.csv");
     parseStudentData(dbBasePath + "Data_on_Each_Student.csv");
+    sessionDecisions.clear();
 
     currentStudentIdx = -1;
     for (int i = 0; i < (int)students.size(); ++i) {
@@ -179,13 +239,18 @@ void AdminCourseManager::initUI(void* ui_ptr) {
     if (currentStudentIdx == -1) {
         resetUI(ui_ptr);
         auto ui = static_cast<Main_App*>(ui_ptr);
+        ui->set_no_course_requests(true);
         ui->set_student_id("");
+        ui->set_is_next_student_available(false);
+        ui->set_is_previous_student_available(false);
     } else {
         loadStudentToUI(ui_ptr);
     }
 }
 
 void AdminCourseManager::nextStudent(void* ui_ptr) {
+    saveCurrentDecisions(ui_ptr);
+
     int start_search = (currentStudentIdx == -1) ? 0 : currentStudentIdx + 1;
     for (int i = start_search; i < (int)students.size(); ++i) {
         if (!students[i].requestedCourses.empty()) {
@@ -194,10 +259,11 @@ void AdminCourseManager::nextStudent(void* ui_ptr) {
             return;
         }
     }
-    cout << "No more students with requested courses forwards." << endl;
 }
 
 void AdminCourseManager::prevStudent(void* ui_ptr) {
+    saveCurrentDecisions(ui_ptr);
+
     int prev_idx = currentStudentIdx - 1;
     while (prev_idx >= 0) {
         if (!students[prev_idx].requestedCourses.empty()) {
@@ -239,6 +305,34 @@ void AdminCourseManager::submitDecisions(void* ui_ptr) {
     s.requestedCourses = still_requested;
     saveAllToCSV(dbBasePath + "Data_on_Each_Student.csv");
 
+    sessionDecisions.erase(s.id);
+
     ui->set_Submit_Button_Pressed(true);
     ui->set_show_warning(false);
+
+    // --- SMART UI REFRESH ---
+    bool found_next = false;
+    for (int i = currentStudentIdx; i < (int)students.size(); ++i) {
+        if (!students[i].requestedCourses.empty()) {
+            currentStudentIdx = i;
+            found_next = true;
+            break;
+        }
+    }
+
+    if (!found_next) {
+        for (int i = 0; i < currentStudentIdx; ++i) {
+            if (!students[i].requestedCourses.empty()) {
+                currentStudentIdx = i;
+                found_next = true;
+                break;
+            }
+        }
+    }
+
+    if (!found_next) {
+        currentStudentIdx = -1;
+    }
+
+    loadStudentToUI(ui_ptr);
 }

@@ -73,7 +73,8 @@ private:
     // Internal UI State Handlers
     void resetUI(void* ui_ptr);
     void loadStudentToUI(void* ui_ptr);
-
+    map<string, vector<int>> sessionDecisions;
+    void saveCurrentDecisions(void* ui_ptr);
 public:
     // Constructor
     explicit AdminCourseManager(const string& basePath);
