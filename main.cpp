@@ -95,6 +95,55 @@ int main() {
         }
     });
 
+    //Student Request courses Callback
+    ui->on_request_courses_clicked([&](slint::SharedString id, slint::SharedString name, slint::SharedString faculty) {
+        current_id = std::string(id.data());
+        Request_Courses backend(current_id);
+
+        ui->set_student_id(id);
+        ui->set_student_name(name);
+        ui->set_faculty(faculty);
+
+        // Clean, normal code! No namespaces, no messy pointer declarations.
+        auto ui_courses_model = std::make_shared<slint::VectorModel<CourseInfo>>();
+
+        auto iterator = backend.get_available_courses_inorder();
+        while (iterator->has_next()) {
+            Course& c = iterator->next();
+
+            CourseInfo ui_course;
+            ui_course.course_code = slint::SharedString(c.code.c_str());
+            ui_course.course_name = slint::SharedString(c.name.c_str());
+
+            ui_courses_model->push_back(ui_course);
+        }
+
+        ui->set_available_courses(ui_courses_model); 
+    });
+
+    ui->on_request_course([&](slint::SharedString requested_code) {
+        if (current_id.empty()) return;
+        Request_Courses backend(current_id);
+        backend.request_course(std::string(requested_code.data()));
+    });
+
+    // Handle the "Request" button click from the table
+    ui->on_request_course([&](slint::SharedString requested_code) {
+        if (current_id.empty()) return;
+
+        Request_Courses backend(current_id);
+        std::string code_str = std::string(requested_code.data());
+
+        bool success = backend.request_course(code_str);
+
+        if (success) {
+            std::cout << "Successfully requested course: " << code_str << std::endl;
+            // You can add a success message to the UI here if you want!
+        } else {
+            std::cout << "Failed to request course: " << code_str << std::endl;
+        }
+    });
+
     // Logout Callback
     ui->on_logout([&]() {
         Student_Profile::get_instance().reset();
