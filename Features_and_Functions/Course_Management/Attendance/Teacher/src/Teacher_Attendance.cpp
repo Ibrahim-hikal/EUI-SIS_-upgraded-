@@ -4,10 +4,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
-// The new UI Initialization method
 void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     this->teacher_name = name;
 
@@ -21,13 +21,14 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(std_courses);
     ui->set_available_courses(courses_model);
 
-    // 2. Auto-load the first course's students if available
-    if (!std_courses.empty()) {
-        ui->invoke_load_students(std_courses[0], 1);
-    }
-    // 3. Register the load students callback
+    // 2. Register the load students callback FIRST
     ui->on_load_students([this, ui](slint::SharedString course, int week) {
-        auto vec = this->get_students_for_week(course.data(), week);
+        std::string course_str(course.data());
+        // Clean any hidden carriage returns from CSV parsing
+        course_str.erase(std::remove(course_str.begin(), course_str.end(), '\r'), course_str.end());
+        course_str.erase(std::remove(course_str.begin(), course_str.end(), '\n'), course_str.end());
+
+        auto vec = this->get_students_for_week(course_str, week);
         std::vector<StudentAttendanceData> std_vec;
         for (int i = 0; i < vec.size(); ++i) {
             std_vec.push_back(vec[i]);
@@ -35,6 +36,11 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
         auto model = std::make_shared<slint::VectorModel<StudentAttendanceData>>(std_vec);
         ui->set_students_data(model);
     });
+
+    // 3. Auto-load the first course's students AFTER the callback is registered
+    if (!std_courses.empty()) {
+        ui->invoke_load_students(std_courses[0], 1);
+    }
 
     // 4. Register the save attendance callback
     ui->on_save_attendance([this](std::shared_ptr<slint::Model<StudentAttendanceData>> data, slint::SharedString course, int week) {
@@ -44,9 +50,14 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
                 vec.push_back(*row);
             }
         }
-        bool success = this->save_attendance(course.data(), week, vec);
+
+        std::string course_str(course.data());
+        course_str.erase(std::remove(course_str.begin(), course_str.end(), '\r'), course_str.end());
+        course_str.erase(std::remove(course_str.begin(), course_str.end(), '\n'), course_str.end());
+
+        bool success = this->save_attendance(course_str, week, vec);
         if(success) {
-            cout << "Attendance for " << course << " Week " << week << " saved successfully!" << endl;
+            cout << "Attendance for " << course_str << " Week " << week << " saved successfully!" << endl;
         } else {
             cout << "Failed to save attendance." << endl;
         }
@@ -58,6 +69,7 @@ vector<string> TeacherAttendanceManager::parse_csv_line(const string& line) cons
     string current;
     bool in_quotes = false;
     for (char c : line) {
+        if (c == '\r') continue; // Fix: Strip \r to prevent path corruption
         if (c == '"') { in_quotes = !in_quotes; }
         else if (c == ',' && !in_quotes) { result.push_back(current); current.clear(); }
         else { current += c; }
@@ -76,7 +88,6 @@ slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available
     while (getline(file, line)) {
         if (line.empty()) continue;
         vector<string> cols = parse_csv_line(line);
-        // Instructor Name is column 4. Matches against the name saved in initUI
         if (cols.size() > 4 && cols[4] == teacher_name) {
             courses.push_back(slint::SharedString(cols[0]));
         }
@@ -86,7 +97,8 @@ slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available
 
 slint::SharedVector<StudentAttendanceData> TeacherAttendanceManager::get_students_for_week(const string& course_code, int week) const {
     slint::SharedVector<StudentAttendanceData> students;
-    ifstream file("Databases/Courses/" + course_code + "/Attendance.csv");
+    string filepath = "Databases/Courses/" + course_code + "/Attendance.csv";
+    ifstream file(filepath);
     if (!file.is_open()) return students;
 
     string line;

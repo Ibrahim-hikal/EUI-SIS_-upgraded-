@@ -9,7 +9,7 @@ void Teacher_Profile::load_profile(const std::string& target_id) {
     this->id = target_id;
     this->email = target_id + "@eui.edu.eg";
 
-    // TODO: Read your teacher database CSV here to get their real name based on target_id.
-    // For now, hardcoding an existing instructor to test the attendance UI:
+    // TODO: Logic to put the target id as whoever teacher is signed in
+    // For now, hardcoding an existing instructor to test the attendance UI
     this->name = "Ahmed Mahmoud";
 }
