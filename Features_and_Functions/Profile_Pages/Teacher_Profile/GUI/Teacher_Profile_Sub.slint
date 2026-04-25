@@ -1,0 +1,130 @@
+// Import CourseInfo so Slint knows what the list contains
+import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export component TC_Profile inherits Rectangle {
+    // --- PROPERTIES ---
+    in-out property <float> ui-scale: 1.0;
+    in-out property <string> User_name: "";
+    in-out property <string> User_email: "";
+
+    // Changed this to accept a list of courses!
+    in-out property <[string]> Courses_taught;
+
+    in-out property <image> User_profile_pic;
+
+    callback change_picture();
+
+    background: white;
+    Profile_Window := Rectangle {
+        width: 100%;
+        height: 100%;
+        background: white;
+
+        Pfp_container := Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: 30px * ui-scale;
+            border-color : black;
+            border-width: 3px * ui-scale;
+            width: 300px * ui-scale;
+            height: 300px * ui-scale;
+            background: black;
+            border-radius: self.width / 2;
+            clip: true;
+
+            Profile_Pic := Image {
+                source: root.User_profile_pic;
+                width: 100%;
+                height: 100%;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                image-fit: cover;
+                image-rendering: smooth;
+                opacity: picture_hover.has-hover ? 0.9 : 1.0;
+                animate opacity { duration: 200ms; easing: ease-in-out; }
+                picture_hover := TouchArea {
+                    clicked => { root.change_picture(); }
+                }
+            }
+
+            edit_icon := Image {
+                source: @image-url("../../../../Databases/Profile_Pics/edit_icon.svg");
+                width: 100px * ui-scale;
+                colorize: picture_hover.pressed ? #262626 : #383838;
+                x: parent.width - self.width - 30px;
+                y: parent.height - self.height - 5px;
+                opacity: picture_hover.has-hover ? 1 : 0.0;
+                animate opacity { duration: 200ms; easing: ease-in-out; }
+            }
+        }
+
+        Text_container := Rectangle {
+            width: 700px * ui-scale;
+            height: 500px * ui-scale;
+            y: 360px * ui-scale; // Moved slightly up to fit the taller list
+            x: (parent.width - self.width) / 2;
+
+            // Use a VerticalLayout to cleanly stack the 3 boxes
+            VerticalLayout {
+                spacing: 15px * ui-scale; // Gap between the boxes
+
+                // --- BOX 1: NAME (Full Width) ---
+                Rectangle {
+                    width: 100%;
+                    height: 70px * ui-scale;
+                    background: #abaeb3;
+                    border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                    Text { x: 20px * ui-scale;
+                    text: "Name: " + User_name; font-size: 22px * ui-scale; font-weight: 700; vertical-alignment: center;
+                    }
+                }
+
+                // --- BOX 2: EMAIL (Full Width) ---
+                Rectangle {
+                    width: 100%;
+                    height: 70px * ui-scale;
+                    background: #abaeb3;
+                    border-color: black; border-width: 2px * ui-scale; border-radius: 10px * ui-scale;
+
+                    Text { x: 20px * ui-scale;
+                    text: "Email: " + User_email; font-size: 20px * ui-scale; font-weight: 700; vertical-alignment: center;
+                    }
+                }
+
+                // --- BOX 3: COURSES TAUGHT LIST (Full Width) ---
+                Rectangle {
+                    width: 100%;
+                    height: 220px * ui-scale; // Made taller to fit the list!
+                    background: #abaeb3; border-color: black; border-width: 2px * ui-scale;
+                    border-radius: 10px * ui-scale;
+
+                    VerticalLayout {
+                        padding: 15px * ui-scale;
+                        spacing: 10px * ui-scale;
+
+                        Text {
+                            text: "Courses Taught:";
+                            font-size: 18px * ui-scale;
+                            font-weight: 700;
+                        }
+
+                        // A scrollable area that loops through the courses!
+                        ScrollView {
+                            VerticalLayout {
+                                spacing: 8px * ui-scale;
+                                for course in root.Courses_taught : Text {
+                                    // Adjust "course_name" if your struct uses a different variable name!
+                                    text: "• " + course; // Display the course name with a bullet point
+                                    font-size: 18px * ui-scale;
+                                    font-weight: 600;
+                                    color: #222222;
+                                }
+                            }
+                        }
+                    }
+                }
+            } // End VerticalLayout
+        }
+    }
+}

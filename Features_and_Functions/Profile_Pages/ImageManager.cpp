@@ -31,7 +31,12 @@ std::string ImageManager::save_profile_picture(const std::string& source_path, c
         if (!fs::exists(target_dir)) {
             fs::create_directories(target_dir);
         }
-
+        for (const std::string& ext : {".png", ".jpg", ".jpeg"}) {
+            std::string old_file = target_dir + user_id + ext;
+            if (fs::exists(old_file)) {
+                fs::remove(old_file); // Destroy the old file so it doesn't conflict
+            }
+        }
         std::string extension = fs::path(source_path).extension().string();
         std::string new_filename = user_id + extension;
         std::string final_path = target_dir + new_filename;
@@ -58,6 +63,16 @@ std::string ImageManager::get_user_pfp_path(const std::string& user_id) {
             return base_path + ext;
         }
     }
+    std::string default_path = "Databases/Profile_Pics/default_pic.jpeg";
 
-    return "Databases/Profile_Pics/default_pic.png";
+    std::cout << "\n--- PICTURE DEBUG ---" << std::endl;
+    std::cout << "Trying to load default picture from: " << std::filesystem::absolute(default_path) << std::endl;
+
+    if (!fs::exists(default_path)) {
+        std::cerr << "ERROR: The file DOES NOT exist at that location!" << std::endl;
+    } else {
+        std::cout << "SUCCESS: The file exists!" << std::endl;
+    }
+    std::cout << "---------------------\n" << std::endl;
+    return default_path;
 }

@@ -23,6 +23,7 @@ int main() {
     TeacherAttendanceManager teacherAttendanceManager;
 
     string current_id = "";
+    string current_email = "";
 
     ui->on_check_credentials([&](const slint::SharedString& id, const slint::SharedString& pass, int role) {
         string string_id = string(id);
@@ -55,7 +56,26 @@ int main() {
             }
             else if (role == 2) { // Teacher Logic
                 auto& teacher = Teacher_Profile::get_instance();
+                // Load the profile using the email (which is the current_id for teachers)
                 teacher.load_profile(current_id);
+                current_email = teacher.get_email();
+                string pfp_path = ImageManager::get_user_pfp_path(current_id);
+                auto img = slint::Image::load_from_path(pfp_path.c_str());
+                ui->set_user_profile_pic(img);
+                // Set common profile info
+                ui->set_user_name(teacher.get_name().c_str());
+                ui->set_user_email(current_email.c_str());
+
+                //converting vectors to models for slint
+                auto c_courses = teacher.get_courses_taught();
+                std::vector<slint::SharedString> slint_courses;
+                for (const auto& course_str : teacher.get_courses_taught()) {
+                slint_courses.push_back(slint::SharedString(course_str));
+                }
+
+                // send the courses to the UI
+                auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(slint_courses);
+                ui->set_available_courses(courses_model);
 
                 // Keep main.cpp clean - delegate entirely to the Manager
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());

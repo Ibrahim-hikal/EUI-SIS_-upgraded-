@@ -1,27 +1,42 @@
-#ifndef TEACHER_PROFILE_H
-#define TEACHER_PROFILE_H
+#pragma once    //to fix multiple definition error
 
 #include <string>
+#include <vector>
+
+using namespace std;
 
 class Teacher_Profile {
 private:
-    std::string id;
-    std::string name;
-    std::string email;
+    string name;
+    string email; // Acts as the unique ID
+    vector<string> courses_taught;
 
-    Teacher_Profile() = default;
+    // Private constructor for Singleton
+    Teacher_Profile() {}
+
+    // Helper functions for CSV parsing
+    string trim(const string& str);
+    vector<string> split(const string& str, char delimiter);
 
 public:
-    static Teacher_Profile& get_instance();
+    // Delete copy constructor and assignment operator to enforce Singleton
     Teacher_Profile(const Teacher_Profile&) = delete;
     void operator=(const Teacher_Profile&) = delete;
 
-    void load_profile(const std::string& target_id);
+    // Get the single instance
+    static Teacher_Profile& get_instance() {
+        static Teacher_Profile instance;
+        return instance;
+    }
 
-    std::string get_id() const { return id; }
-    std::string get_name() const { return name; }
-    std::string get_email() const { return email; }
+    // Load data from the CSV based on the teacher's email
+    void load_profile(const string& current_email);
 
-    void reset() { id = ""; name = "Loading..."; email = ""; }
+    // Reset the profile (used during logout)
+    void reset();
+
+    // Getters
+    string get_name() const { return name; }
+    string get_email() const { return email; }
+    vector<string> get_courses_taught() const { return courses_taught; }
 };
-#endif //TEACHER_PROFILE_H

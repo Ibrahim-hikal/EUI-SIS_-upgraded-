@@ -114,7 +114,14 @@ export component Main_App inherits Window {
                     ui-scale: root.global_scale;
                     Logout => { root.active_panel = 0; }
 
-                    available_courses: root.available_courses; // <--- ADD THIS LINE
+                    // --- LINK THE NEW USER DATA HERE ---
+                    user_name <=> root.user_name;
+                    user_email <=> root.user_email;
+                    user_profile_pic : root.user_profile_pic;
+                    change_picture => { root.change_picture(); }
+                    // -----------------------------------
+
+                    available_courses <=> root.available_courses;
 
                     // Link Teacher Properties & Callbacks
                     students_data <=> root.students_data;
