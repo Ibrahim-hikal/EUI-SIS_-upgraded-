@@ -1,28 +1,24 @@
 import { ST_Profile } from "Student_Profile_sub.slint";
-import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses_Sub.slint";
+import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
 import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
 export component Student_Profile inherits Rectangle {
 
     //properties
-    in property <float> ui-scale: assigned_scale;
+    property <int> manage-courses-tab: 1; // 0: Request, 1: Registered, 2: Previous
     property <int> selected-menu-item: 0; // 0: Profile, 1: Manage Courses, etc.
 
-    in property <float> assigned_scale: 1.0;
-
     //in-out properties
-    in-out property <int> Logout_value: 0;
-    // 0: default, 1: confirmation, 2: finalized
+    in-out property <int> Logout_value: 0; // 0: default, 1: confirmation, 2: finalized
     in-out property <string> user_name;
     in-out property <string> user_id;
     in-out property <string> user_Faculty;
     in-out property <string> student_gpa;
     in-out property <string> user_email;
     in-out property <image> user_profile_pic;
-
     in-out property <[CourseInfo]> my_courses;
-
-    //out properties
+    in property <float> assigned_scale: 1.0;
+    in property <float> ui-scale: assigned_scale;
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
 
     //callbacks
@@ -223,10 +219,50 @@ export component Student_Profile inherits Rectangle {
             change_picture => { root.change_picture(); }
         }
 
-        if (selected-menu-item == 1) : Registered_Courses_Panel {
-            ui-scale: root.ui-scale;
-            my_courses: root.my_courses;
-        }
+        if (selected-menu-item == 1) : VerticalLayout {
+                    padding-top: 20px * root.ui-scale;
+                    spacing: 20px * root.ui-scale;
+
+                    // Horizontal buttons
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 20px * root.ui-scale;
+                        height: 50px * root.ui-scale;
+
+                        Rectangle {
+                            width: 220px * root.ui-scale;
+                            border-radius: 10px;
+                            background: root.manage-courses-tab == 0 ? #007bff : #64647a;
+                            Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                            TouchArea { clicked => { root.manage-courses-tab = 0; } }
+                        }
+
+                        Rectangle {
+                            width: 220px * root.ui-scale;
+                            border-radius: 10px;
+                            background: root.manage-courses-tab == 1 ? #007bff : #64647a;
+                            Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                            TouchArea { clicked => { root.manage-courses-tab = 1; } }
+                        }
+
+                        Rectangle {
+                            width: 220px * root.ui-scale;
+                            border-radius: 10px;
+                            background: root.manage-courses-tab == 2 ? #007bff : #64647a;
+                            Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                            TouchArea { clicked => { root.manage-courses-tab = 2; } }
+                        }
+                    }
+
+                    // Content Area
+                    Rectangle {
+                        // Tab 0 and 2 are left intentionally empty
+                        if (root.manage-courses-tab == 1) : Registered_Courses_Panel {
+                            ui-scale: root.ui-scale;
+                            my_courses: root.my_courses;
+                        }
+                    }
+                }
     }
 
     if (root.Logout_value == 1) : Rectangle {

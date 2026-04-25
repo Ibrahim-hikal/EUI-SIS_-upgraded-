@@ -13,6 +13,10 @@ export component Teacher_Attendance_Panel inherits Rectangle {
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
 
+    init => {
+            root.load_students(root.selected_course, root.selected_week);
+        }
+
     background: white;
 
     VerticalLayout {
@@ -26,13 +30,19 @@ export component Teacher_Attendance_Panel inherits Rectangle {
             height: 40px * root.ui-scale;
             ComboBox {
                 model: available_courses;
-                current-value <=> selected_course;
-                selected => { root.load_students(root.selected_course, root.selected_week); }
+                current-value: root.selected_course;
+                selected(val) => {
+                    root.selected_course = val;
+                    root.load_students(val, root.selected_week);
+                }
             }
             ComboBox {
                 model: available_weeks;
                 current-value: "1";
-                selected(val) => { root.selected_week = val.to-float(); root.load_students(root.selected_course, root.selected_week); }
+                selected(val) => {
+                    root.selected_week = val.to-float();
+                    root.load_students(root.selected_course, root.selected_week);
+                }
             }
         }
 
@@ -82,21 +92,20 @@ export component Teacher_Attendance_Panel inherits Rectangle {
         }
 
         Submit_Button := Rectangle {
-        width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
-        height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        background: Submit_Button_Touch.pressed? #00ff44 : #218838;
-        border-radius: 15px * root.ui-scale;
-        animate width, height, background { duration: 150ms; easing: ease-in; }
+            width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+            height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+            x: (parent.width - self.width) / 2;
+            background: Submit_Button_Touch.pressed? #00ff44 : #218838;
+            border-radius: 15px * root.ui-scale;
+            animate width, height, background { duration: 150ms; easing: ease-in; }
 
-        Text { text: "Submit";
-               color: black;
-               font-size: 22px * root.ui-scale;
-             }
-             Submit_Button_Touch:= TouchArea {
-                         clicked=>{root.save_attendance(root.students_data,root.selected_course,root.selected_week);}
-
-                     }
-    }
+            Text { text: "Submit";
+                   color: black;
+                   font-size: 22px * root.ui-scale;
+            }
+            Submit_Button_Touch:= TouchArea {
+                clicked=>{root.save_attendance(root.students_data,root.selected_course,root.selected_week);}
+            }
+        }
     }
 }
