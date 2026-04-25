@@ -25,6 +25,7 @@ export component Main_App inherits Window {
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
     in-out property <[CourseInfo]> my_courses;
+    in-out property <[string]> teacher_profile_display_list;
 
 
     //...................Start Accept and refuse courses admin properties
@@ -120,7 +121,7 @@ export component Main_App inherits Window {
                     user_profile_pic : root.user_profile_pic;
                     change_picture => { root.change_picture(); }
                     // -----------------------------------
-
+                    teacher_display_list <=> root.teacher_profile_display_list;
                     available_courses <=> root.available_courses;
 
                     // Link Teacher Properties & Callbacks

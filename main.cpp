@@ -67,15 +67,14 @@ int main() {
                 ui->set_user_email(current_email.c_str());
 
                 //converting vectors to models for slint
-                auto c_courses = teacher.get_courses_taught();
-                std::vector<slint::SharedString> slint_courses;
+                std::vector<slint::SharedString> display_list;
                 for (const auto& course_str : teacher.get_courses_taught()) {
-                slint_courses.push_back(slint::SharedString(course_str));
+                    display_list.push_back(slint::SharedString(course_str));
                 }
+                auto display_model = std::make_shared<slint::VectorModel<slint::SharedString>>(display_list);
 
                 // send the courses to the UI
-                auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(slint_courses);
-                ui->set_available_courses(courses_model);
+                ui->set_teacher_profile_display_list(display_model);
 
                 // Keep main.cpp clean - delegate entirely to the Manager
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());

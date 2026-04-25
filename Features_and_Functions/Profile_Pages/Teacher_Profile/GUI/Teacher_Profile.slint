@@ -20,7 +20,7 @@ export component Teacher_Profile inherits Rectangle {
     in-out property <[string]> available_courses;
     in-out property <int> Logout_value: 0;
     in-out property <[StudentAttendanceData]> students_data;
-
+    in-out property <[string]> teacher_display_list;
     //callbacks
     callback Logout;
     callback change_picture();
@@ -194,7 +194,7 @@ export component Teacher_Profile inherits Rectangle {
             User_name: root.user_name;
             User_email: root.user_email;
             User_profile_pic: root.user_profile_pic;
-            Courses_taught: root.available_courses;
+            Courses_taught: root.teacher_display_list;
             change_picture => { root.change_picture(); }
         }
 
