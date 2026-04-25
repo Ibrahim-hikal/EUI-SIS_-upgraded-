@@ -3,7 +3,6 @@ import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
 
-
 // FIXED: Imported CourseInfo directly from Shared_Structs where it is originally declared
 import { StudentAttendanceData, CourseInfo } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
@@ -21,17 +20,11 @@ export component Main_App inherits Window {
     in-out property <image> user_profile_pic;
 
     // --- STUDENT & TEACHER DATA FORWARDING ---
-    in-out property <[CourseInfo]> available_courses;
+    in-out property <[string]> available_courses;
     in-out property <[StudentAttendanceData]> students_data;
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
     in-out property <[CourseInfo]> my_courses;
-
-
-    //------Student course request properties and callbacks---------
-       callback request_courses_clicked(string, string, string);
-       callback request_course(string);
-
 
 
     //...................Start Accept and refuse courses admin properties
@@ -73,7 +66,6 @@ export component Main_App inherits Window {
     callback admin_next_student();
     callback admin_previous_student();
     callback admin_submit_decisions();
-
 
     min-height: 600px;
     min-width: 1024px;
