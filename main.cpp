@@ -11,12 +11,13 @@
 #include "Features_and_Functions/Course_Management/Attendance/Teacher/header/Teacher_Attendance.h"
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Request_Courses/header/Request_Courses.h"
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
-
+#include "Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h"
 using namespace std;
 
 int main() {
     auto ui = Main_App::create();
     Login_Manager& db = Login_Manager::get_instance();
+    TeacherGradesManager teacherGradesManager;
 
     // Declare Managers (so they live for the duration of the program)
     AdminCourseManager adminManager("Databases/");
@@ -78,6 +79,8 @@ int main() {
 
                 // Keep main.cpp clean - delegate entirely to the Manager
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());
+
+                teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
             }
             else if (role == 3) { // Admin Logic
                 adminManager.initUI(ui.operator->());

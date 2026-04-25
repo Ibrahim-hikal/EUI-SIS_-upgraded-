@@ -1,0 +1,119 @@
+import { ComboBox, ScrollView, LineEdit } from "std-widgets.slint";
+import { StudentGradeData } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+
+// Custom input box: dark background + outline to fix invisible text in dark mode
+component GradeInput inherits Rectangle {
+    in property <string> text;
+    in property <float> ui-scale: 1.0;
+    callback edited(string);
+
+    background: #2d2d2d;
+    border-color: #007bff;
+    border-width: 2px;
+    border-radius: 4px * root.ui-scale;
+
+    input := LineEdit {
+        width: 100%;
+        height: 100%;
+        text: root.text;
+        edited(val) => { root.edited(val); }
+    }
+}
+
+export component Teacher_Grades_Panel inherits Rectangle {
+    in-out property <float> ui-scale: 1.0;
+    in property <[string]> available_courses;
+    in-out property <[StudentGradeData]> grades_data;
+
+    out property <string> selected_course: available_courses[0];
+
+    callback load_grades(string);
+    callback save_grades([StudentGradeData], string);
+
+    init => { root.load_grades(root.selected_course); }
+    background: white;
+
+    VerticalLayout {
+        padding: 20px * root.ui-scale;
+        spacing: 20px * root.ui-scale;
+
+        Text { text: "Manage Course Grades"; color:black; font-size: 24px * root.ui-scale; font-weight: 700; }
+
+        HorizontalLayout {
+            spacing: 20px * root.ui-scale;
+            height: 40px * root.ui-scale;
+            ComboBox {
+                model: available_courses;
+                current-value: root.selected_course;
+                selected(val) => {
+                    root.selected_course = val;
+                    root.load_grades(val);
+                }
+            }
+        }
+
+        ScrollView {
+            VerticalLayout {
+                spacing: 10px * root.ui-scale;
+                alignment: start; // <-- FIX 1: Pins all student rows to the top
+
+                // Header row
+                HorizontalLayout {
+                    padding: 10px * root.ui-scale;
+                    spacing: 10px * root.ui-scale;
+                    Text { text: "Student ID"; width: 100px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Quiz 1"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Quiz 2"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Assignment 1"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Assignment 2"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Midterm Exam"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Project"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Final Exam"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Total"; width: 50px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "Letter"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                    Text { text: "GPA"; width: 40px * root.ui-scale; font-weight: 700; color: #555; }
+                }
+
+                for student in grades_data: Rectangle {
+                    height: 50px * root.ui-scale;
+                    background: #f4f6f9; border-radius: 8px * root.ui-scale;
+                    HorizontalLayout {
+                        padding: 10px * root.ui-scale;
+                        spacing: 10px * root.ui-scale;
+
+                        Text { text: student.id; color:black; width: 100px * root.ui-scale; vertical-alignment: center; font-weight: 600; }
+                        GradeInput { text: student.quiz1; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.quiz1 = val; } }
+                        GradeInput { text: student.quiz2; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.quiz2 = val; } }
+                        GradeInput { text: student.ass1; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.ass1 = val; } }
+                        GradeInput { text: student.ass2; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.ass2 = val; } }
+                        GradeInput { text: student.midterm; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.midterm = val; } }
+                        GradeInput { text: student.project; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.project = val; } }
+                        GradeInput { text: student.final_mark; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.final_mark = val; } }
+                        GradeInput { text: student.total; width: 50px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.total = val; } }
+                        GradeInput { text: student.letter; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.letter = val; } }
+                        GradeInput { text: student.gpa; width: 40px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.gpa = val; } }
+                    }
+                }
+            }
+        }
+
+        HorizontalLayout {
+            alignment: center;
+            height: 80px * root.ui-scale; // <-- FIX 2: Fixed height stops the layout from shifting on hover
+            padding-top: 10px * root.ui-scale;
+
+            Submit_Button := Rectangle {
+                width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale : 200px * root.ui-scale;
+                height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale : 60px * root.ui-scale;
+                background: Submit_Button_Touch.pressed ? #00ff44 : #218838;
+                border-radius: 15px * root.ui-scale;
+                animate width, height, background { duration: 150ms; easing: ease-in; }
+
+                Text { text: "Submit Grades"; color: black; font-size: 22px * root.ui-scale; }
+                Submit_Button_Touch := TouchArea {
+                    clicked => { root.save_grades(root.grades_data, root.selected_course); }
+                }
+            }
+        }
+    }
+}

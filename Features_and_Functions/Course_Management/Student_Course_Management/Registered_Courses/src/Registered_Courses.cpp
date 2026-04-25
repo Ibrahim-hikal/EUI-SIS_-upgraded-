@@ -45,6 +45,21 @@ string RegisteredCoursesManager::calculate_total_attendance(const string& course
     return "0 / 0 weeks";
 }
 
+string RegisteredCoursesManager::calculate_total_grade(const string& course_code) const {
+    ifstream file("Databases/Courses/" + course_code + "/Grades.csv");
+    if (!file.is_open()) return "No Data";
+
+    string line;
+    getline(file, line);
+    while (getline(file, line)) {
+        vector<string> cols = parse_csv_line(line);
+        if (cols.size() >= 10 && cols[0] == student_id) {
+            return cols[8] + " (" + cols[9] + ")";
+        }
+    }
+    return "No Data";
+}
+
 slint::SharedVector<CourseInfo> RegisteredCoursesManager::get_registered_courses_with_attendance() const {
     slint::SharedVector<CourseInfo> result_list;
 
@@ -95,6 +110,7 @@ slint::SharedVector<CourseInfo> RegisteredCoursesManager::get_registered_courses
 
         // Inject the attendance calculation
         info.attendance_summary = slint::SharedString(calculate_total_attendance(code));
+        info.grade_summary = slint::SharedString(calculate_total_grade(code));
         result_list.push_back(info);
     }
     return result_list;

@@ -34,7 +34,7 @@ export component Registered_Courses_Panel inherits Rectangle {
 
                         // Attendance Badge Box on the right side
                         Rectangle {
-                            width: 200px * root.ui-scale;
+                            width: 160px * root.ui-scale;
                             background: #e0f2f1;
                             border-radius: 8px * root.ui-scale;
                             border-width: 1px;
@@ -44,6 +44,19 @@ export component Registered_Courses_Panel inherits Rectangle {
                                 alignment: center;
                                 Text { text: "Total Attendance"; horizontal-alignment: center; font-size: 14px * root.ui-scale; color: #004d40; }
                                 Text { text: course.attendance_summary; horizontal-alignment: center; font-size: 16px * root.ui-scale; font-weight: 700; color: #00695c; }
+                            }
+                        }
+                        Rectangle {
+                            width: 160px * root.ui-scale;
+                            background: #fff3e0;
+                            border-radius: 8px * root.ui-scale;
+                            border-width: 1px;
+                            border-color: #ef6c00;
+
+                            VerticalLayout {
+                                alignment: center;
+                                Text { text: "Overall Grade"; horizontal-alignment: center; font-size: 14px * root.ui-scale; color: #e65100; }
+                                Text { text: course.grade_summary; horizontal-alignment: center; font-size: 16px * root.ui-scale; font-weight: 700; color: #e65100; }
                             }
                         }
                     }

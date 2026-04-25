@@ -12,6 +12,7 @@ private:
     std::string student_id;
     std::vector<std::string> parse_csv_line(const std::string& line) const;
     std::string calculate_total_attendance(const std::string& course_code) const;
+    std::string calculate_total_grade(const std::string& course_code) const;
 
 public:
     explicit RegisteredCoursesManager(std::string id);
