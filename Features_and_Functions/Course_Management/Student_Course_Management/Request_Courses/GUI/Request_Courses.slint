@@ -1,6 +1,11 @@
 import { TabWidget, ScrollView } from "std-widgets.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
+export struct CourseInfo {
+    code: string,
+    name: string,
+}
+
 export component Request_Courses inherits Rectangle {
     //==================== INPUT PROPERTIES ====================
     in property <float> ui-scale: assigned_scale;
@@ -61,8 +66,120 @@ export component Request_Courses inherits Rectangle {
 
     // Main layout placeholder
     Rectangle {
-        y: -50px * root.ui-scale;
+            y: -50px * root.ui-scale;
 
-    }
-}
+            // --- HEADER SECTION (Your existing code) ---
+            Header_Container := Rectangle {
+                width: 100%; height: 250px * root.ui-scale; y: 0;
+
+                Student_ID_Label:= Text {
+                    text: "Student ID: " + root.student_id;
+                    font-size: 24px * root.ui-scale; color: black; font-weight: 550;
+                    x: 30px * root.ui-scale; y: 110px * root.ui-scale;
+                }
+                Student_Name_Label:= Text {
+                    text: "Student Name: " + root.student_name;
+                    font-size: 24px * root.ui-scale; color: black; font-weight: 550;
+                    x: 30px * root.ui-scale; y: 150px * root.ui-scale;
+                }
+                Student_Faculty_Label:= Text {
+                    text: "Faculty: " + root.faculty;
+                    font-size: 24px * root.ui-scale; color: black; font-weight: 550;
+                    x: 30px * root.ui-scale; y: 190px * root.ui-scale;
+                }
+            }
+
+            // ==========================================
+            // --- NEW: TABLE HEADER ---
+            // ==========================================
+            Rectangle {
+                y: 260px * root.ui-scale;
+                x: 30px * root.ui-scale;
+                width: parent.width - 60px * root.ui-scale;
+                height: 40px * root.ui-scale;
+                background: #1E63E6;
+                border-radius: 5px;
+
+                HorizontalLayout {
+                    padding-left: 15px * root.ui-scale;
+                    padding-right: 15px * root.ui-scale;
+                    spacing: 15px * root.ui-scale;
+
+                    Text { text: "Course Code"; font-weight: 700; width: 150px * root.ui-scale; vertical-alignment: center; }
+                    Text { text: "Course Name"; font-weight: 700; width: 350px * root.ui-scale; vertical-alignment: center; }
+                    Text { text: "Action"; font-weight: 700; width: 150px * root.ui-scale; vertical-alignment: center; }
+                }
+            }
+
+            // ==========================================
+            // --- NEW: TABLE BODY (SCROLLABLE) ---
+            // ==========================================
+            ScrollView {
+                y: 310px * root.ui-scale;
+                x: 30px * root.ui-scale;
+                width: parent.width - 60px * root.ui-scale;
+                // Takes up the rest of the screen height automatically
+                height: parent.height - 350px * root.ui-scale;
+
+                VerticalLayout {
+                    spacing: 10px * root.ui-scale;
+                    padding-bottom: 20px * root.ui-scale;
+
+                    // Loops through the available_courses array
+                    for course in root.available_courses : Rectangle {
+                        height: 55px * root.ui-scale;
+                        background: request_touch.has-hover ? #f0f4f8 : #fcfcfc;
+                        border-radius: 8px;
+                        border-width: 1px;
+                        border-color: #cccccc;
+
+                        HorizontalLayout {
+                            padding-left: 15px * root.ui-scale;
+                            padding-right: 15px * root.ui-scale;
+                            spacing: 15px * root.ui-scale;
+
+                            // NOTE: If your CourseInfo struct uses different variable names,
+                            // change `course.code` and `course.name` to match!
+                            Text {
+                                text: course.code;
+                                vertical-alignment: center;
+                                width: 150px * root.ui-scale;
+                                font-size: 16px * root.ui-scale;
+                            }
+                            Text {
+                                text: course.name;
+                                vertical-alignment: center;
+                                width: 350px * root.ui-scale;
+                                font-size: 16px * root.ui-scale;
+                            }
+
+                            // The Request Button
+                            Rectangle {
+                                width: 120px * root.ui-scale;
+                                height: 35px * root.ui-scale;
+                                background: request_touch.pressed ? #003d80 : (request_touch.has-hover ? #0056b3 : #007bff);
+                                border-radius: 5px;
+                                y: (parent.height - self.height) / 2; // Centers the button vertically
+
+                                Text {
+                                    text: "Request";
+                                    color: white;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                    font-weight: 600;
+                                }
+
+                                request_touch := TouchArea {
+                                    clicked => {
+                                        // Calls the callback you fixed earlier!
+                                        root.request_course(course.code);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+     }
 
