@@ -45,16 +45,49 @@ string RegisteredCoursesManager::calculate_total_attendance(const string& course
     return "0 / 0 weeks";
 }
 
-string RegisteredCoursesManager::calculate_total_grade(const string& course_code) const {
+string RegisteredCoursesManager::calculate_total_grade(const string& course_code, string& out_details) const {
     ifstream file("Databases/Courses/" + course_code + "/Grades.csv");
     if (!file.is_open()) return "No Data";
 
     string line;
-    getline(file, line);
+    getline(file, line); // Skip header
+
+    int max_weights[] = {0, 5, 5, 5, 5, 25, 15, 40};
+    string labels[] = {"", "Quiz 1", "Quiz 2", "Ass 1", "Ass 2", "Midterm", "Project", "Final"};
+
+    auto format_num = [](double val) {
+        string str = to_string(val);
+        str.erase(str.find_last_not_of('0') + 1, std::string::npos);
+        if (str.back() == '.') str.pop_back();
+        return str;
+    };
+
     while (getline(file, line)) {
         vector<string> cols = parse_csv_line(line);
         if (cols.size() >= 10 && cols[0] == student_id) {
-            return cols[8] + " (" + cols[9] + ")";
+            double current_total = 0;
+            double current_max = 0;
+            string details = "";
+
+            for (int i = 1; i <= 7; ++i) {
+                if (cols.size() > i && !cols[i].empty()) {
+                    try {
+                        double val = stod(cols[i]);
+                        current_total += val;
+                        current_max += max_weights[i];
+                        if (!details.empty()) details += "\n";
+                        details += labels[i] + ": " + cols[i] + "/" + to_string(max_weights[i]);
+                    } catch (...) {}
+                }
+            }
+
+            out_details = details.empty() ? "No grades entered." : details;
+            if (current_max == 0) return "0 / 0";
+
+            string overall = format_num(current_total) + " / " + format_num(current_max);
+            if (!cols[9].empty() && cols[9] != " ") overall += " (" + cols[9] + ")";
+
+            return overall;
         }
     }
     return "No Data";
@@ -109,8 +142,10 @@ slint::SharedVector<CourseInfo> RegisteredCoursesManager::get_registered_courses
         }
 
         // Inject the attendance calculation
+        string details_str;
+        info.grade_summary = slint::SharedString(calculate_total_grade(code, details_str));
         info.attendance_summary = slint::SharedString(calculate_total_attendance(code));
-        info.grade_summary = slint::SharedString(calculate_total_grade(code));
+        info.detailed_grades = slint::SharedString(details_str);
         result_list.push_back(info);
     }
     return result_list;

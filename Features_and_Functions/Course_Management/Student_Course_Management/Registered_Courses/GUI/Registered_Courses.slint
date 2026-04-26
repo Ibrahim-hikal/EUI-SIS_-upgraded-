@@ -4,6 +4,7 @@ import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint"
 export component Registered_Courses_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
     in property <[CourseInfo]> my_courses;
+    property <bool> show_details: false;
 
     callback load_registered_courses();
     background: white;
@@ -46,17 +47,86 @@ export component Registered_Courses_Panel inherits Rectangle {
                                 Text { text: course.attendance_summary; horizontal-alignment: center; font-size: 16px * root.ui-scale; font-weight: 700; color: #00695c; }
                             }
                         }
-                        Rectangle {
-                            width: 160px * root.ui-scale;
+                        grade_rect := Rectangle {
+                            property <bool> show_details: false;
+
+                            width: grade_rect.show_details ? 220px * root.ui-scale : 160px * root.ui-scale;
+                            height: grade_rect.show_details ? 200px * root.ui-scale : 80px * root.ui-scale;
+                            animate height { duration: 300ms; easing: ease-in-out; }
+
                             background: #fff3e0;
                             border-radius: 8px * root.ui-scale;
                             border-width: 1px;
                             border-color: #ef6c00;
+                            clip: true;
 
-                            VerticalLayout {
-                                alignment: center;
-                                Text { text: "Overall Grade"; horizontal-alignment: center; font-size: 14px * root.ui-scale; color: #e65100; }
-                                Text { text: course.grade_summary; horizontal-alignment: center; font-size: 16px * root.ui-scale; font-weight: 700; color: #e65100; }
+                            TouchArea {
+                                width: 100%;
+                                height: 100%;
+
+                                clicked => {
+                                    grade_rect.show_details = !grade_rect.show_details;
+                                }
+                            }
+
+                            Rectangle {
+                                width: 100%;
+                                height: 100%;
+
+                                VerticalLayout {
+                                    y: grade_rect.show_details ? -80px * root.ui-scale : 10px * root.ui-scale;
+                                    height: 60px * root.ui-scale;
+                                    alignment: center;
+                                    animate y { duration: 300ms; easing: ease-in-out; }
+
+                                    Text {
+                                        text: "Overall Grade";
+                                        horizontal-alignment: center;
+                                        font-size: 14px * root.ui-scale;
+                                        color: #e65100;
+                                    }
+
+                                    Text {
+                                        text: course.grade_summary;
+                                        horizontal-alignment: center;
+                                        font-size: 16px * root.ui-scale;
+                                        font-weight: 700;
+                                        color: #e65100;
+                                    }
+                                }
+
+                                VerticalLayout {
+                                    y: grade_rect.show_details ? 15px * root.ui-scale : 100px * root.ui-scale;
+                                    height: 160px * root.ui-scale;
+                                    alignment: start;
+                                    spacing: 4px * root.ui-scale;
+                                    animate y { duration: 300ms; easing: ease-in-out; }
+
+                                    Text {
+                                        text: "Detailed Grades";
+                                        horizontal-alignment: center;
+                                        font-size: 14px * root.ui-scale;
+                                        font-weight: 700;
+                                        color: #e65100;
+                                    }
+
+                                    Text {
+                                        text: course.detailed_grades;
+                                        horizontal-alignment: center;
+                                        font-size: 12px * root.ui-scale;
+                                        color: #e65100;
+                                        wrap: word-wrap;
+                                    }
+                                }
+                            }
+
+                            Text {
+                                text: grade_rect.show_details ? "Show Less ▲" : "Show More ▼";
+                                font-size: 10px * root.ui-scale;
+                                font-weight: 700;
+                                color: #e65100;
+                                x: parent.width - self.width - 8px * root.ui-scale;
+                                y: parent.height - self.height - 8px * root.ui-scale;
                             }
                         }
                     }
