@@ -14,9 +14,9 @@ std::string ImageManager::select_image_dialog() {
     ofn.hwndOwner = GetActiveWindow(); // Better than NULL, keeps dialog on top
     ofn.lpstrFile = szFile;
     ofn.nMaxFile = sizeof(szFile);
-    ofn.lpstrFilter = "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*.*\0";
+    ofn.lpstrFilter = "Image Files\0*.png;*.jpg;*.jpeg\0";
     ofn.nFilterIndex = 1;
-    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_NODEREFERENCELINKS;
 
     if (GetOpenFileNameA(&ofn)) {
         return std::string(szFile);
