@@ -36,6 +36,8 @@ add_executable(main_app
         Features_and_Functions/Profile_Pages/ImageManager.h
         Features_and_Functions/Course_Management/Attendance/Teacher/header/Teacher_Attendance.h
         Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
+        Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h
+        Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
         # Note: Make sure there is a closing parenthesis here after the last .cpp file
 )
 

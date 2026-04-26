@@ -1,5 +1,6 @@
 import { Teacher_Attendance_Panel } from "../../../Course_Management/Attendance/Teacher/GUI/Teacher_Attendance.slint";
-import { StudentAttendanceData, CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { StudentAttendanceData, CourseInfo, StudentGradeData } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { Teacher_Grades_Panel } from "../../../Course_Management/Grades/Teacher/GUI/Teacher_Grades.slint";
 
 // --- IMPORT THE NEW SUB-PROFILE ---
 import { TC_Profile } from "Teacher_Profile_sub.slint";
@@ -21,11 +22,14 @@ export component Teacher_Profile inherits Rectangle {
     in-out property <int> Logout_value: 0;
     in-out property <[StudentAttendanceData]> students_data;
     in-out property <[string]> teacher_display_list;
+    in-out property <[StudentGradeData]> grades_data;
     //callbacks
     callback Logout;
     callback change_picture();
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
+    callback load_grades(string);
+    callback save_grades([StudentGradeData], string);
 
     min-height: 600px;
     min-width: 1024px;
@@ -196,6 +200,14 @@ export component Teacher_Profile inherits Rectangle {
             User_profile_pic: root.user_profile_pic;
             Courses_taught: root.teacher_display_list;
             change_picture => { root.change_picture(); }
+        }
+
+        if (selected-menu-item == 1) : Teacher_Grades_Panel {
+            ui-scale: root.ui-scale;
+            available_courses <=> root.available_courses;
+            grades_data <=> root.grades_data;
+            load_grades(course) => { root.load_grades(course); }
+            save_grades(data, course) => { root.save_grades(data, course); }
         }
 
         if (selected-menu-item == 2) : Teacher_Attendance_Panel {

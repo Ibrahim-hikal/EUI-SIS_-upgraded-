@@ -3,8 +3,7 @@ import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
 
-// FIXED: Imported CourseInfo directly from Shared_Structs where it is originally declared
-import { StudentAttendanceData, CourseInfo } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { StudentAttendanceData, CourseInfo, StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
 export component Main_App inherits Window {
     // 0: Login, 1: Student Dashboard, 2: Teacher, 3: Admin
@@ -26,7 +25,9 @@ export component Main_App inherits Window {
     callback save_attendance([StudentAttendanceData], string, int);
     in-out property <[CourseInfo]> my_courses;
     in-out property <[string]> teacher_profile_display_list;
-
+    in-out property <[StudentGradeData]> grades_data;
+    callback load_grades(string);
+    callback save_grades([StudentGradeData], string);
 
     //...................Start Accept and refuse courses admin properties
     in-out property <string> student_id;
@@ -128,6 +129,10 @@ export component Main_App inherits Window {
                     students_data <=> root.students_data;
                     load_students(course, week) => { root.load_students(course, week); }
                     save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
+
+                    grades_data <=> root.grades_data;
+                    load_grades(course) => { root.load_grades(course); }
+                    save_grades(data, course) => { root.save_grades(data, course); }
                 }
 
         if (active_panel == 3) : Admin_Profile {
