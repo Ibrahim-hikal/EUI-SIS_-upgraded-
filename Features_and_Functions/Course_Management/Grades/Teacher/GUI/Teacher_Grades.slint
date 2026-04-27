@@ -1,23 +1,104 @@
-import { ComboBox, ScrollView, LineEdit } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
 import { StudentGradeData } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
-// Custom input box: dark background + outline to fix invisible text in dark mode
+// Custom dropdown to replace ComboBox, allowing explicit color styling
+component CustomComboBox inherits Rectangle {
+    in property <[string]> model;
+    in-out property <string> current-value;
+    in property <float> ui-scale: 1.0;
+    callback selected(string);
+
+    property <bool> is_open: false;
+
+    width: 250px * root.ui-scale;
+    height: 40px * root.ui-scale;
+
+    // Main selector box
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: #FFFFFF;
+        border-color: CourseSelectorTouchArea.has-hover? #007bff: #707070;
+        border-width: 2px;
+        border-radius: 4px * root.ui-scale;
+
+        Text {
+            text: root.current-value;
+            color: black; // explicitly styled text
+            vertical-alignment: center;
+            x: 15px * root.ui-scale;
+            font-weight: 600;
+        }
+
+        // Dropdown arrow indicator
+        Text {
+            text: "v";
+            color: black;
+            vertical-alignment: center;
+            horizontal-alignment: right;
+            x: parent.width - 20px * root.ui-scale;
+        }
+
+        CourseSelectorTouchArea:= TouchArea{
+            clicked => { root.is_open = !root.is_open; }
+        }
+    }
+
+    // The dropdown list
+    if root.is_open: Rectangle {
+        y: root.height + 2px; // slightly below the main box
+        width: 100%;
+        background: #FFFFFF;
+        border-color: #007bff;
+        border-width: 2px;
+        border-radius: 4px * root.ui-scale;
+
+        VerticalLayout {
+            for item in root.model: Rectangle {
+                height: 40px * root.ui-scale;
+                background: item_touch.has-hover ? #e0e0e0 : #FFFFFF;
+
+                Text {
+                    text: item;
+                    color: black;
+                    vertical-alignment: center;
+                    x: 15px * root.ui-scale;
+                }
+
+                item_touch := TouchArea {
+                    clicked => {
+                        root.current-value = item;
+                        root.is_open = false;
+                        root.selected(item);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Custom input box replacing LineEdit to allow color modification
 component GradeInput inherits Rectangle {
     in property <string> text;
     in property <float> ui-scale: 1.0;
     callback edited(string);
 
     background: #FFFFFF;
-    border-color: #007bff;
+    border-color: GradeInputTouchArea.has-hover? #007bff: #707070;
     border-width: 2px;
     border-radius: 4px * root.ui-scale;
 
-    input := LineEdit {
+    input := TextInput {
         width: 100%;
         height: 100%;
         text: root.text;
+        color: black; // explicitly styling text color to black
+        single-line: true;
+        vertical-alignment: center;
+        horizontal-alignment: center;
+        edited => { root.edited(self.text); }
 
-        edited(val) => { root.edited(val); }
+        GradeInputTouchArea:= TouchArea{ }
     }
 }
 
@@ -43,9 +124,12 @@ export component Teacher_Grades_Panel inherits Rectangle {
         HorizontalLayout {
             spacing: 20px * root.ui-scale;
             height: 40px * root.ui-scale;
-            ComboBox {
+            z: 100; // Brings the custom dropdown forward so its overlay isn't hidden by the ScrollView below
+
+            CustomComboBox {
                 model: available_courses;
                 current-value: root.selected_course;
+                ui-scale: root.ui-scale;
                 selected(val) => {
                     root.selected_course = val;
                     root.load_grades(val);
@@ -54,6 +138,7 @@ export component Teacher_Grades_Panel inherits Rectangle {
         }
 
         ScrollView {
+            z: 0;
             VerticalLayout {
                 spacing: 10px * root.ui-scale;
                 alignment: start; // <-- FIX 1: Pins all student rows to the top
@@ -62,6 +147,7 @@ export component Teacher_Grades_Panel inherits Rectangle {
                 HorizontalLayout {
                     padding: 10px * root.ui-scale;
                     spacing: 10px * root.ui-scale;
+
                     Text { text: "Student ID"; width: 100px * root.ui-scale; font-weight: 700; color: #555; }
                     Text { text: "Quiz 1"; width: 70px * root.ui-scale; font-weight: 700; color: #555; }
                     Text { text: "Quiz 2"; width: 70px * root.ui-scale; font-weight: 700; color: #555; }
@@ -102,7 +188,6 @@ export component Teacher_Grades_Panel inherits Rectangle {
             alignment: center;
             height: 80px * root.ui-scale; // <-- FIX 2: Fixed height stops the layout from shifting on hover
             padding-top: 10px * root.ui-scale;
-
             Submit_Button := Rectangle {
                 width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale : 200px * root.ui-scale;
                 height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale : 60px * root.ui-scale;
