@@ -17,6 +17,7 @@ export component Main_App inherits Window {
     in-out property <string> student_gpa;
     in-out property <string> user_email;
     in-out property <image> user_profile_pic;
+    in-out property <string> admin_position;
 
     // --- STUDENT & TEACHER DATA FORWARDING ---
     in-out property <[string]> available_courses;
@@ -140,7 +141,11 @@ export component Main_App inherits Window {
             height: 100%;
             ui-scale: root.global_scale;
             Logout => { root.active_panel = 0; }
-
+            change_picture => {root.change_picture()}
+            User_profile_pic <=> root.user_profile_pic;
+            User_email <=> root.user_email;
+            User_name <=> root.user_name;
+            admin_position <=> root.admin_position;
             student_id <=> root.student_id;
             student_name <=> root.student_name;
             faculty <=> root.faculty;

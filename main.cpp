@@ -12,11 +12,12 @@
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Request_Courses/header/Request_Courses.h"
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
 #include "Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h"
+#include "Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h"
 using namespace std;
 
 int main() {
     auto ui = Main_App::create();
-    Login_Manager& db = Login_Manager::get_instance();
+    Login_Manager &db = Login_Manager::get_instance();
     TeacherGradesManager teacherGradesManager;
 
     // Declare Managers (so they live for the duration of the program)
@@ -26,7 +27,7 @@ int main() {
     string current_id = "";
     string current_email = "";
 
-    ui->on_check_credentials([&](const slint::SharedString& id, const slint::SharedString& pass, int role) {
+    ui->on_check_credentials([&](const slint::SharedString &id, const slint::SharedString &pass, int role) {
         string string_id = string(id);
         Login_Status status = db.login(string_id, string(pass), static_cast<User_Role>(role));
 
@@ -34,8 +35,9 @@ int main() {
             ui->set_login_error_state(false);
             current_id = string_id;
 
-            if (role == 1) { // Student logic
-                auto& student = Student_Profile::get_instance();
+            if (role == 1) {
+                // Student logic
+                auto &student = Student_Profile::get_instance();
                 student.load_profile(current_id);
 
                 ui->set_user_name(student.get_name().c_str());
@@ -52,11 +54,11 @@ int main() {
                 auto courses_vec = rc_manager.get_registered_courses_with_attendance();
                 std::vector<CourseInfo> std_courses;
                 for (int i = 0; i < courses_vec.size(); ++i) std_courses.push_back(courses_vec[i]);
-                auto courses_model = std::make_shared<slint::VectorModel<CourseInfo>>(std_courses);
+                auto courses_model = std::make_shared<slint::VectorModel<CourseInfo> >(std_courses);
                 ui->set_my_courses(courses_model);
-            }
-            else if (role == 2) { // Teacher Logic
-                auto& teacher = Teacher_Profile::get_instance();
+            } else if (role == 2) {
+                // Teacher Logic
+                auto &teacher = Teacher_Profile::get_instance();
                 // Load the profile using the email (which is the current_id for teachers)
                 teacher.load_profile(current_id);
                 current_email = teacher.get_email();
@@ -69,10 +71,10 @@ int main() {
 
                 //converting vectors to models for slint
                 std::vector<slint::SharedString> display_list;
-                for (const auto& course_str : teacher.get_courses_taught()) {
+                for (const auto &course_str: teacher.get_courses_taught()) {
                     display_list.push_back(slint::SharedString(course_str));
                 }
-                auto display_model = std::make_shared<slint::VectorModel<slint::SharedString>>(display_list);
+                auto display_model = std::make_shared<slint::VectorModel<slint::SharedString> >(display_list);
 
                 // send the courses to the UI
                 ui->set_teacher_profile_display_list(display_model);
@@ -81,8 +83,23 @@ int main() {
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());
 
                 teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
-            }
-            else if (role == 3) { // Admin Logic
+            } else if (role == 3) {
+                // Admin Logic
+                auto &admin = Admin_Profile::get_instance();
+
+                // FIX: Use current_id because current_email is empty here!
+                admin.load_profile(current_id);
+
+                // Now that the profile is loaded, update the UI
+                ui->set_user_name(admin.get_name().c_str());
+                ui->set_user_email(admin.get_email().c_str());
+                ui->set_admin_position(admin.get_position().c_str());
+
+                // Load the profile picture using the email/ID
+                string pfp_path = ImageManager::get_user_pfp_path(current_id);
+                auto img = slint::Image::load_from_path(pfp_path.c_str());
+                ui->set_user_profile_pic(img);
+
                 adminManager.initUI(ui.operator->());
             }
 
@@ -121,6 +138,7 @@ int main() {
     ui->on_logout([&]() {
         Student_Profile::get_instance().reset();
         Teacher_Profile::get_instance().reset();
+        Admin_Profile::get_instance().reset();
         current_id = "";
         ui->set_user_name("");
         ui->set_user_id("");

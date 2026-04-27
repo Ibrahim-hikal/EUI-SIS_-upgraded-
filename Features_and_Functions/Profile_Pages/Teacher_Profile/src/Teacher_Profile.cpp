@@ -17,7 +17,7 @@ string trim_teacher(const string& str) {
 void Teacher_Profile::load_profile(const string& target_email) {
     // Reset data
     this->email = target_email;
-    this->name = "Unknown Instructor";
+    this->name = "";
     this->courses_taught.clear();
 
     // 1. Get the Teacher's real name from Login_Credentials.csv
