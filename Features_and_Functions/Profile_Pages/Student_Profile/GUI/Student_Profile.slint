@@ -1,5 +1,6 @@
 import { ST_Profile } from "Student_Profile_sub.slint";
 import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
+import { Request_Courses } from "../../../Course_Management/Student_Course_Management/Request_Courses/GUI/Request_Courses.slint";
 import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
 export component Student_Profile inherits Rectangle {
@@ -17,6 +18,9 @@ export component Student_Profile inherits Rectangle {
     in-out property <string> user_email;
     in-out property <image> user_profile_pic;
     in-out property <[CourseInfo]> my_courses;
+    in-out property <[CourseInfo]> available_courses;
+    in-out property <[CourseInfo]> requested_courses;
+    in-out property <[CourseInfo]> course_code;
     in property <float> assigned_scale: 1.0;
     in property <float> ui-scale: assigned_scale;
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
@@ -24,6 +28,13 @@ export component Student_Profile inherits Rectangle {
     //callbacks
     callback Logout;
     callback change_picture();
+    callback load_available_courses();
+    callback request_course(string);
+    callback remove_requested_course(string);
+    callback submit_course_requests();
+    callback clear_selections();
+    callback course_selected(string);
+    callback request_courses_clicked(string,string,string);
 
     min-height: 600px;
     min-width: 1024px;
@@ -107,7 +118,10 @@ export component Student_Profile inherits Rectangle {
                 vertical-alignment: center;
             }
             Manage_courses_button_touch_area := TouchArea{
-                clicked => { root.selected-menu-item = 1; }
+                clicked => {
+                    root.selected-menu-item = 1;
+                    root.load_available_courses();
+                }
             }
         }
         //Acadamic requests button
@@ -220,49 +234,71 @@ export component Student_Profile inherits Rectangle {
         }
 
         if (selected-menu-item == 1) : VerticalLayout {
-                    padding-top: 20px * root.ui-scale;
-                    spacing: 20px * root.ui-scale;
+            padding-top: 20px * root.ui-scale;
+            spacing: 20px * root.ui-scale;
 
-                    // Horizontal buttons
-                    HorizontalLayout {
-                        alignment: center;
-                        spacing: 20px * root.ui-scale;
-                        height: 50px * root.ui-scale;
+            // Horizontal buttons
+            HorizontalLayout {
+                alignment: center;
+                spacing: 20px * root.ui-scale;
+                height: 50px * root.ui-scale;
 
-                        Rectangle {
-                            width: 220px * root.ui-scale;
-                            border-radius: 10px;
-                            background: root.manage-courses-tab == 0 ? #007bff : #64647a;
-                            Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                            TouchArea { clicked => { root.manage-courses-tab = 0; } }
-                        }
-
-                        Rectangle {
-                            width: 220px * root.ui-scale;
-                            border-radius: 10px;
-                            background: root.manage-courses-tab == 1 ? #007bff : #64647a;
-                            Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                            TouchArea { clicked => { root.manage-courses-tab = 1; } }
-                        }
-
-                        Rectangle {
-                            width: 220px * root.ui-scale;
-                            border-radius: 10px;
-                            background: root.manage-courses-tab == 2 ? #007bff : #64647a;
-                            Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                            TouchArea { clicked => { root.manage-courses-tab = 2; } }
-                        }
-                    }
-
-                    // Content Area
-                    Rectangle {
-                        // Tab 0 and 2 are left intentionally empty
-                        if (root.manage-courses-tab == 1) : Registered_Courses_Panel {
-                            ui-scale: root.ui-scale;
-                            my_courses: root.my_courses;
-                        }
-                    }
+                Rectangle {
+                    width: 220px * root.ui-scale;
+                    border-radius: 10px;
+                    background: root.manage-courses-tab == 0 ? #007bff : #64647a;
+                    Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                    TouchArea { clicked => { root.manage-courses-tab = 0; } }
                 }
+
+                Rectangle {
+                    width: 220px * root.ui-scale;
+                    border-radius: 10px;
+                    background: root.manage-courses-tab == 1 ? #007bff : #64647a;
+                    Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                    TouchArea { clicked => { root.manage-courses-tab = 1; } }
+                }
+
+                Rectangle {
+                    width: 220px * root.ui-scale;
+                    border-radius: 10px;
+                    background: root.manage-courses-tab == 2 ? #007bff : #64647a;
+                    Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                    TouchArea { clicked => { root.manage-courses-tab = 2; } }
+                }
+            }
+
+            // Content Area
+            Rectangle {
+                width: 100%;
+
+                // TAB 0: Request Courses
+                if (root.manage-courses-tab == 0) : Request_Courses {
+                    ui-scale: root.ui-scale;
+                    student_id: root.user_id;
+                    student_name: root.user_name;
+                    faculty: root.user_Faculty;
+                    available_courses: root.available_courses;
+                    requested_courses: root.requested_courses;
+
+                    load_available_courses => { root.load_available_courses(); }
+                    request_course(course_code) => { root.request_course(course_code); }
+                    remove_requested_course(course_code) => { root.remove_requested_course(course_code); }
+                    submit_course_requests => { root.submit_course_requests(); }
+                    clear_selections => { root.clear_selections(); }
+                    course_selected(course_code) => { root.course_selected(course_code); }
+                    request_courses_clicked(id, name, fac) => { root.request_courses_clicked(id, name, fac); }
+                }
+
+                // TAB 1: Registered Courses
+                if (root.manage-courses-tab == 1) : Registered_Courses_Panel {
+                    ui-scale: root.ui-scale;
+                    my_courses: root.my_courses;
+                }
+
+                // TAB 2: Previous Enrollments (empty for now)
+            }
+        }
     }
 
     if (root.Logout_value == 1) : Rectangle {

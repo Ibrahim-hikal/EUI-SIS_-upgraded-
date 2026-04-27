@@ -6,6 +6,7 @@ Request_Courses::Request_Courses(const std::string& student_id) {
     student = new Student(student_id);
     Student::load_offered_courses();
     student->load_data();
+    registered_count = count_registered_courses();
     load_available_courses();
 }
 
@@ -23,6 +24,19 @@ void Request_Courses::load_available_courses() {
     for (const auto& course : eligible_courses) {
         available_courses_tree.insert(course);
     }
+}
+
+int Request_Courses::count_registered_courses() {
+    if (student == nullptr) return 0;
+
+    const std::string& reg = student->registeredCourses;
+    int count = 0;
+    size_t pos = 0;
+    while ((pos = reg.find('_', pos)) != std::string::npos) {
+        count++;
+        pos++;
+    }
+    return count;
 }
 
 std::unique_ptr<CourseTreeIterator> Request_Courses::get_available_courses_inorder() {
@@ -53,12 +67,19 @@ Course* Request_Courses::find_course(const std::string& course_code) {
 bool Request_Courses::request_course(const std::string& course_code) {
     if (student == nullptr) return false;
 
+    // Check if already registered for 5 courses
+    if (registered_count >= 5) return false;
+
     // Verify course exists in tree
     Course* course = find_course(course_code);
     if (course == nullptr) return false;
 
     // Request the course through student
-    return Student::register_course(course_code);
+    bool success = Student::register_course(course_code);
+    if (success) {
+        registered_count++;
+    }
+    return success;
 }
 
 int Request_Courses::get_available_courses_count() const {

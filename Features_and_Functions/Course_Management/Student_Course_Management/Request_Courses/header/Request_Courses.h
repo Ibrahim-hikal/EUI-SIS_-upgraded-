@@ -340,8 +340,10 @@ class Request_Courses {
 private:
     Student* student;
     CourseBinaryTree available_courses_tree;
+    int registered_count;
 
     void load_available_courses();
+    int count_registered_courses();
 
 public:
     explicit Request_Courses(const std::string& student_id);
