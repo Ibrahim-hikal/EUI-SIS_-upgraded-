@@ -20,7 +20,8 @@ export component Main_App inherits Window {
     in-out property <string> admin_position;
 
     // --- STUDENT & TEACHER DATA FORWARDING ---
-    in-out property <[string]> available_courses;
+    in-out property <[CourseInfo]> available_courses;
+    in-out property <[CourseInfo]> requested_courses;
     in-out property <[StudentAttendanceData]> students_data;
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
@@ -29,6 +30,7 @@ export component Main_App inherits Window {
     in-out property <[StudentGradeData]> grades_data;
     callback load_grades(string);
     callback save_grades([StudentGradeData], string);
+    in-out property <string> status_message;
 
     //...................Start Accept and refuse courses admin properties
     in-out property <string> student_id;
@@ -109,6 +111,9 @@ export component Main_App inherits Window {
 
             // Link Student Courses Property
             my_courses <=> root.my_courses;
+            available_courses <=> root.available_courses;
+            requested_courses <=> root.requested_courses;
+            status_message : root.status_message;
         }
 
         if (active_panel == 2) : Teacher_Profile {
@@ -124,7 +129,7 @@ export component Main_App inherits Window {
                     change_picture => { root.change_picture(); }
                     // -----------------------------------
                     teacher_display_list <=> root.teacher_profile_display_list;
-                    available_courses <=> root.available_courses;
+                    available_courses : root.available_courses;
 
                     // Link Teacher Properties & Callbacks
                     students_data <=> root.students_data;
