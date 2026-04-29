@@ -279,10 +279,12 @@ export component Admin_Profile inherits Rectangle {
         // --- 2. THE CONTENT SANDBOX (Right Side) ---
         Content_Area := Rectangle {
             background: white;
+                width: parent.width - Selection_menu.width;
+                height: parent.height;
             if (selected-menu-item == 0): AD_Profile { // Profile Page
                 width: 100%;
                 height: 100%;
-                ui-scale: min(root.ui-scale, self.width / 1020px);
+                ui-scale: max(1 , min(root.ui-scale, self.width / 1020px));
 
                 User_name <=> root.User_name;
                 User_profile_pic <=> root.User_profile_pic;
