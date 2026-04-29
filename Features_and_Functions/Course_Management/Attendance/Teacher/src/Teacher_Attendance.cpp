@@ -13,12 +13,17 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
 
     // 1. Fetch available courses and pass to UI
     auto courses_vec = get_available_courses();
-    std::vector<slint::SharedString> std_courses;
+    std::vector<CourseInfo> std_courses; // <-- CHANGED: Now holds CourseInfo
+
     for (int i = 0; i < courses_vec.size(); ++i) {
-        std_courses.push_back(courses_vec[i]);
+        CourseInfo info;
+        info.course_code = courses_vec[i];
+        info.course_name = slint::SharedString(""); // Empty string since your CSV just gives the code
+        std_courses.push_back(info);
     }
 
-    auto courses_model = std::make_shared<slint::VectorModel<slint::SharedString>>(std_courses);
+    // <-- CHANGED: Model is now CourseInfo
+    auto courses_model = std::make_shared<slint::VectorModel<CourseInfo>>(std_courses);
     ui->set_available_courses(courses_model);
 
     // 2. Register the load students callback FIRST
@@ -39,7 +44,8 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
 
     // 3. Auto-load the first course's students AFTER the callback is registered
     if (!std_courses.empty()) {
-        ui->invoke_load_students(std_courses[0], 1);
+        // <-- CHANGED: We now access .course_code from the struct
+        ui->invoke_load_students(std_courses[0].course_code, 1);
     }
 
     // 4. Register the save attendance callback
@@ -80,7 +86,7 @@ vector<string> TeacherAttendanceManager::parse_csv_line(const string& line) cons
 
 slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available_courses() const {
     slint::SharedVector<slint::SharedString> courses;
-    ifstream file("Databases/Offered_Courses.csv");
+    ifstream file("Offered_Courses.csv");
     if (!file.is_open()) return courses;
 
     string line;

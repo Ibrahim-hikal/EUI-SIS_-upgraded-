@@ -24,6 +24,8 @@ export component Student_Profile inherits Rectangle {
     in property <float> assigned_scale: 1.0;
     in property <float> ui-scale: assigned_scale;
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
+    in-out property <bool> request_submitted: false;
+    in-out property <string> status_message;
 
     //callbacks
     callback Logout;
@@ -35,6 +37,7 @@ export component Student_Profile inherits Rectangle {
     callback clear_selections();
     callback course_selected(string);
     callback request_courses_clicked(string,string,string);
+
 
     min-height: 600px;
     min-width: 1024px;
@@ -281,13 +284,14 @@ export component Student_Profile inherits Rectangle {
                     available_courses: root.available_courses;
                     requested_courses: root.requested_courses;
 
-                    load_available_courses => { root.load_available_courses(); }
-                    request_course(course_code) => { root.request_course(course_code); }
-                    remove_requested_course(course_code) => { root.remove_requested_course(course_code); }
-                    submit_course_requests => { root.submit_course_requests(); }
-                    clear_selections => { root.clear_selections(); }
-                    course_selected(course_code) => { root.course_selected(course_code); }
-                    request_courses_clicked(id, name, fac) => { root.request_courses_clicked(id, name, fac); }
+                    request_course(code) => {
+                            root.request_course(code);
+                        }
+                    load_available_courses() => { root.load_available_courses(); }
+                    submit_course_requests() => { root.submit_course_requests(); }
+                        remove_requested_course(code) => { root.remove_requested_course(code); }
+                        clear_selections() => { root.clear_selections(); }
+
                 }
 
                 // TAB 1: Registered Courses

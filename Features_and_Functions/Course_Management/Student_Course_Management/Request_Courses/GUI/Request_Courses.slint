@@ -1,375 +1,197 @@
 import { TabWidget, ScrollView } from "std-widgets.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
-
 export component Request_Courses inherits Rectangle {
     //==================== INPUT PROPERTIES ====================
     in property <float> ui-scale: assigned_scale;
     in property <float> assigned_scale: 1.0;
 
     //==================== IN-OUT PROPERTIES ====================
-    // Student Information
     in-out property <string> student_id;
     in-out property <string> student_name;
     in-out property <string> faculty;
 
-    // Available Courses Data
     in-out property <[CourseInfo]> available_courses;
     in-out property <[CourseInfo]> requested_courses;
-    in-out property <[CourseInfo]> course_code;
 
-    // UI State
-    in-out property <int> selected_course_index: -1;
-    in-out property <bool> is_loading: false;
-    in-out property <string> status_message: "";
-    in-out property <bool> request_submitted: false;
-
-    // Pagination
     in-out property <int> current_page: 0;
     in-out property <int> courses_per_page: 5;
     in-out property <int> max_requests: 5;
+    in-out property <string> status_message: "";
+    in-out property <bool> request_submitted: false;
+    pure callback get_page_items(int, int, [CourseInfo]) -> [CourseInfo];
+        get_page_items(page, size, total_list) => {
+            return total_list;
+        }
 
     //==================== OUTPUT PROPERTIES ====================
-    out property <int> available_courses_count: eligible_courses.length;
-    out property <int> requested_courses_count: requested_courses.length;
-    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
-
-    // Filtered eligible courses
-    out property <[CourseInfo]> eligible_courses: available_courses;
-    out property <int> total_pages: max(1, (eligible_courses.length + courses_per_page - 1) / courses_per_page);
+    out property <int> total_pages: Math.max(1, Math.ceil(available_courses.length / courses_per_page));
     out property <bool> can_request_more: requested_courses.length < max_requests;
 
-    // Paginated courses for current page
-    out property <[CourseInfo]> current_page_courses: eligible_courses;
 
     //==================== CALLBACKS ====================
-    callback load_available_courses();
-    callback request_course(string);
-    callback remove_requested_course(string);
-    callback submit_course_requests();
-    callback clear_selections();
-    callback course_selected(string);
-    callback request_courses_clicked(string,string,string);
+    // Core Logic
+        callback request_course(string);          // Triggers C++ find_course and register_course
+        callback load_available_courses();        // Tells C++ to refresh the tree/model
+
+        // UI Interactions
+        callback remove_requested_course(string); // If you want to undo a selection
+        callback submit_course_requests();        // Batch submit all choices
+        callback clear_selections();              // Reset local UI state;
+
 
     //==================== SPECIFICATIONS ====================
-    focus_anchor := FocusScope { }
+    background: white;
     min-height: 600px;
     min-width: 1024px;
-    preferred-height: 768px;
-    preferred-width: 1024px;
-    max-height: 840px;
-    max-width: 1300px;
-    background: white;
 
-    // Main layout
-    Rectangle {
-        y: -50px * root.ui-scale;
+    // Main layout container fixing the negative offset and visibility issues
+    VerticalLayout {
+        padding: 30px * root.ui-scale;
+        spacing: 20px * root.ui-scale;
 
         // --- HEADER SECTION ---
-        Header_Container := Rectangle {
-            width: 100%; height: 250px * root.ui-scale; y: 0;
-
-            Student_ID_Label:= Text {
+        VerticalLayout {
+            spacing: 8px * root.ui-scale;
+            Text {
                 text: "Student ID: " + root.student_id;
-                font-size: 24px * root.ui-scale; color: black; font-weight: 550;
-                x: 30px * root.ui-scale; y: 110px * root.ui-scale;
+                font-size: 22px * root.ui-scale; color: black;
             }
-            Student_Name_Label:= Text {
+            Text {
                 text: "Student Name: " + root.student_name;
-                font-size: 24px * root.ui-scale; color: black; font-weight: 550;
-                x: 30px * root.ui-scale; y: 150px * root.ui-scale;
+                font-size: 22px * root.ui-scale; color: black;
             }
-            Student_Faculty_Label:= Text {
+            Text {
                 text: "Faculty: " + root.faculty;
-                font-size: 24px * root.ui-scale; color: black; font-weight: 550;
-                x: 30px * root.ui-scale; y: 190px * root.ui-scale;
+                font-size: 22px * root.ui-scale; color: black;
             }
-
-            // Request counter display
-            Request_Counter := Text {
-                text: "Requests: " + root.requested_courses.length + "/" + root.max_requests + " semester";
-                font-size: 20px * root.ui-scale; color: root.requested_courses.length >= root.max_requests ? #dc3545 : #28a745;
+            Text {
+                text: "Requests: " + root.requested_courses.length + "/" + root.max_requests;
+                font-size: 18px * root.ui-scale;
+                color: root.requested_courses.length >= root.max_requests ? #dc3545 : #28a745;
                 font-weight: 600;
-                x: parent.width - 350px * root.ui-scale; y: 150px * root.ui-scale;
             }
         }
 
-        // Status message
+        // Status message area
         if root.status_message != "" : Text {
             text: root.status_message;
-            font-size: 18px * root.ui-scale;
+            font-size: 16px * root.ui-scale;
             color: root.request_submitted ? #28a745 : #dc3545;
-            x: 30px * root.ui-scale; y: 260px * root.ui-scale;
+            horizontal-alignment: center;
         }
 
         // --- TABLE HEADER ---
         Rectangle {
-            y: 280px * root.ui-scale;
-            x: 30px * root.ui-scale;
-            width: parent.width - 60px * root.ui-scale;
-            height: 40px * root.ui-scale;
+            height: 45px * root.ui-scale;
             background: #007bff;
             border-radius: 5px;
 
             HorizontalLayout {
                 padding-left: 15px * root.ui-scale;
                 padding-right: 15px * root.ui-scale;
-                spacing: 15px * root.ui-scale;
-
-                Text { text: "Course Code"; font-weight: 700; width: 150px * root.ui-scale; color: white; }
-                Text { text: "Course Name"; font-weight: 700; width: 350px * root.ui-scale; color: white; }
-                Text { text: "Actions"; font-weight: 700; width: 400px * root.ui-scale; color: white; }
+                Text { text: "Course Code"; font-weight: 700; width: 140px * root.ui-scale; color: white; vertical-alignment: center; }
+                Text { text: "Course Name"; font-weight: 700; width: 300px * root.ui-scale; color: white; vertical-alignment: center; }
+                Text { text: "Actions (Req / Prior / Wait / Quick / Info)"; font-weight: 700; color: white; vertical-alignment: center; }
             }
         }
 
         // --- TABLE BODY (SCROLLABLE) ---
-        ScrollView {
-            y: 330px * root.ui-scale;
-            x: 30px * root.ui-scale;
-            width: parent.width - 60px * root.ui-scale;
-            height: parent.height - 450px * root.ui-scale;
 
-            VerticalLayout {
-                spacing: 10px * root.ui-scale;
-                padding-bottom: 20px * root.ui-scale;
+                // 1. DEBUG WARNING: If C++ sends 0 courses, this will show up.
+                if root.available_courses.length == 0 : Rectangle {
+                    vertical-stretch: 1;
+                    Text {
+                        text: "No courses loaded! Check if Offered_Courses.csv is in the build folder.";
+                        color: red;
+                        font-size: 18px * root.ui-scale;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
 
-                // Display eligible courses only for current page
-                for course in root.current_page_courses : Rectangle {
-                    height: 55px * root.ui-scale;
-                    background: row_touch.has-hover ? #f0f4f8 : #fcfcfc;
-                    border-radius: 8px;
-                    border-width: 1px;
-                    border-color: #cccccc;
+                // 2. THE ACTUAL TABLE
+                if root.available_courses.length > 0 : ScrollView {
+                    vertical-stretch: 1;
+                    VerticalLayout {
+                        spacing: 10px * root.ui-scale;
+                        padding-bottom: 20px * root.ui-scale;
 
-                    row_touch := TouchArea { }
+                        // Notice the [i] here! We need the index to know which page we are on.
+                        for course[i] in root.available_courses : Rectangle {
 
-                    HorizontalLayout {
-                        padding-left: 15px * root.ui-scale;
-                        padding-right: 15px * root.ui-scale;
-                        spacing: 15px * root.ui-scale;
+                            // PAGINATION LOGIC: Hides courses that aren't on the current page
+                            visible: i >= root.current_page * root.courses_per_page && i < (root.current_page + 1) * root.courses_per_page;
+                            height: self.visible ? 65px * root.ui-scale : 0px;
+                            clip: true;
 
-                        Text {
-                            text: course.course_code;
-                            vertical-alignment: center;
-                            width: 150px * root.ui-scale;
-                            font-size: 16px * root.ui-scale;
-                        }
-                        Text {
-                            text: course.course_name;
-                            vertical-alignment: center;
-                            width: 350px * root.ui-scale;
-                            font-size: 16px * root.ui-scale;
-                        }
+                            background: #fcfcfc;
+                            border-radius: 8px;
+                            border-width: 1px;
+                            border-color: #cccccc;
 
-                        // Action buttons container
-                        HorizontalLayout {
-                            width: 400px * root.ui-scale;
-                            spacing: 8px * root.ui-scale;
+                            HorizontalLayout {
+                                padding-left: 15px * root.ui-scale;
+                                padding-right: 15px * root.ui-scale;
+                                spacing: 15px * root.ui-scale;
 
-                            // Request Button 1 - Add to cart
-                            Button1 := Rectangle {
-                                width: 70px * root.ui-scale;
-                                height: 35px * root.ui-scale;
-                                background: btn1_touch.pressed ? #003d80 : (btn1_touch.has-hover ? #0056b3 : #007bff);
-                                border-radius: 5px;
-                                opacity: root.can_request_more ? 1.0 : 0.5;
+                                Text { text: course.course_code; vertical-alignment: center; width: 140px * root.ui-scale; color:black; }
+                                Text { text: course.course_name; vertical-alignment: center; width: 300px * root.ui-scale; color :black; }
 
-                                Text {
-                                    text: "Request";
-                                    color: white;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                    font-size: 12px * root.ui-scale;
-                                    font-weight: 600;
-                                }
+                                HorizontalLayout {
+                                    spacing: 8px * root.ui-scale;
+                                    alignment: center;
+                                    horizontal-stretch: 1;
 
-                                btn1_touch := TouchArea {
-                                    enabled: root.can_request_more;
-                                    clicked => {
-                                        root.request_course(course.course_code);
-                                    }
-                                }
-                            }
+                                    Rectangle {
+                                        width: 65px * root.ui-scale; height: 35px * root.ui-scale;
+                                        background: req_touch.pressed ? #004a99 : (req_touch.has-hover ? #0056b3 : #007bff);
+                                        animate background { duration: 150ms; }
+                                        border-radius: 4px;
+                                        Text { text: "Req"; color: white; font-size: 12px; font-weight: 600; }
+                                        req_touch := TouchArea { clicked => { root.request_course(course.course_code); } }
+                                                                    }
 
-                            // Request Button 2 - Priority High
-                            Button2 := Rectangle {
-                                width: 70px * root.ui-scale;
-                                height: 35px * root.ui-scale;
-                                background: btn2_touch.pressed ? #003d80 : (btn2_touch.has-hover ? #0056b3 : #6c757d);
-                                border-radius: 5px;
-                                opacity: root.can_request_more ? 1.0 : 0.5;
-
-                                Text {
-                                    text: "Priority";
-                                    color: white;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                    font-size: 11px * root.ui-scale;
-                                    font-weight: 600;
-                                }
-
-                                btn2_touch := TouchArea {
-                                    enabled: root.can_request_more;
-                                    clicked => {
-                                        root.request_course(course.course_code + "_HIGH");
-                                    }
-                                }
-                            }
-
-                            // Request Button 3 - Add to waitlist
-                            Button3 := Rectangle {
-                                width: 70px * root.ui-scale;
-                                height: 35px * root.ui-scale;
-                                background: btn3_touch.pressed ? #003d80 : (btn3_touch.has-hover ? #0056b3 : #ffc107);
-                                border-radius: 5px;
-                                opacity: root.can_request_more ? 1.0 : 0.5;
-
-                                Text {
-                                    text: "Waitlist";
-                                    color: #212529;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                    font-size: 11px * root.ui-scale;
-                                    font-weight: 600;
-                                }
-
-                                btn3_touch := TouchArea {
-                                    enabled: root.can_request_more;
-                                    clicked => {
-                                        root.request_course(course.course_code + "_WAIT");
-                                    }
-                                }
-                            }
-
-                            // Request Button 4 - Quick add
-                            Button4 := Rectangle {
-                                width: 70px * root.ui-scale;
-                                height: 35px * root.ui-scale;
-                                background: btn4_touch.pressed ? #003d80 : (btn4_touch.has-hover ? #0056b3 : #28a745);
-                                border-radius: 5px;
-                                opacity: root.can_request_more ? 1.0 : 0.5;
-
-                                Text {
-                                    text: "Quick";
-                                    color: white;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                    font-size: 13px * root.ui-scale;
-                                    font-weight: 600;
-                                }
-
-                                btn4_touch := TouchArea {
-                                    enabled: root.can_request_more;
-                                    clicked => {
-                                        root.request_course(course.course_code + "_QUICK");
-                                    }
-                                }
-                            }
-
-                            // Request Button 5 - Info/Details
-                            Button5 := Rectangle {
-                                width: 70px * root.ui-scale;
-                                height: 35px * root.ui-scale;
-                                background: btn5_touch.pressed ? #003d80 : (btn5_touch.has-hover ? #0056b3 : #17a2b8);
-                                border-radius: 5px;
-                                opacity: root.can_request_more ? 1.0 : 0.5;
-
-                                Text {
-                                    text: "Info";
-                                    color: white;
-                                    horizontal-alignment: center;
-                                    vertical-alignment: center;
-                                    font-size: 13px * root.ui-scale;
-                                    font-weight: 600;
-                                }
-
-                                btn5_touch := TouchArea {
-                                    enabled: root.can_request_more;
-                                    clicked => {
-                                        root.request_course(course.course_code + "_INFO");
-                                    }
                                 }
                             }
                         }
                     }
+                }
+
+        // --- FOOTER SECTION (PAGE INDICATOR) ---
+        HorizontalLayout {
+            padding: 10px * root.ui-scale;
+            alignment: center;
+            spacing: 30px * root.ui-scale;
+            height: 60px * root.ui-scale;
+
+            Rectangle {
+                width: 100px * root.ui-scale; height: 40px * root.ui-scale;
+                background: root.current_page > 0 ? #007bff : #6c757d;
+                border-radius: 5px;
+                Text { text: "Previous"; color: white; font-weight: 600; }
+                TouchArea {
+                    enabled: root.current_page > 0;
+                    clicked => { root.current_page -= 1; }
                 }
             }
-        }
 
-        // --- PAGE INDICATOR ---
-        Rectangle {
-            y: parent.height - 100px * root.ui-scale;
-            x: (parent.width - 400px * root.ui-scale) / 2;
-            width: 400px * root.ui-scale;
-            height: 50px * root.ui-scale;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-width: 1px;
-            border-color: #dee2e6;
+            Text {
+                text: "Page " + (root.current_page + 1) + " of " + root.total_pages;
+                vertical-alignment: center;
+                font-size: 18px * root.ui-scale;
+                font-weight: 600;
+                color: black;
+            }
 
-            HorizontalLayout {
-                spacing: 10px * root.ui-scale;
-                alignment: center;
-
-                // Previous page button
-                PrevButton := Rectangle {
-                    width: 80px * root.ui-scale;
-                    height: 35px * root.ui-scale;
-                    background: prev_touch.pressed ? #0056b3 : (prev_touch.has-hover ? #007bff : #6c757d);
-                    border-radius: 5px;
-                    opacity: root.current_page > 0 ? 1.0 : 0.5;
-
-                    Text {
-                        text: "Previous";
-                        color: white;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                        font-size: 14px * root.ui-scale;
-                        font-weight: 600;
-                    }
-
-                    prev_touch := TouchArea {
-                        enabled: root.current_page > 0;
-                        clicked => {
-                            root.current_page = root.current_page - 1;
-                        }
-                    }
-                }
-
-                // Page indicator text
-                Text {
-                    text: "Page " + (root.current_page + 1) + " of " + root.total_pages;
-                    horizontal-alignment: center;
-                    vertical-alignment: center;
-                    font-size: 16px * root.ui-scale;
-                    font-weight: 600;
-                    width: 180px * root.ui-scale;
-                    color: black;
-                }
-
-                // Next page button
-                NextButton := Rectangle {
-                    width: 80px * root.ui-scale;
-                    height: 35px * root.ui-scale;
-                    background: next_touch.pressed ? #0056b3 : (next_touch.has-hover ? #007bff : #6c757d);
-                    border-radius: 5px;
-                    opacity: root.current_page < root.total_pages - 1 ? 1.0 : 0.5;
-
-                    Text {
-                        text: "Next";
-                        color: white;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                        font-size: 14px * root.ui-scale;
-                        font-weight: 600;
-                    }
-
-                    next_touch := TouchArea {
-                        enabled: root.current_page < root.total_pages - 1;
-                        clicked => {
-                            root.current_page = root.current_page + 1;
-                        }
-                    }
+            Rectangle {
+                width: 100px * root.ui-scale; height: 40px * root.ui-scale;
+                background: root.current_page < root.total_pages - 1 ? #007bff : #6c757d;
+                border-radius: 5px;
+                Text { text: "Next"; color: white; font-weight: 600; }
+                TouchArea {
+                    enabled: root.current_page < root.total_pages - 1;
+                    clicked => { root.current_page += 1; }
                 }
             }
         }

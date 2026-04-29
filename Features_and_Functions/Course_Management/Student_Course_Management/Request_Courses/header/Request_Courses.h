@@ -342,6 +342,8 @@ private:
     CourseBinaryTree available_courses_tree;
     int registered_count;
 
+    static constexpr int MAX_COURSES_PER_SEMESTER = 5;
+
     void load_available_courses();
     int count_registered_courses();
 

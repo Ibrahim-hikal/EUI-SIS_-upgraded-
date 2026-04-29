@@ -15,6 +15,8 @@
 #include "Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h"
 using namespace std;
 
+std::unique_ptr<Request_Courses> global_request_manager;
+
 int main() {
     auto ui = Main_App::create();
     Login_Manager &db = Login_Manager::get_instance();
@@ -56,6 +58,51 @@ int main() {
                 for (int i = 0; i < courses_vec.size(); ++i) std_courses.push_back(courses_vec[i]);
                 auto courses_model = std::make_shared<slint::VectorModel<CourseInfo> >(std_courses);
                 ui->set_my_courses(courses_model);
+
+                global_request_manager = std::make_unique<Request_Courses>(current_id);
+                std::vector<CourseInfo> available_vec;
+                auto iterator = global_request_manager->get_available_courses_inorder();
+                while(iterator->has_next()) {
+                    Course& c = iterator->next();
+                    available_vec.push_back({slint::SharedString(c.code), slint::SharedString(c.name)});
+                }
+                std::cout << "DEBUG: C++ found " << available_vec.size() << " courses!" << std::endl;
+                if (available_vec.empty()) {
+                    std::cout << "Injecting a fake course to test the UI..." << std::endl;
+                    available_vec.push_back({slint::SharedString("TEST101"), slint::SharedString("Debug Course")});
+                    available_vec.push_back({slint::SharedString("TEST102"), slint::SharedString("Another Debug Course")});
+                }
+                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_vec));
+                auto available_model = std::make_shared<slint::VectorModel<CourseInfo>>(available_vec);
+                ui->set_available_courses(available_model);
+
+                // Notice we just capture '&, ui' here now
+                ui->on_request_course([&, ui](slint::SharedString course_code) {
+                    if (global_request_manager) {
+                        // 1. Convert Slint string to standard C++ string
+                        string code_str = string(course_code);
+
+                        // 2. Find the underscore to separate the Code from the Action
+                        size_t underscore_pos = code_str.find_last_of('_');
+
+                        // 3. Extract just the course code (e.g., "ENG011" instead of "ENG011_Req")
+                        string clean_code = (underscore_pos != string::npos)
+                                            ? code_str.substr(0, underscore_pos)
+                                            : code_str;
+
+                        // 4. Process the request
+                        bool success = global_request_manager->request_course(clean_code);
+
+                        // 5. Update UI
+                        if (success) {
+                            ui->set_status_message("Course " + slint::SharedString(clean_code) + " Requested!");
+                        } else {
+                            ui->set_status_message("Request Failed (Limit 5 reached or Not found).");
+                        }
+                    }
+                });
+
+
             } else if (role == 2) {
                 // Teacher Logic
                 auto &teacher = Teacher_Profile::get_instance();

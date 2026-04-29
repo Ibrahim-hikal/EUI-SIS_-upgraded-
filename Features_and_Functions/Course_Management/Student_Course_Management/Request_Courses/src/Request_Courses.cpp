@@ -1,6 +1,8 @@
 //-------------Request Courses Implementation (Binary Tree with Iterator Pattern)-------------
 
 #include "../header/Request_Courses.h"
+#include <iostream>
+
 
 Request_Courses::Request_Courses(const std::string& student_id) {
     student = new Student(student_id);
@@ -65,14 +67,19 @@ Course* Request_Courses::find_course(const std::string& course_code) {
 }
 
 bool Request_Courses::request_course(const std::string& course_code) {
-    if (student == nullptr) return false;
+    // 1. Check if the student has already hit the limit
+    if (registered_count >= MAX_COURSES_PER_SEMESTER) {
+        std::cout << "Cannot request course. Maximum limit of "
+                  << MAX_COURSES_PER_SEMESTER << " courses reached." << std::endl;
+        return false;
+    }
 
-    // Check if already registered for 5 courses
-    if (registered_count >= 5) return false;
-
-    // Verify course exists in tree
-    Course* course = find_course(course_code);
-    if (course == nullptr) return false;
+    // 2. Make sure the course actually exists in the tree
+    Course* target_course = find_course(course_code);
+    if (target_course == nullptr) {
+        std::cout << "Course not found." << std::endl;
+        return false;
+    }
 
     // Request the course through student
     bool success = Student::register_course(course_code);

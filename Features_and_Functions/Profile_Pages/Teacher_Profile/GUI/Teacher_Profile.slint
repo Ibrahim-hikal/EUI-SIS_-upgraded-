@@ -1,6 +1,7 @@
 import { Teacher_Attendance_Panel } from "../../../Course_Management/Attendance/Teacher/GUI/Teacher_Attendance.slint";
 import { StudentAttendanceData, CourseInfo, StudentGradeData } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { Teacher_Grades_Panel } from "../../../Course_Management/Grades/Teacher/GUI/Teacher_Grades.slint";
+import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
 // --- IMPORT THE NEW SUB-PROFILE ---
 import { TC_Profile } from "Teacher_Profile_sub.slint";
@@ -18,7 +19,7 @@ export component Teacher_Profile inherits Rectangle {
     in-out property <image> user_profile_pic;
 
     //in-out properties
-    in-out property <[string]> available_courses;
+    in-out property <[CourseInfo]> available_courses;
     in-out property <int> Logout_value: 0;
     in-out property <[StudentAttendanceData]> students_data;
     in-out property <[string]> teacher_display_list;
@@ -203,20 +204,21 @@ export component Teacher_Profile inherits Rectangle {
         }
 
         if (selected-menu-item == 1) : Teacher_Grades_Panel {
-            ui-scale: root.ui-scale;
-            available_courses <=> root.available_courses;
-            grades_data <=> root.grades_data;
-            load_grades(course) => { root.load_grades(course); }
-            save_grades(data, course) => { root.save_grades(data, course); }
-        }
+                    ui-scale: root.ui-scale;
+                    available_courses: root.available_courses;
+                    grades_data <=> root.grades_data;
+                    load_grades(course) => { root.load_grades(course); }
+                    save_grades(data, course) => { root.save_grades(data, course); }
+                }
 
-        if (selected-menu-item == 2) : Teacher_Attendance_Panel {
-            ui-scale: root.ui-scale;
-            available_courses <=> root.available_courses;
-            students_data <=> root.students_data;
-            load_students(course, week) => { root.load_students(course, week); }
-            save_attendance(data, course, week) => { root.save_attendance(data, course, week);}
-        }
+                if (selected-menu-item == 2) : Teacher_Attendance_Panel {
+                    ui-scale: root.ui-scale;
+                    available_courses: root.available_courses;
+                    students_data: root.students_data;
+
+                    load_students(course, week) => { root.load_students(course, week); }
+                    save_attendance(data, course, week) => { root.save_attendance(data, course, week);}
+                }
     }
 
     // --- LOGOUT POPUP PLACED AT THE BOTTOM ---

@@ -1,21 +1,92 @@
 import { ComboBox, ScrollView, CheckBox, Button } from "std-widgets.slint";
 import { StudentAttendanceData } from "../../Shared/GUI/Shared_Structs.slint";
+import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+
+component CustomComboBox inherits Rectangle {
+    in property <[CourseInfo]> model;
+    in-out property <string> current-value;
+    in property <float> ui-scale: 1.0;
+    callback selected(string);
+
+    property <bool> is_open: false;
+
+    width: 250px * root.ui-scale;
+    height: 40px * root.ui-scale;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: #FFFFFF;
+        border-color: CourseSelectorTouchArea.has-hover? #007bff: #707070;
+        border-width: 2px;
+        border-radius: 4px * root.ui-scale;
+
+        Text {
+            text: root.current-value;
+            color: black;
+            vertical-alignment: center;
+            x: 15px * root.ui-scale;
+            font-weight: 600;
+        }
+
+        Text {
+            text: "v";
+            color: black;
+            vertical-alignment: center;
+            horizontal-alignment: right;
+            x: parent.width - 20px * root.ui-scale;
+        }
+
+        CourseSelectorTouchArea:= TouchArea{
+            clicked => { root.is_open = !root.is_open; }
+        }
+    }
+
+    if root.is_open: Rectangle {
+        y: root.height + 2px;
+        width: 100%;
+        background: #FFFFFF;
+        border-color: #007bff;
+        border-width: 2px;
+        border-radius: 4px * root.ui-scale;
+
+        VerticalLayout {
+            for item in root.model: Rectangle {
+                height: 40px * root.ui-scale;
+                background: item_touch.has-hover ? #e0e0e0 : #FFFFFF;
+
+                Text {
+                    text: item.course_code;
+                    color: black;
+                    vertical-alignment: center;
+                    x: 15px * root.ui-scale;
+                }
+
+                item_touch := TouchArea {
+                    clicked => {
+                        root.current-value = item.course_code;
+                        root.is_open = false;
+                        root.selected(item.course_code);
+                    }
+                }
+            }
+        }
+    }
+}
 
 export component Teacher_Attendance_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
-    in property <[string]> available_courses;
+    in property <[CourseInfo]> available_courses;
     in property <[string]> available_weeks: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"];
     in property <[StudentAttendanceData]> students_data;
 
-    out property <string> selected_course: available_courses[0];
-    out property <int> selected_week: 1;
+    out property <string> selected_course: "";
+    in-out property <int> selected_week: 1;
 
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
 
-    init => {
-            root.load_students(root.selected_course, root.selected_week);
-        }
+
 
     background: white;
 
@@ -28,14 +99,20 @@ export component Teacher_Attendance_Panel inherits Rectangle {
         HorizontalLayout {
             spacing: 20px * root.ui-scale;
             height: 40px * root.ui-scale;
-            ComboBox {
+            z: 100; // Keep dropdown menu on top
+
+            // FIX 2: Replaced the standard ComboBox with our CustomComboBox for courses
+            CustomComboBox {
                 model: available_courses;
                 current-value: root.selected_course;
+                ui-scale: root.ui-scale;
                 selected(val) => {
                     root.selected_course = val;
                     root.load_students(val, root.selected_week);
                 }
             }
+
+            // Standard ComboBox is fine here because available_weeks is an array of strings
             ComboBox {
                 model: available_weeks;
                 current-value: "1";
@@ -47,6 +124,7 @@ export component Teacher_Attendance_Panel inherits Rectangle {
         }
 
         ScrollView {
+            z: 0;
             VerticalLayout {
                 spacing: 10px * root.ui-scale;
                 for student[i] in students_data: Rectangle {
@@ -71,11 +149,8 @@ export component Teacher_Attendance_Panel inherits Rectangle {
                             vertical-alignment: center;
                         }
 
-                        // This empty Rectangle acts as a spring,
-                        // pushing everything after it to the far right.
                         Rectangle { }
 
-                        // Optional: Smaller label right next to the box
                         Text {
                             text: "Present:";
                             vertical-alignment: center;

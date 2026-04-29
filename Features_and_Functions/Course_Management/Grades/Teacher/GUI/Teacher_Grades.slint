@@ -1,9 +1,11 @@
 import { ScrollView } from "std-widgets.slint";
 import { StudentGradeData } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+
 
 // Custom dropdown to replace ComboBox, allowing explicit color styling
 component CustomComboBox inherits Rectangle {
-    in property <[string]> model;
+    in property <[CourseInfo]> model; // <-- Changed to [CourseInfo]
     in-out property <string> current-value;
     in property <float> ui-scale: 1.0;
     callback selected(string);
@@ -24,7 +26,7 @@ component CustomComboBox inherits Rectangle {
 
         Text {
             text: root.current-value;
-            color: black; // explicitly styled text
+            color: black;
             vertical-alignment: center;
             x: 15px * root.ui-scale;
             font-weight: 600;
@@ -46,7 +48,7 @@ component CustomComboBox inherits Rectangle {
 
     // The dropdown list
     if root.is_open: Rectangle {
-        y: root.height + 2px; // slightly below the main box
+        y: root.height + 2px;
         width: 100%;
         background: #FFFFFF;
         border-color: #007bff;
@@ -59,7 +61,7 @@ component CustomComboBox inherits Rectangle {
                 background: item_touch.has-hover ? #e0e0e0 : #FFFFFF;
 
                 Text {
-                    text: item;
+                    text: item.course_code; // <-- Extract the string here
                     color: black;
                     vertical-alignment: center;
                     x: 15px * root.ui-scale;
@@ -67,9 +69,9 @@ component CustomComboBox inherits Rectangle {
 
                 item_touch := TouchArea {
                     clicked => {
-                        root.current-value = item;
+                        root.current-value = item.course_code; // <-- Extract the string here
                         root.is_open = false;
-                        root.selected(item);
+                        root.selected(item.course_code); // <-- Extract the string here
                     }
                 }
             }
@@ -104,15 +106,13 @@ component GradeInput inherits Rectangle {
 
 export component Teacher_Grades_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
-    in property <[string]> available_courses;
+    in property <[CourseInfo]> available_courses;
     in-out property <[StudentGradeData]> grades_data;
 
-    out property <string> selected_course: available_courses[0];
+     out property <string> selected_course: "";
+     callback load_grades(string);
+     callback save_grades([StudentGradeData], string);
 
-    callback load_grades(string);
-    callback save_grades([StudentGradeData], string);
-
-    init => { root.load_grades(root.selected_course); }
     background: white;
 
     VerticalLayout {
