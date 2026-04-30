@@ -38,6 +38,8 @@ add_executable(main_app
         Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
         Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h
         Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
+        Features_and_Functions/Course_Management/Shared/Student.cpp
+        Features_and_Functions/Course_Management/Shared/Student.h
         # Note: Make sure there is a closing parenthesis here after the last .cpp file
 )
 

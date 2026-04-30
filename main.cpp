@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
 #include "Features_and_Functions/Login_Page/header/Login_Page.h"
 #include "Features_and_Functions/Profile_Pages/Student_Profile/header/Student_Profile.h"
 #include "Features_and_Functions/Profile_Pages/Teacher_Profile/header/Teacher_Profile.h"
@@ -13,9 +14,10 @@
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
 #include "Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h"
 #include "Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h"
+
 using namespace std;
 
-std::unique_ptr<Request_Courses> global_request_manager;
+unique_ptr<Request_Courses> global_request_manager;
 
 int main() {
     auto ui = Main_App::create();
@@ -38,7 +40,9 @@ int main() {
             current_id = string_id;
 
             if (role == 1) {
-                // Student logic
+                // =====================================
+                // STUDENT LOGIC
+                // =====================================
                 auto &student = Student_Profile::get_instance();
                 student.load_profile(current_id);
 
@@ -52,59 +56,97 @@ int main() {
                 auto img = slint::Image::load_from_path(pfp_path.c_str());
                 ui->set_user_profile_pic(img);
 
+                // --- Registered Courses Setup ---
                 RegisteredCoursesManager rc_manager(current_id);
                 auto courses_vec = rc_manager.get_registered_courses_with_attendance();
-                std::vector<CourseInfo> std_courses;
+                vector<CourseInfo> std_courses;
                 for (int i = 0; i < courses_vec.size(); ++i) std_courses.push_back(courses_vec[i]);
-                auto courses_model = std::make_shared<slint::VectorModel<CourseInfo> >(std_courses);
+                auto courses_model = make_shared<slint::VectorModel<CourseInfo> >(std_courses);
                 ui->set_my_courses(courses_model);
 
-                global_request_manager = std::make_unique<Request_Courses>(current_id);
-                std::vector<CourseInfo> available_vec;
+                // --- Request Courses Setup ---
+                global_request_manager = make_unique<Request_Courses>(current_id);
+                vector<CourseInfo> available_vec;
                 auto iterator = global_request_manager->get_available_courses_inorder();
+
                 while(iterator->has_next()) {
                     Course& c = iterator->next();
-                    available_vec.push_back({slint::SharedString(c.code), slint::SharedString(c.name)});
+                    CourseInfo info;
+                    info.course_code = slint::SharedString(c.code);
+                    info.course_name = slint::SharedString(c.name);
+                    available_vec.push_back(info);
                 }
-                std::cout << "DEBUG: C++ found " << available_vec.size() << " courses!" << std::endl;
-                if (available_vec.empty()) {
-                    std::cout << "Injecting a fake course to test the UI..." << std::endl;
-                    available_vec.push_back({slint::SharedString("TEST101"), slint::SharedString("Debug Course")});
-                    available_vec.push_back({slint::SharedString("TEST102"), slint::SharedString("Another Debug Course")});
-                }
-                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_vec));
-                auto available_model = std::make_shared<slint::VectorModel<CourseInfo>>(available_vec);
+
+                auto available_model = make_shared<slint::VectorModel<CourseInfo>>(available_vec);
                 ui->set_available_courses(available_model);
 
-                // Notice we just capture '&, ui' here now
+                // ========================================================
+                // REQUEST COURSES BUTTON CALLBACK
+                // ========================================================
                 ui->on_request_course([&, ui](slint::SharedString course_code) {
                     if (global_request_manager) {
                         // 1. Convert Slint string to standard C++ string
-                        string code_str = string(course_code);
+                        string code_str = string(course_code.data());
 
                         // 2. Find the underscore to separate the Code from the Action
                         size_t underscore_pos = code_str.find_last_of('_');
-
-                        // 3. Extract just the course code (e.g., "ENG011" instead of "ENG011_Req")
                         string clean_code = (underscore_pos != string::npos)
                                             ? code_str.substr(0, underscore_pos)
                                             : code_str;
 
+                        // 3. THE STRING SCRUBBER
+                        clean_code.erase(remove(clean_code.begin(), clean_code.end(), '\r'), clean_code.end());
+                        clean_code.erase(remove(clean_code.begin(), clean_code.end(), '\n'), clean_code.end());
+                        size_t endpos = clean_code.find_last_not_of(" \t");
+                        if(string::npos != endpos) clean_code = clean_code.substr(0, endpos + 1);
+
+                        cout << "\nAttempting to request: [" << clean_code << "]" << endl;
+
                         // 4. Process the request
                         bool success = global_request_manager->request_course(clean_code);
+                        cout << "Backend Result: " << (success ? "SUCCESS" : "FAILED") << endl;
 
                         // 5. Update UI
                         if (success) {
                             ui->set_status_message("Course " + slint::SharedString(clean_code) + " Requested!");
+                            ui->set_request_submitted(true);
+
+                            // ---> PART A: Refresh the bottom requested list (Updates the 1/5 Counter)
+                            auto student_requests = global_request_manager->get_student()->requestedCourses;
+                            vector<CourseInfo> req_vec;
+                            for(const auto& c : student_requests) {
+                                CourseInfo info;
+                                info.course_code = slint::SharedString(c.code);
+                                info.course_name = slint::SharedString(c.name);
+                                req_vec.push_back(info);
+                            }
+                            auto req_model = make_shared<slint::VectorModel<CourseInfo>>(req_vec);
+                            ui->set_requested_courses(req_model);
+
+                            // ---> PART B: Refresh the top available courses table! (Makes it disappear)
+                            vector<CourseInfo> updated_available_vec;
+                            auto new_iterator = global_request_manager->get_available_courses_inorder();
+                            while(new_iterator->has_next()) {
+                                Course& c = new_iterator->next();
+                                CourseInfo info;
+                                info.course_code = slint::SharedString(c.code);
+                                info.course_name = slint::SharedString(c.name);
+                                updated_available_vec.push_back(info);
+                            }
+                            auto updated_available_model = make_shared<slint::VectorModel<CourseInfo>>(updated_available_vec);
+                            ui->set_available_courses(updated_available_model);
+
                         } else {
                             ui->set_status_message("Request Failed (Limit 5 reached or Not found).");
+                            ui->set_request_submitted(false);
                         }
                     }
                 });
 
-
             } else if (role == 2) {
-                // Teacher Logic
+                // =====================================
+                // TEACHER LOGIC
+                // =====================================
                 auto &teacher = Teacher_Profile::get_instance();
                 // Load the profile using the email (which is the current_id for teachers)
                 teacher.load_profile(current_id);
@@ -117,11 +159,11 @@ int main() {
                 ui->set_user_email(current_email.c_str());
 
                 //converting vectors to models for slint
-                std::vector<slint::SharedString> display_list;
+                vector<slint::SharedString> display_list;
                 for (const auto &course_str: teacher.get_courses_taught()) {
                     display_list.push_back(slint::SharedString(course_str));
                 }
-                auto display_model = std::make_shared<slint::VectorModel<slint::SharedString> >(display_list);
+                auto display_model = make_shared<slint::VectorModel<slint::SharedString> >(display_list);
 
                 // send the courses to the UI
                 ui->set_teacher_profile_display_list(display_model);
@@ -131,7 +173,9 @@ int main() {
 
                 teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
             } else if (role == 3) {
-                // Admin Logic
+                // =====================================
+                // ADMIN LOGIC
+                // =====================================
                 auto &admin = Admin_Profile::get_instance();
 
                 // FIX: Use current_id because current_email is empty here!

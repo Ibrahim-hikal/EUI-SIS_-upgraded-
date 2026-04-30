@@ -66,7 +66,7 @@ export component Request_Courses inherits Rectangle {
                 font-size: 22px * root.ui-scale; color: black;
             }
             Text {
-                text: "Requests: " + root.requested_courses.length + "/" + root.max_requests;
+                text: "Registered Courses: " + root.requested_courses.length + "/" + root.max_requests;
                 font-size: 18px * root.ui-scale;
                 color: root.requested_courses.length >= root.max_requests ? #dc3545 : #28a745;
                 font-weight: 600;
@@ -142,9 +142,10 @@ export component Request_Courses inherits Rectangle {
                                     spacing: 8px * root.ui-scale;
                                     alignment: center;
                                     horizontal-stretch: 1;
-
+                                    padding-left: 10px * root.ui-scale;
                                     Rectangle {
                                         width: 65px * root.ui-scale; height: 35px * root.ui-scale;
+                                        y: 15px * root.ui-scale;
                                         background: req_touch.pressed ? #004a99 : (req_touch.has-hover ? #0056b3 : #007bff);
                                         animate background { duration: 150ms; }
                                         border-radius: 4px;
