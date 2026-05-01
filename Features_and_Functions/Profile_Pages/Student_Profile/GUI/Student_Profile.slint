@@ -2,320 +2,80 @@ import { ST_Profile } from "Student_Profile_sub.slint";
 import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
 import { Request_Courses } from "../../../Course_Management/Student_Course_Management/Request_Courses/GUI/Request_Courses.slint";
 import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { ScrollView } from "std-widgets.slint";
+
+// Imports for Academic Requests
+import { Student_Course_Withdrawal } from "../../../Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
+import { Student_Attendance_Excuses } from "../../../Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
 
 export component Student_Profile inherits Rectangle {
+    property <int> manage-courses-tab: 1;
+    property <int> selected-menu-item: 0;
+    in-out property <int> Logout_value: 0;
+    in-out property <string> user_name; in-out property <string> user_id; in-out property <string> user_Faculty; in-out property <string> student_gpa; in-out property <string> user_email; in-out property <image> user_profile_pic;
+    in-out property <[CourseInfo]> my_courses; in-out property <[CourseInfo]> available_courses; in-out property <[CourseInfo]> requested_courses; in-out property <[CourseInfo]> course_code;
+    in property <float> assigned_scale: 1.0; in property <float> ui-scale: assigned_scale; out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
+    in-out property <bool> request_submitted: false; in-out property <string> status_message;
+    callback Logout; callback change_picture(); callback load_available_courses(); callback request_course(string); callback remove_requested_course(string); callback submit_course_requests(); callback clear_selections(); callback course_selected(string); callback request_courses_clicked(string,string,string);
+    in-out property <int> active_tab <=> selected-menu-item;
 
-    //properties
-    property <int> manage-courses-tab: 1; // 0: Request, 1: Registered, 2: Previous
-    property <int> selected-menu-item: 0; // 0: Profile, 1: Manage Courses, etc.
+    // Callbacks for requests
+    callback submit_withdrawal_req(string, string);
+    callback submit_excuse_req(string, string, string);
 
-    //in-out properties
-    in-out property <int> Logout_value: 0; // 0: default, 1: confirmation, 2: finalized
-    in-out property <string> user_name;
-    in-out property <string> user_id;
-    in-out property <string> user_Faculty;
-    in-out property <string> student_gpa;
-    in-out property <string> user_email;
-    in-out property <image> user_profile_pic;
-    in-out property <[CourseInfo]> my_courses;
-    in-out property <[CourseInfo]> available_courses;
-    in-out property <[CourseInfo]> requested_courses;
-    in-out property <[CourseInfo]> course_code;
-    in property <float> assigned_scale: 1.0;
-    in property <float> ui-scale: assigned_scale;
-    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
-    in-out property <bool> request_submitted: false;
-    in-out property <string> status_message;
+    min-height: 600px; min-width: 1024px; preferred-height: 768px; preferred-width: 1024px; max-height: 840px; max-width: 1300px; background: white;
 
-    //callbacks
-    callback Logout;
-    callback change_picture();
-    callback load_available_courses();
-    callback request_course(string);
-    callback remove_requested_course(string);
-    callback submit_course_requests();
-    callback clear_selections();
-    callback course_selected(string);
-    callback request_courses_clicked(string,string,string);
-
-
-    min-height: 600px;
-    min-width: 1024px;
-    preferred-height: 768px;
-    preferred-width: 1024px;
-    max-height: 840px;
-    max-width: 1300px;
-    background: white;
-
-    //Selection menu on the left side of the screen
     Selection_menu := Rectangle{
-        width: 270px * root.ui-scale;
-        x: 0;
-        border-bottom-right-radius:15px;
-        border-top-right-radius:15px;
-        border-color: #727275;
-        border-width: 2px;
-        background: #d0d2d6;
-
-        //University logo
-        University_logo := Image{
-            source: @image-url("Uni-Logo.png");
-            width: 200px * root.ui-scale;
-            height: 60px * root.ui-scale;
-            x: 30px * root.ui-scale;
-            y: 20px * root.ui-scale;
-        }
-        //seperator line
-        Seperator_line := Rectangle{
-            width: 220px * root.ui-scale;
-            height: 2px * root.ui-scale;
-            x: 20px * root.ui-scale;
-            y: 110px * root.ui-scale;
-            background: #727275;
-        }
-
-        //Profile button
-        Profile_button := Rectangle{
-            width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-            height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-            x: 10px * root.ui-scale;
-            y: 150px * root.ui-scale;
-            border-radius: 10px;
-            background: Profile_Button_touch_area.pressed? #003d80:(selected-menu-item == 0 ? #007bff:#64647a);
-            animate background,width,height{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Text{
-                text: "Profile";
-                font-size: 23px * root.ui-scale;
-                font-weight: 700;
-                color: white;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-            Profile_Button_touch_area := TouchArea{
-                clicked => { root.selected-menu-item = 0; }
-            }
-        }
-        //Manage courses button
-        Manage_courses_button := Rectangle{
-            width: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-            height: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-            x: 10px * root.ui-scale;
-            y: 250px * root.ui-scale;
-            border-radius: 10px;
-            background: Manage_courses_button_touch_area.pressed? #003d80:(selected-menu-item == 1 ? #007bff:#64647a);
-            animate background,width,height{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Text{
-                text: "Manage Courses";
-                font-size: 23px * root.ui-scale;
-                font-weight: 700;
-                color: white;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-            Manage_courses_button_touch_area := TouchArea{
-                clicked => {
-                    root.selected-menu-item = 1;
-                    root.load_available_courses();
-                }
-            }
-        }
-        //Acadamic requests button
-        Acadamic_requests_button := Rectangle{
-            width: (selected-menu-item == 2 || Acadamic_requests_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-            height: (selected-menu-item == 2 || Acadamic_requests_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-            x: 10px * root.ui-scale;
-            y: 350px * root.ui-scale;
-            border-radius: 10px;
-            background: Acadamic_requests_button_touch_area.pressed ?#003d80:(selected-menu-item == 2 ? #007bff:#64647a);
-            animate background,width,height{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Text{
-                text: "Acadamic Requests";
-                font-size: 23px * root.ui-scale;
-                font-weight: 700;
-                color: white;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-            Acadamic_requests_button_touch_area := TouchArea{
-                clicked => { root.selected-menu-item = 2; }
-            }
-        }
-        Schedule_button := Rectangle{
-            width: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-            height: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-            x: 10px * root.ui-scale;
-            y: 450px * root.ui-scale;
-            border-radius: 10px;
-            background: Schedule_button_touch_area.pressed ? #003d80:(selected-menu-item == 3 ? #007bff:#64647a);
-            animate background,width,height{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Text{
-                text: "Schedule";
-                font-size: 23px * root.ui-scale;
-                font-weight: 700;
-                color: white;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-            Schedule_button_touch_area := TouchArea{
-                clicked => { root.selected-menu-item = 3; }
-            }
-        }
-        Notifications_button := Rectangle{
-            width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale;
-            height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale;
-            x: 10px * root.ui-scale;
-            y: 550px * root.ui-scale;
-            border-radius: 10px;
-            background: Notifications_button_touch_area.pressed ? #003d80:(selected-menu-item == 4 ? #007bff:#64647a);
-            animate background,width,height{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Text{
-                text: "Notifications";
-                font-size: 23px * root.ui-scale;
-                font-weight: 700;
-                color: white;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-            }
-            Notifications_button_touch_area := TouchArea{
-                clicked => { root.selected-menu-item = 4; }
-            }
-        }
-        Logout_icon := Image{
-            source: @image-url("exit.svg");
-            width: 50px * root.ui-scale;
-            height: 50px * root.ui-scale;
-            x: 20px * root.ui-scale;
-            y: 680px * root.ui-scale;
-            colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000);
-            animate colorize{
-                duration: 200ms;
-                easing: ease-in-out;
-            }
-
-            Logout_touch_area := TouchArea{
-                width: 50px * root.ui-scale;
-                height: 50px * root.ui-scale;
-                clicked => { root.Logout_value = 1; }
-            }
-        }
+        width: 270px * root.ui-scale; x: 0; border-bottom-right-radius:15px; border-top-right-radius:15px; border-color: #727275; border-width: 2px; background: #d0d2d6;
+        University_logo := Image{ source: @image-url("Uni-Logo.png"); width: 200px * root.ui-scale; height: 60px * root.ui-scale; x: 30px * root.ui-scale; y: 20px * root.ui-scale; }
+        Seperator_line := Rectangle{ width: 220px * root.ui-scale; height: 2px * root.ui-scale; x: 20px * root.ui-scale; y: 110px * root.ui-scale; background: #727275; }
+        Profile_button := Rectangle{ width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 150px * root.ui-scale; border-radius: 10px; background: Profile_Button_touch_area.pressed? #003d80:(selected-menu-item == 0 ? #007bff:#64647a); animate background,width,height{ duration: 200ms; easing: ease-in-out; } Text{ text: "Profile"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Profile_Button_touch_area := TouchArea{ clicked => { root.selected-menu-item = 0; } } }
+        Manage_courses_button := Rectangle{ width: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 1 || Manage_courses_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 250px * root.ui-scale; border-radius: 10px; background: Manage_courses_button_touch_area.pressed? #003d80:(selected-menu-item == 1 ? #007bff:#64647a); animate background,width,height{ duration: 200ms; easing: ease-in-out; } Text{ text: "Manage Courses"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Manage_courses_button_touch_area := TouchArea{ clicked => { root.selected-menu-item = 1; root.load_available_courses(); } } }
+        Acadamic_requests_button := Rectangle{ width: (selected-menu-item == 2 || Acadamic_requests_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 2 || Acadamic_requests_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 350px * root.ui-scale; border-radius: 10px; background: Acadamic_requests_button_touch_area.pressed ?#003d80:(selected-menu-item == 2 ? #007bff:#64647a); animate background,width,height{ duration: 200ms; easing: ease-in-out; } Text{ text: "Academic Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Acadamic_requests_button_touch_area := TouchArea{ clicked => { root.selected-menu-item = 2; } } }
+        Schedule_button := Rectangle{ width: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 3 || Schedule_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 450px * root.ui-scale; border-radius: 10px; background: Schedule_button_touch_area.pressed ? #003d80:(selected-menu-item == 3 ? #007bff:#64647a); animate background,width,height{ duration: 200ms; easing: ease-in-out; } Text{ text: "Schedule"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Schedule_button_touch_area := TouchArea{ clicked => { root.selected-menu-item = 3; } } }
+        Notifications_button := Rectangle{ width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover)? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 550px * root.ui-scale; border-radius: 10px; background: Notifications_button_touch_area.pressed ? #003d80:(selected-menu-item == 4 ? #007bff:#64647a); animate background,width,height{ duration: 200ms; easing: ease-in-out; } Text{ text: "Notifications"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Notifications_button_touch_area := TouchArea{ clicked => { root.selected-menu-item = 4; } } }
+        Logout_icon := Image{ source: @image-url("exit.svg"); width: 50px * root.ui-scale; height: 50px * root.ui-scale; x: 20px * root.ui-scale; y: 680px * root.ui-scale; colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000); animate colorize{ duration: 200ms; easing: ease-in-out; } Logout_touch_area := TouchArea{ width: 50px * root.ui-scale; height: 50px * root.ui-scale; clicked => { root.Logout_value = 1; } } }
     }
 
     Rectangle {
-        background: white;
-        width: parent.width - Selection_menu.width;
-        x: Selection_menu.width;
+        background: white; width: parent.width - Selection_menu.width; x: Selection_menu.width;
+        if (selected-menu-item == 0) : ST_Profile { ui-scale: root.ui-scale; User_name: root.user_name; User_id: root.user_id; User_Faculty: root.user_Faculty; Student_gpa: root.student_gpa; User_email: root.user_email; User_profile_pic: root.user_profile_pic; change_picture => { root.change_picture(); } }
+        if (selected-menu-item == 1) : VerticalLayout { padding-top: 20px * root.ui-scale; spacing: 20px * root.ui-scale; HorizontalLayout { alignment: center; spacing: 20px * root.ui-scale; height: 50px * root.ui-scale; Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 0 ? #007bff : #64647a; Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 0; } } } Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 1 ? #007bff : #64647a; Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 1; } } } Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 2 ? #007bff : #64647a; Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 2; } } } } Rectangle { width: 100%; if (root.manage-courses-tab == 0) : Request_Courses { ui-scale: root.ui-scale; student_id: root.user_id; student_name: root.user_name; faculty: root.user_Faculty; available_courses: root.available_courses; requested_courses: root.requested_courses; request_course(code) => { root.request_course(code); } load_available_courses() => { root.load_available_courses(); } submit_course_requests() => { root.submit_course_requests(); } remove_requested_course(code) => { root.remove_requested_course(code); } clear_selections() => { root.clear_selections(); } } if (root.manage-courses-tab == 1) : Registered_Courses_Panel { ui-scale: root.ui-scale; my_courses: root.my_courses; } } }
 
-        if (selected-menu-item == 0) : ST_Profile {
-            ui-scale: root.ui-scale;
-            User_name: root.user_name;
-            User_id: root.user_id;
-            User_Faculty: root.user_Faculty;
-            Student_gpa: root.student_gpa;
-            User_email: root.user_email;
-            User_profile_pic: root.user_profile_pic;
-            change_picture => { root.change_picture(); }
-        }
-
-        if (selected-menu-item == 1) : VerticalLayout {
-            padding-top: 20px * root.ui-scale;
-            spacing: 20px * root.ui-scale;
-
-            // Horizontal buttons
-            HorizontalLayout {
-                alignment: center;
-                spacing: 20px * root.ui-scale;
-                height: 50px * root.ui-scale;
-
-                Rectangle {
-                    width: 220px * root.ui-scale;
-                    border-radius: 10px;
-                    background: root.manage-courses-tab == 0 ? #007bff : #64647a;
-                    Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                    TouchArea { clicked => { root.manage-courses-tab = 0; } }
+        // --- ADDED: NEW CENTERED LAYOUT FOR ACADEMIC REQUESTS ---
+        if (selected-menu-item == 2) : ScrollView {
+            width: 100%; height: 100%;
+            VerticalLayout {
+                padding: 40px * root.ui-scale; spacing: 40px * root.ui-scale; alignment: start;
+                HorizontalLayout {
+                    alignment: center;
+                    Student_Course_Withdrawal {
+                        width: 700px * root.ui-scale; ui-scale: root.ui-scale;
+                        submit_withdrawal(code, reason) => { root.submit_withdrawal_req(code, reason); }
+                    }
                 }
-
-                Rectangle {
-                    width: 220px * root.ui-scale;
-                    border-radius: 10px;
-                    background: root.manage-courses-tab == 1 ? #007bff : #64647a;
-                    Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                    TouchArea { clicked => { root.manage-courses-tab = 1; } }
+                HorizontalLayout {
+                    alignment: center;
+                    Student_Attendance_Excuses {
+                        width: 700px * root.ui-scale; ui-scale: root.ui-scale;
+                        submit_excuse(code, week, reason) => { root.submit_excuse_req(code, week, reason); }
+                    }
                 }
-
-                Rectangle {
-                    width: 220px * root.ui-scale;
-                    border-radius: 10px;
-                    background: root.manage-courses-tab == 2 ? #007bff : #64647a;
-                    Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                    TouchArea { clicked => { root.manage-courses-tab = 2; } }
-                }
-            }
-
-            // Content Area
-            Rectangle {
-                width: 100%;
-
-                // TAB 0: Request Courses
-                if (root.manage-courses-tab == 0) : Request_Courses {
-                    ui-scale: root.ui-scale;
-                    student_id: root.user_id;
-                    student_name: root.user_name;
-                    faculty: root.user_Faculty;
-                    available_courses: root.available_courses;
-                    requested_courses: root.requested_courses;
-
-                    request_course(code) => {
-                            root.request_course(code);
-                        }
-                    load_available_courses() => { root.load_available_courses(); }
-                    submit_course_requests() => { root.submit_course_requests(); }
-                        remove_requested_course(code) => { root.remove_requested_course(code); }
-                        clear_selections() => { root.clear_selections(); }
-
-
-                }
-
-                // TAB 1: Registered Courses
-                if (root.manage-courses-tab == 1) : Registered_Courses_Panel {
-                    ui-scale: root.ui-scale;
-                    my_courses: root.my_courses;
-                }
-
-                // TAB 2: Previous Enrollments (empty for now)
             }
         }
     }
 
+    // --- LOGOUT CONFIRMATION POPUP ---
+    // When Logout_value == 1, show dialog. "Yes" calls root.Logout(). "No" resets to 0.
     if (root.Logout_value == 1) : Rectangle {
         width: 400px * root.ui-scale;
         height: 200px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        y: (parent.height - self.height) / 2;
+        x: (root.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
         background: #d0d2d6;
         border-radius: 15px;
         border-color: #727275;
         border-width: 2px;
-        z: 100;
 
         Confirmation_text := Text {
             text: "Are you sure you want to logout?";
@@ -326,40 +86,49 @@ export component Student_Profile inherits Rectangle {
             vertical-alignment: center;
             y: 40px * root.ui-scale;
         }
-
         Yes_button := Rectangle {
             width: 100px * root.ui-scale;
             height: 40px * root.ui-scale;
             x: 80px * root.ui-scale;
             y: 120px * root.ui-scale;
             border-radius: 10px;
-            background: Yes_button_touch_area.pressed ? darkred :(Yes_button_touch_area.has-hover ? red :#007bff);
+            background: Yes_touch.pressed ? darkred : (Yes_touch.has-hover ? red : #007bff);
             animate background { duration: 200ms; easing: ease-in-out; }
-
-            Text { text: "Yes"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; }
-
-            Yes_button_touch_area := TouchArea {
+            Text {
+                text: "Yes";
+                font-size: 18px * root.ui-scale;
+                font-weight: 600;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            Yes_touch := TouchArea {
                 clicked => {
                     root.Logout_value = 2;
                     root.Logout();
                 }
             }
         }
-
         No_button := Rectangle {
             width: 100px * root.ui-scale;
             height: 40px * root.ui-scale;
             x: 220px * root.ui-scale;
             y: 120px * root.ui-scale;
             border-radius: 10px;
-            background: No_button_touch_area.pressed ? #003d80 :(No_button_touch_area.has-hover ? #104682 :#007bff);
+            background: No_touch.pressed ? #003d80 : (No_touch.has-hover ? #104682 : #007bff);
             animate background { duration: 200ms; easing: ease-in-out; }
-
-            Text { text: "No"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; }
-
-            No_button_touch_area := TouchArea {
+            Text {
+                text: "No";
+                font-size: 18px * root.ui-scale;
+                font-weight: 600;
+                color: white;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+            No_touch := TouchArea {
                 clicked => { root.Logout_value = 0; }
             }
         }
     }
+
 }

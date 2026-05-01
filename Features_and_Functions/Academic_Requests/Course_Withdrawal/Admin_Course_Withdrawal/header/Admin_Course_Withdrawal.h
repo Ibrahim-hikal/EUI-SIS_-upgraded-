@@ -1,8 +1,16 @@
-//
-// Created by ahmed on 4/14/2026.
-//
+#pragma once
+#include <string>
+#include <vector>
 
-#ifndef PROJECT_ADMIN_COURSE_WITHDRAWAL_H
-#define PROJECT_ADMIN_COURSE_WITHDRAWAL_H
+// Pure C++ Struct - NO SLINT INCLUDES NEEDED HERE
+struct CppWithdrawalRequest {
+    std::string student_id;
+    std::string course_code;
+    std::string reason;
+};
 
-#endif //PROJECT_ADMIN_COURSE_WITHDRAWAL_H
+class AdminWithdrawalManager {
+public:
+    static std::vector<CppWithdrawalRequest> fetch();
+    static void process(const std::string& target_id, const std::string& target_course, bool approved);
+};

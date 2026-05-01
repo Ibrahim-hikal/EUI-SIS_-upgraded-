@@ -1,0 +1,49 @@
+export component Student_Attendance_Excuses inherits Rectangle {
+    in property <float> ui-scale: 1.0;
+    callback submit_excuse(string, string, string);
+
+    background: #F2F2F2; border_radius: 15px * root.ui-scale;
+    width: 450px * root.ui-scale; height: 420px * root.ui-scale;
+
+    VerticalLayout {
+        padding: 30px * root.ui-scale; spacing: 15px * root.ui-scale; alignment: center;
+        Text { text: "Attendance Excuse"; font-size: 22px * root.ui-scale; font-weight: 800; color: black; horizontal-alignment: center; }
+
+        Text { text: "Course Code:"; font-size: 16px * root.ui-scale; color: black; font-weight: 600; }
+        Rectangle {
+            height: 40px * root.ui-scale; background: #e8e8e8; border-radius: 5px * root.ui-scale; border-width: 1px; border-color: #64647a;
+            forward-focus: course_input;
+            course_input := TextInput { width: 95%; height: 100%; color: black; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+            if (course_input.text == "") : Text { text: "Enter code..."; color: #727275; vertical-alignment: center; x: 10px * root.ui-scale; }
+        }
+
+        Text { text: "Week/Date:"; font-size: 16px * root.ui-scale; color: black; font-weight: 600; }
+        Rectangle {
+            height: 40px * root.ui-scale; background: #e8e8e8; border-radius: 5px * root.ui-scale; border-width: 1px; border-color: #64647a;
+            forward-focus: week_input;
+            week_input := TextInput { width: 95%; height: 100%; color: black; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+            if (week_input.text == "") : Text { text: "Enter week/date..."; color: #727275; vertical-alignment: center; x: 10px * root.ui-scale; }
+        }
+
+        Text { text: "Reason:"; font-size: 16px * root.ui-scale; color: black; font-weight: 600; }
+        Rectangle {
+            height: 40px * root.ui-scale; background: #e8e8e8; border-radius: 5px * root.ui-scale; border-width: 1px; border-color: #64647a;
+            forward-focus: reason_input;
+            reason_input := TextInput { width: 95%; height: 100%; color: black; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+            if (reason_input.text == "") : Text { text: "Enter reason..."; color: #727275; vertical-alignment: center; x: 10px * root.ui-scale; }
+        }
+
+        Rectangle {
+            height: 45px * root.ui-scale; border-radius: 8px * root.ui-scale;
+            background: btn_touch.pressed ? #0056b3 : (btn_touch.has-hover ? #007bff : #4A4A4A);
+            animate background { duration: 150ms; }
+            Text { text: "Submit Excuse"; color: white; font-weight: 700; horizontal-alignment: center; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+            btn_touch := TouchArea {
+                clicked => {
+                    root.submit_excuse(course_input.text, week_input.text, reason_input.text);
+                    course_input.text = ""; week_input.text = ""; reason_input.text = "";
+                }
+            }
+        }
+    }
+}

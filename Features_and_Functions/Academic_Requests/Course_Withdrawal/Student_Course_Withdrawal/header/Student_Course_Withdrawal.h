@@ -1,8 +1,7 @@
-//
-// Created by ahmed on 4/14/2026.
-//
+#pragma once
+#include <string>
 
-#ifndef PROJECT_STUDENT_COURSE_WITHDRAWAL_H
-#define PROJECT_STUDENT_COURSE_WITHDRAWAL_H
-
-#endif //PROJECT_STUDENT_COURSE_WITHDRAWAL_H
+class StudentWithdrawalManager {
+public:
+    static void submit(const std::string& id, const std::string& course, const std::string& reason);
+};

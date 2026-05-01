@@ -1,3 +1,37 @@
-export component Admin_Attendance_Excuses  inherits Rectangle{
+import { ScrollView } from "std-widgets.slint";
+export struct ExcuseRequest { student_id: string, course_code: string, week: string, reason: string }
 
+component ActionBtn inherits Rectangle {
+    in property <string> text; in property <float> ui-scale: 1.0; callback clicked();
+    width: 75px * root.ui-scale; height: 30px * root.ui-scale; border-radius: 5px * root.ui-scale;
+    background: touch.pressed ? #0056b3 : (touch.has-hover ? #007bff : #333333); animate background { duration: 150ms; }
+    Text { text: root.text; color: white; font-weight: 700; horizontal-alignment: center; vertical-alignment: center; font-size: 13px * root.ui-scale; }
+    touch := TouchArea { clicked => { root.clicked(); } }
+}
+
+export component Admin_Attendance_Excuses inherits Rectangle {
+    in property <float> ui-scale: 1.0; in property <[ExcuseRequest]> requests; callback handle_excuse(string, string, string, bool);
+    background: #F2F2F2; border_radius: 15px * root.ui-scale; width: 600px * root.ui-scale; height: 400px * root.ui-scale;
+
+    VerticalLayout {
+        padding: 20px * root.ui-scale; spacing: 15px * root.ui-scale;
+        Text { text: "Pending Excuses"; font-size: 22px * root.ui-scale; font-weight: 800; color: black; horizontal-alignment: center; }
+        if (root.requests.length == 0) : Text { text: "No pending requests."; color: #555; horizontal-alignment: center; font-size: 16px * root.ui-scale; }
+        if (root.requests.length > 0) : ScrollView {
+            VerticalLayout {
+                spacing: 10px * root.ui-scale;
+                for req in root.requests : Rectangle {
+                    height: 115px * root.ui-scale; background: white; border_radius: 10px * root.ui-scale; border-width: 1px; border-color: #ddd;
+                    HorizontalLayout {
+                        padding: 15px * root.ui-scale;
+                        VerticalLayout { alignment: center; Text { text: req.student_id + " - " + req.course_code; font-weight: 700; color: black; font-size: 16px * root.ui-scale;} Text { text: "Week: " + req.week; color: #555; font-size: 14px * root.ui-scale; } Text { text: req.reason; font-italic: true; color: #444; } }
+                        VerticalLayout { alignment: center; spacing: 8px * root.ui-scale;
+                            ActionBtn { text: "Approve"; ui-scale: root.ui-scale; clicked => { root.handle_excuse(req.student_id, req.course_code, req.week, true); } }
+                            ActionBtn { text: "Reject"; ui-scale: root.ui-scale; clicked => { root.handle_excuse(req.student_id, req.course_code, req.week, false); } }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

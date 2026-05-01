@@ -1,8 +1,6 @@
-//
-// Created by ahmed on 4/14/2026.
-//
-
-#ifndef PROJECT_STUDENT__ATTENDANCE_EXCUSES_H
-#define PROJECT_STUDENT__ATTENDANCE_EXCUSES_H
-
-#endif //PROJECT_STUDENT__ATTENDANCE_EXCUSES_H
+#pragma once
+#include <string>
+class StudentExcuseManager {
+public:
+    static void submit(const std::string& id, const std::string& course, const std::string& week, const std::string& reason);
+};

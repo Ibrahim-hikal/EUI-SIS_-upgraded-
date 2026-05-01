@@ -1,3 +1,8 @@
-//
-// Created by ahmed on 4/14/2026.
-//
+#include "../header/Student_Attendance_Excuses.h"
+#include <fstream>
+#include <filesystem>
+void StudentExcuseManager::submit(const std::string& id, const std::string& course, const std::string& week, const std::string& reason) {
+    std::filesystem::create_directories("Databases");
+    std::ofstream file("Databases/Attendance_Excuses.csv", std::ios::app);
+    if(file.is_open()) file << id << "," << course << "," << week << "," << reason << ",Pending\n";
+}
