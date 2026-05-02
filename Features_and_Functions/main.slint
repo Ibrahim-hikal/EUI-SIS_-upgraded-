@@ -1,14 +1,20 @@
+import { ScrollView } from "std-widgets.slint";
 import { Login_Page } from "../Features_and_Functions/Login_Page/GUI/Login_page.slint";
 import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
 import { StudentAttendanceData, CourseInfo, StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 
+import { Student_Course_Withdrawal } from "Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
+import { Student_Attendance_Excuses } from "Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
+import { Admin_Course_Withdrawal, WithdrawalRequest } from "Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
+import { Admin_Attendance_Excuses, ExcuseRequest } from "Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
+import { CourseSlot } from "../Features_and_Functions/Schedule/Student_Schedule/GUI/Student_Schedule.slint";
 // We only import the Structs here so C++ can see them. We DO NOT import the GUI components!
 import { WithdrawalRequest } from "Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
 import { ExcuseRequest } from "Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
 
-export { WithdrawalRequest, ExcuseRequest }
+export { WithdrawalRequest, ExcuseRequest, CourseSlot }
 
 export component Main_App inherits Window {
     in-out property <int> active_panel: 0;
@@ -30,12 +36,17 @@ export component Main_App inherits Window {
     in-out property <[CourseInfo]> my_courses; in-out property <[string]> teacher_profile_display_list; in-out property <[StudentGradeData]> grades_data;
     callback load_grades(string); callback save_grades([StudentGradeData], string);
 
+    in-out property <int> student_active_tab: 0;
+    in-out property <int> admin_active_tab: 0;
     // --- ACADEMIC REQUESTS PROPERTIES (Data & Signals only, no state tracking!) ---
     in-out property <[WithdrawalRequest]> pending_withdrawals;
     in-out property <[ExcuseRequest]> pending_excuses;
     in-out property <[string]> my_course_codes;
     callback submit_withdrawal_req(string, string); callback submit_excuse_req(string, string, string);
     callback admin_handle_withdrawal(string, string, bool); callback admin_handle_excuse(string, string, string, bool);
+
+    in-out property <[CourseSlot]> student_schedule_data;
+    in-out property <[CourseSlot]> teacher_schedule_data;
 
     in-out property <string> student_id; in-out property <string> student_name; in-out property <string> faculty;
     in-out property <bool> course1_accept_button_pressed: false; in-out property <bool> course2_accept_button_pressed: false; in-out property <bool> course3_accept_button_pressed: false; in-out property <bool> course4_accept_button_pressed: false; in-out property <bool> course5_accept_button_pressed: false;
@@ -66,6 +77,14 @@ export component Main_App inherits Window {
             user_Faculty: root.user_Faculty; user_profile_pic: root.user_profile_pic; student_gpa: root.student_gpa;
             change_picture => {root.change_picture(); } my_courses <=> root.my_courses; available_courses <=> root.available_courses;
 
+                    requested_courses <=> root.requested_courses;
+                    request_submitted <=> root.request_submitted;
+                    status_message <=> root.status_message;
+                    request_course(code) => { root.request_course(code); }
+                    Logout_value <=> root.Logout_value;
+                    active_tab <=> root.student_active_tab;
+                    student_schedule_data <=> root.student_schedule_data;
+                }
             requested_courses <=> root.requested_courses;
             request_submitted <=> root.request_submitted;
             status_message <=> root.status_message;
@@ -79,18 +98,20 @@ export component Main_App inherits Window {
         }
 
         if (active_panel == 2) : Teacher_Profile {
-            width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
-            user_name <=> root.user_name; user_email <=> root.user_email; user_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
-            teacher_display_list <=> root.teacher_profile_display_list; available_courses <=> root.available_courses;
-            students_data <=> root.students_data; load_students(course, week) => { root.load_students(course, week); } save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
-            grades_data <=> root.grades_data; load_grades(course) => { root.load_grades(course); } save_grades(data, course) => { root.save_grades(data, course); }
-            Logout_value <=> root.Logout_value;
-        }
+                    width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
+                    user_name <=> root.user_name; user_email <=> root.user_email; user_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
+                    teacher_display_list <=> root.teacher_profile_display_list; available_courses <=> root.available_courses;
+                    students_data <=> root.students_data; load_students(course, week) => { root.load_students(course, week); } save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
+                    grades_data <=> root.grades_data; load_grades(course) => { root.load_grades(course); } save_grades(data, course) => { root.save_grades(data, course); }
+                    teacher_schedule_data <=> root.teacher_schedule_data;
+                    Logout_value <=> root.Logout_value;
+                }
 
         if (active_panel == 3) : Admin_Profile {
             width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
             User_name <=> root.user_name; User_email <=> root.user_email; User_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
             admin_position <=> root.admin_position;
+            active_tab <=> root.admin_active_tab;
 
             student_id <=> root.student_id; student_name <=> root.student_name; faculty <=> root.faculty; Submit_Button_Pressed <=> root.Submit_Button_Pressed; show_warning <=> root.show_warning; no_course_requests <=> root.no_course_requests; is_next_student_available <=> root.is_next_student_available; is_previous_student_available <=> root.is_previous_student_available;
             course1_accept_button_pressed <=> root.course1_accept_button_pressed; course2_accept_button_pressed <=> root.course2_accept_button_pressed; course3_accept_button_pressed <=> root.course3_accept_button_pressed; course4_accept_button_pressed <=> root.course4_accept_button_pressed; course5_accept_button_pressed <=> root.course5_accept_button_pressed;
@@ -104,6 +125,26 @@ export component Main_App inherits Window {
             pending_excuses <=> root.pending_excuses;
             admin_handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); }
             admin_handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); }
+        if (active_panel == 1 && root.student_active_tab == 2) : Rectangle {
+            x: 270px * root.global_scale; width: parent.width - self.x; height: parent.height; background: white;
+            ScrollView {
+                VerticalLayout {
+                    padding: 40px * root.global_scale; spacing: 40px * root.global_scale; alignment: center;
+                    HorizontalLayout { alignment: center; Student_Course_Withdrawal { ui-scale: root.global_scale; submit_withdrawal(code, reason) => { root.submit_withdrawal_req(code, reason); } } }
+                    HorizontalLayout { alignment: center; Student_Attendance_Excuses { ui-scale: root.global_scale; submit_excuse(code, week, reason) => { root.submit_excuse_req(code, week, reason); } } }
+                }
+            }
+        }
+
+        if (active_panel == 3 && root.admin_active_tab == 1) : Rectangle {
+            x: 270px * root.global_scale; width: parent.width - self.x; height: parent.height; background: white;
+            ScrollView {
+                VerticalLayout {
+                    padding: 40px * root.global_scale; spacing: 40px * root.global_scale; alignment: center;
+                    HorizontalLayout { alignment: center; Admin_Course_Withdrawal { ui-scale: root.global_scale; requests <=> root.pending_withdrawals; handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); } } }
+                    HorizontalLayout { alignment: center; Admin_Attendance_Excuses { ui-scale: root.global_scale; requests <=> root.pending_excuses; handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); } } }
+                }
+            }
         }
     }
 }

@@ -13,6 +13,9 @@
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
 #include "Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h"
 #include "Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h"
+#include "Features_and_Functions/Schedule/Student_Schedule/header/Student_Schedule_Manager.h"
+#include "Features_and_Functions/Schedule/Teacher_Schedule/header/Teacher_Schedule_Manager.h"
+
 #include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/header/Student_Course_Withdrawal.h"
 #include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/header/Admin_Course_Withdrawal.h"
 #include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h"
@@ -152,6 +155,14 @@ int main() {
                             }
                         }
 
+                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo> >(available_vec));
+                if (available_vec.empty()) {
+                    available_vec.push_back({slint::SharedString("TEST101"), slint::SharedString("Debug Course")});
+                    available_vec.push_back({slint::SharedString("TEST102"), slint::SharedString("Another Debug Course")});
+                }
+                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_vec));
+                auto available_model = std::make_shared<slint::VectorModel<CourseInfo>>(available_vec);
+                ui->set_available_courses(available_model);
                         // Check if the student failed this in the past
                         info.is_failed = (student_ptr->failedCourses.find(c.code) != std::string::npos);
 
@@ -213,6 +224,8 @@ int main() {
                 // Teacher Logic
                 auto &teacher = Teacher_Profile::get_instance();
                 teacher.load_profile(current_id);
+                teacherScheduleManager.load_teacher_schedule(teacher.get_name());
+                teacherScheduleManager.initUI(ui.operator->());
                 current_email = teacher.get_email();
 
                 string pfp_path = ImageManager::get_user_pfp_path(current_id);

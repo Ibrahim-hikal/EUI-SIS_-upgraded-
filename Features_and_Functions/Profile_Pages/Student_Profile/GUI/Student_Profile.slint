@@ -1,22 +1,12 @@
 import { ST_Profile } from "Student_Profile_sub.slint";
-import {
-    Registered_Courses_Panel,
-} from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
-import {
-    Request_Courses,
-} from "../../../Course_Management/Student_Course_Management/Request_Courses/GUI/Request_Courses.slint";
-import {
-    CourseInfo,
-} from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
+import { Request_Courses } from "../../../Course_Management/Student_Course_Management/Request_Courses/GUI/Request_Courses.slint";
+import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { ScrollView } from "std-widgets.slint";
 
-// Imports for Academic Requests
-import {
-    Student_Course_Withdrawal,
-} from "../../../Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
-import {
-    Student_Attendance_Excuses,
-} from "../../../Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
+import { Student_Course_Withdrawal } from "../../../Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
+import { Student_Attendance_Excuses } from "../../../Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
+import { Student_Schedule, CourseSlot } from "../../../../Features_and_Functions/Schedule/Student_Schedule/GUI/Student_Schedule.slint";
 
 export component Student_Profile inherits Rectangle {
     property <int> manage-courses-tab: 1;
@@ -49,7 +39,8 @@ export component Student_Profile inherits Rectangle {
     in-out property <int> active_tab <=> selected-menu-item;
     in-out property <[string]> registered_course_codes;
 
-    // Callbacks for requests
+    in-out property <[CourseSlot]> student_schedule_data;
+
     callback submit_withdrawal_req(string, string);
     callback submit_excuse_req(string, string, string);
 
@@ -391,6 +382,23 @@ if (selected-menu-item == 2): ScrollView {
                 }
             }
         }
+
+        if (selected-menu-item == 3) : VerticalLayout {
+                    width: 100%; height: 100%;
+
+                    // Adjust the top padding specifically to move it higher
+                    padding-top: 7px * root.ui-scale;
+
+                    // Keep the side padding so it doesn't touch the left/right edges
+                    padding-left: 40px * root.ui-scale;
+                    padding-right: 40px * root.ui-scale;
+                    padding-bottom: 40px * root.ui-scale;
+
+                    Student_Schedule {
+                        ui-scale: root.ui-scale;
+                        schedule_slots: root.student_schedule_data;
+                    }
+                }
     }
 
     // --- LOGOUT CONFIRMATION POPUP ---

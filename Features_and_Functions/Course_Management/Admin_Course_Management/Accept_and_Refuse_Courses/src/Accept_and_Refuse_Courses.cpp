@@ -143,7 +143,6 @@ void AdminCourseManager::saveCurrentDecisions(void* ui_ptr) {
 void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
     auto ui = static_cast<Main_App*>(ui_ptr);
 
-    // --- 1. EMPTY STATE CHECK ---
     if (currentStudentIdx < 0 || currentStudentIdx >= (int)students.size()) {
         resetUI(ui);
         ui->set_no_course_requests(true);
@@ -155,7 +154,6 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
         return;
     }
 
-    // --- 2. ACTIVE STATE SETUP ---
     ui->set_no_course_requests(false);
     resetUI(ui);
     ui->set_show_warning(false);
@@ -165,7 +163,6 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
     ui->set_student_name(s.name.c_str());
     ui->set_faculty(s.faculty.c_str());
 
-    // Load course text
     if (s.requestedCourses.size() >= 1) {
         ui->set_c1_code(s.requestedCourses[0].code.c_str()); ui->set_c1_name(s.requestedCourses[0].name.c_str());
         ui->set_c1_l_day(s.requestedCourses[0].lectureDay.c_str()); ui->set_c1_l_slot(s.requestedCourses[0].lectureTime.c_str());
@@ -192,7 +189,6 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
         ui->set_c5_t_day(s.requestedCourses[4].tutorialDay.c_str()); ui->set_c5_t_slot(s.requestedCourses[4].tutorialTime.c_str());
     }
 
-    // --- 3. RE-APPLY MEMORY ---
     if (sessionDecisions.count(s.id)) {
         const auto& d = sessionDecisions[s.id];
         if (s.requestedCourses.size() >= 1) { ui->set_course1_accept_button_pressed(d[0] == 1); ui->set_course1_decline_button_pressed(d[0] == -1); }
@@ -202,7 +198,6 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
         if (s.requestedCourses.size() >= 5) { ui->set_course5_accept_button_pressed(d[4] == 1); ui->set_course5_decline_button_pressed(d[4] == -1); }
     }
 
-    // --- 4. CALCULATE PREVIOUS/NEXT BUTTON VISIBILITY ---
     bool has_next = false;
     for (int i = currentStudentIdx + 1; i < (int)students.size(); ++i) {
         if (!students[i].requestedCourses.empty()) {
@@ -222,7 +217,6 @@ void AdminCourseManager::loadStudentToUI(void* ui_ptr) {
     ui->set_is_previous_student_available(has_prev);
 }
 
-// --- Public Interface ---
 void AdminCourseManager::initUI(void* ui_ptr) {
     loadCourseNames(dbBasePath + "Offered_Courses.csv");
     parseStudentData(dbBasePath + "Data_on_Each_Student.csv");
@@ -250,7 +244,6 @@ void AdminCourseManager::initUI(void* ui_ptr) {
 
 void AdminCourseManager::nextStudent(void* ui_ptr) {
     saveCurrentDecisions(ui_ptr);
-
     int start_search = (currentStudentIdx == -1) ? 0 : currentStudentIdx + 1;
     for (int i = start_search; i < (int)students.size(); ++i) {
         if (!students[i].requestedCourses.empty()) {
@@ -263,7 +256,6 @@ void AdminCourseManager::nextStudent(void* ui_ptr) {
 
 void AdminCourseManager::prevStudent(void* ui_ptr) {
     saveCurrentDecisions(ui_ptr);
-
     int prev_idx = currentStudentIdx - 1;
     while (prev_idx >= 0) {
         if (!students[prev_idx].requestedCourses.empty()) {
@@ -291,6 +283,36 @@ void AdminCourseManager::submitDecisions(void* ui_ptr) {
         if (idx >= (int)s.requestedCourses.size()) return;
         if (accepted) {
             s.registeredCourses += formatForCSV(s.requestedCourses[idx]);
+
+            // --- BULLETPROOF ATTENDANCE & GRADES INJECTION ---
+            string courseCode = trim(s.requestedCourses[idx].code); // Trim hidden characters
+            string attPath = dbBasePath + "Courses/" + courseCode + "/Attendance.csv";
+            string gradesPath = dbBasePath + "Courses/" + courseCode + "/Grades.csv";
+
+            // 1. Append to Attendance.csv
+            ofstream attFile(attPath, ios::app);
+            if (attFile.is_open()) {
+                attFile << trim(s.id) << "," << trim(s.name) << ","
+                        << trim(s.requestedCourses[idx].lectureDay) << " " << trim(s.requestedCourses[idx].lectureTime) << ","
+                        << trim(s.requestedCourses[idx].tutorialDay) << " " << trim(s.requestedCourses[idx].tutorialTime)
+                        << ",-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1\n";
+                attFile.close();
+                cout << "[DEBUG] SUCCESS: Appended " << s.id << " to " << attPath << "\n";
+            } else {
+                cerr << "[ERROR] FAILED to open Attendance file. Close it if it's open in Excel! Path: " << attPath << "\n";
+            }
+
+            // 2. Append to Grades.csv
+            ofstream gradesFile(gradesPath, ios::app);
+            if (gradesFile.is_open()) {
+                gradesFile << trim(s.id) << ",,,,,,,,,,\n";
+                gradesFile.close();
+                cout << "[DEBUG] SUCCESS: Appended " << s.id << " to " << gradesPath << "\n";
+            } else {
+                cerr << "[ERROR] FAILED to open Grades file. Close it if it's open in Excel! Path: " << gradesPath << "\n";
+            }
+            // --------------------------------------------------
+
         } else if (!declined) {
             still_requested.push_back(s.requestedCourses[idx]);
         }
@@ -310,7 +332,6 @@ void AdminCourseManager::submitDecisions(void* ui_ptr) {
     ui->set_Submit_Button_Pressed(true);
     ui->set_show_warning(false);
 
-    // --- SMART UI REFRESH ---
     bool found_next = false;
     for (int i = currentStudentIdx; i < (int)students.size(); ++i) {
         if (!students[i].requestedCourses.empty()) {
