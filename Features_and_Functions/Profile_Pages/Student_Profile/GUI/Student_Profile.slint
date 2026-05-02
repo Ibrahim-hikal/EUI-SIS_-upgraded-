@@ -4,9 +4,9 @@ import { Request_Courses } from "../../../Course_Management/Student_Course_Manag
 import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { ScrollView } from "std-widgets.slint";
 
-// Imports for Academic Requests
 import { Student_Course_Withdrawal } from "../../../Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
 import { Student_Attendance_Excuses } from "../../../Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
+import { Student_Schedule, CourseSlot } from "../../../../Features_and_Functions/Schedule/Student_Schedule/GUI/Student_Schedule.slint";
 
 export component Student_Profile inherits Rectangle {
     property <int> manage-courses-tab: 1;
@@ -19,7 +19,8 @@ export component Student_Profile inherits Rectangle {
     callback Logout; callback change_picture(); callback load_available_courses(); callback request_course(string); callback remove_requested_course(string); callback submit_course_requests(); callback clear_selections(); callback course_selected(string); callback request_courses_clicked(string,string,string);
     in-out property <int> active_tab <=> selected-menu-item;
 
-    // Callbacks for requests
+    in-out property <[CourseSlot]> student_schedule_data;
+
     callback submit_withdrawal_req(string, string);
     callback submit_excuse_req(string, string, string);
 
@@ -42,7 +43,6 @@ export component Student_Profile inherits Rectangle {
         if (selected-menu-item == 0) : ST_Profile { ui-scale: root.ui-scale; User_name: root.user_name; User_id: root.user_id; User_Faculty: root.user_Faculty; Student_gpa: root.student_gpa; User_email: root.user_email; User_profile_pic: root.user_profile_pic; change_picture => { root.change_picture(); } }
         if (selected-menu-item == 1) : VerticalLayout { padding-top: 20px * root.ui-scale; spacing: 20px * root.ui-scale; HorizontalLayout { alignment: center; spacing: 20px * root.ui-scale; height: 50px * root.ui-scale; Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 0 ? #007bff : #64647a; Text { text: "Request Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 0; } } } Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 1 ? #007bff : #64647a; Text { text: "Registered Courses"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 1; } } } Rectangle { width: 220px * root.ui-scale; border-radius: 10px; background: root.manage-courses-tab == 2 ? #007bff : #64647a; Text { text: "Previous Enrollments"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } TouchArea { clicked => { root.manage-courses-tab = 2; } } } } Rectangle { width: 100%; if (root.manage-courses-tab == 0) : Request_Courses { ui-scale: root.ui-scale; student_id: root.user_id; student_name: root.user_name; faculty: root.user_Faculty; available_courses: root.available_courses; requested_courses: root.requested_courses; request_course(code) => { root.request_course(code); } load_available_courses() => { root.load_available_courses(); } submit_course_requests() => { root.submit_course_requests(); } remove_requested_course(code) => { root.remove_requested_course(code); } clear_selections() => { root.clear_selections(); } } if (root.manage-courses-tab == 1) : Registered_Courses_Panel { ui-scale: root.ui-scale; my_courses: root.my_courses; } } }
 
-        // --- ADDED: NEW CENTERED LAYOUT FOR ACADEMIC REQUESTS ---
         if (selected-menu-item == 2) : ScrollView {
             width: 100%; height: 100%;
             VerticalLayout {
@@ -63,10 +63,25 @@ export component Student_Profile inherits Rectangle {
                 }
             }
         }
+
+        if (selected-menu-item == 3) : VerticalLayout {
+                    width: 100%; height: 100%;
+
+                    // Adjust the top padding specifically to move it higher
+                    padding-top: 7px * root.ui-scale;
+
+                    // Keep the side padding so it doesn't touch the left/right edges
+                    padding-left: 40px * root.ui-scale;
+                    padding-right: 40px * root.ui-scale;
+                    padding-bottom: 40px * root.ui-scale;
+
+                    Student_Schedule {
+                        ui-scale: root.ui-scale;
+                        schedule_slots: root.student_schedule_data;
+                    }
+                }
     }
 
-    // --- LOGOUT CONFIRMATION POPUP ---
-    // When Logout_value == 1, show dialog. "Yes" calls root.Logout(). "No" resets to 0.
     if (root.Logout_value == 1) : Rectangle {
         width: 400px * root.ui-scale;
         height: 200px * root.ui-scale;
