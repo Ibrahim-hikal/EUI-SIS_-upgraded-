@@ -33,7 +33,8 @@ int main() {
     // Declare Managers (so they live for the duration of the program)
     AdminCourseManager adminManager("Databases/");
     TeacherAttendanceManager teacherAttendanceManager;
-
+    TeacherScheduleManager teacherScheduleManager;
+    StudentScheduleManager studentScheduleManager;
     string current_id = "";
     string current_email = "";
 
@@ -128,6 +129,8 @@ int main() {
 
                 // 3. Send the string list to the UI
                 ui->set_my_course_codes(codes_model);
+                studentScheduleManager.load_student_schedule(current_id);
+                studentScheduleManager.initUI(ui.operator->());
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;
@@ -154,15 +157,6 @@ int main() {
                                 break;
                             }
                         }
-
-                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo> >(available_vec));
-                if (available_vec.empty()) {
-                    available_vec.push_back({slint::SharedString("TEST101"), slint::SharedString("Debug Course")});
-                    available_vec.push_back({slint::SharedString("TEST102"), slint::SharedString("Another Debug Course")});
-                }
-                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_vec));
-                auto available_model = std::make_shared<slint::VectorModel<CourseInfo>>(available_vec);
-                ui->set_available_courses(available_model);
                         // Check if the student failed this in the past
                         info.is_failed = (student_ptr->failedCourses.find(c.code) != std::string::npos);
 

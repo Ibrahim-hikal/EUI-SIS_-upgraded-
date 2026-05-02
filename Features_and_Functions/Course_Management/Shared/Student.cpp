@@ -102,7 +102,10 @@ bool Student::has_time_conflict(const string& l_day, const string& l_time, const
     string new_lec = l_day + " " + l_time;
     string new_tut = t_day + " " + t_time;
 
-    // 1. Check Pending Requested Courses
+    // 1. CRITICAL FIX: A course cannot have its lecture and tutorial at the exact same time!
+    if (new_lec == new_tut) return true;
+
+    // 2. Check Pending Requested Courses
     for (const auto& c : requestedCourses) {
         string exist_lec = c.lectureDay + " " + c.lectureTime;
         string exist_tut = c.tutorialDay + " " + c.tutorialTime;
@@ -112,7 +115,7 @@ bool Student::has_time_conflict(const string& l_day, const string& l_time, const
             }
     }
 
-    // 2. Check Already Registered Courses (Quick string search)
+    // 3. Check Already Registered Courses
     if (registeredCourses.find(new_lec) != string::npos) return true;
     if (registeredCourses.find(new_tut) != string::npos) return true;
 

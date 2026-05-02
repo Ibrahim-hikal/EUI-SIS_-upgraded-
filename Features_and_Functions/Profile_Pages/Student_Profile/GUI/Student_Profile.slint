@@ -326,19 +326,14 @@ export component Student_Profile inherits Rectangle {
                     faculty: root.user_Faculty;
                     available_courses: root.available_courses;
                     requested_courses: root.requested_courses;
+                    already_registered: root.my_courses.length;
                     request_course(code, ld, ls, td, ts) => { root.request_course(code, ld, ls, td, ts); }
                     load_available_courses() => {
                         root.load_available_courses();
                     }
-                    submit_course_requests() => {
-                        root.submit_course_requests();
-                    }
-                    remove_requested_course(code) => {
-                        root.remove_requested_course(code);
-                    }
-                    clear_selections() => {
-                        root.clear_selections();
-                    }
+                    submit_course_requests() => {root.submit_course_requests();}
+                    remove_requested_course(code) => {root.remove_requested_course(code);}
+                    clear_selections() => {root.clear_selections();}
                 }
                 if (root.manage-courses-tab == 1): Registered_Courses_Panel {
                     ui-scale: root.ui-scale;
