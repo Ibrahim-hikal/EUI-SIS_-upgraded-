@@ -1,0 +1,103 @@
+import { ScrollView } from "std-widgets.slint";
+
+export component CustomDropdown inherits Rectangle {
+    in property <[string]> model;
+    in-out property <string> current_value: "Select...";
+    in property <float> ui-scale: 1.0;
+    property <bool> is_open: false;
+
+    height: 45px * ui-scale;
+    clip: false;
+    z: is_open ? 1000 : 1;
+
+    // --- 1. The Main Button ---
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: #FFFFFF;
+        border-radius: 6px * ui-scale;
+        border-width: 2px;
+        border-color: drop_touch.has-hover ? #007bff : #727275;
+
+        HorizontalLayout {
+            padding-left: 15px * ui-scale;
+            padding-right: 15px * ui-scale;
+            Text {
+                text: root.current_value;
+                color: black;
+                vertical-alignment: center;
+                font-size: 16px * ui-scale;
+                font-weight: 600;
+            }
+            Text {
+                text: root.is_open ? "▲" : "▼";
+                color: #555;
+                horizontal-alignment: right;
+                vertical-alignment: center;
+            }
+        }
+
+        drop_touch := TouchArea {
+            clicked => { root.is_open = !root.is_open; }
+        }
+    }
+
+    // --- 2. The Invisible Shield ---
+    // Blocks clicks to other UI elements when open and closes the menu if clicked
+    if is_open : TouchArea {
+        x: -5000px;
+        y: -5000px;
+        width: 10000px;
+        height: 10000px;
+        z: 900;
+        clicked => { root.is_open = false; }
+    }
+
+    // --- 3. The Floating List ---
+    if is_open : Rectangle {
+        x: 0;
+        y: parent.height + 4px; // Pushes it exactly below the button
+        width: parent.width;
+        height: Math.min(160px * ui-scale, root.model.length * 40px * ui-scale);
+
+        background: white;
+        border-radius: 6px * ui-scale;
+        border-width: 2px;
+        border-color: #007bff;
+
+        clip: true; // Keeps the rounded corners clean
+        z: 1100;
+
+        ScrollView {
+            width: 100%;
+            height: 100%;
+
+            VerticalLayout {
+                spacing: 0;
+                alignment: start;
+
+                for item in root.model : TouchArea {
+                    height: 40px * ui-scale;
+
+                    clicked => {
+                        root.current_value = item;
+                        root.is_open = false;
+                    }
+
+                    Rectangle {
+                        height: 100%;
+                        background: parent.has-hover ? #e9ecef : white;
+
+                        Text {
+                            x: 15px * ui-scale;
+                            text: item;
+                            color: black;
+                            vertical-alignment: center;
+                            font-size: 14px * ui-scale;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

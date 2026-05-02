@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 
-// Pure C++ Struct - NO SLINT INCLUDES NEEDED HERE
 struct CppWithdrawalRequest {
     std::string student_id;
     std::string course_code;
@@ -12,5 +11,6 @@ struct CppWithdrawalRequest {
 class AdminWithdrawalManager {
 public:
     static std::vector<CppWithdrawalRequest> fetch();
+    // This will now handle BOTH updating the request status AND removing the course enrollment
     static void process(const std::string& target_id, const std::string& target_course, bool approved);
 };

@@ -37,16 +37,17 @@ add_executable(main_app
         Features_and_Functions/Course_Management/Attendance/Teacher/header/Teacher_Attendance.h
         Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
         Features_and_Functions/Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/src/Accept_and_Refuse_Courses.cpp
+        Features_and_Functions/Course_Management/Shared/Student.cpp
+        Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/src/Student_Course_Withdrawal.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/src/Admin_Course_Withdrawal.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/src/Student_Attendance_Excuses.cpp
         Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/src/Admin_Attendance_Excuses.cpp
-        Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
-        Features_and_Functions/Course_Management/Shared/Student.cpp
         Features_and_Functions/Schedule/Student_Schedule/header/Student_Schedule_Manager.h
         Features_and_Functions/Schedule/Student_Schedule/src/Student_Schedule_Manager.cpp
         Features_and_Functions/Schedule/Teacher_Schedule/src/Teacher_Schedule_Manager.cpp
         Features_and_Functions/Schedule/Teacher_Schedule/header/Teacher_Schedule_Manager.h
+
 )
 
 # 3. Add Slint files
