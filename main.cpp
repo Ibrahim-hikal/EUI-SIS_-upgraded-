@@ -13,6 +13,11 @@
 #include "Features_and_Functions/Course_Management/Student_Course_Management/Registered_Courses/header/Registered_Courses.h"
 #include "Features_and_Functions/Course_Management/Grades/Teacher/header/Teacher_Grades.h"
 #include "Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h"
+#include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/header/Student_Course_Withdrawal.h"
+#include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/header/Admin_Course_Withdrawal.h"
+#include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h"
+#include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/header/Admin_Attendance_Excuses.h"
+
 using namespace std;
 
 std::unique_ptr<Request_Courses> global_request_manager;
@@ -28,6 +33,59 @@ int main() {
 
     string current_id = "";
     string current_email = "";
+
+    // =========================================================
+    // 1. DEFINE ACADEMIC REQUESTS CALLBACKS FIRST!
+    // =========================================================
+
+    auto refresh_admin_requests = [&]() {
+        // Fetch and format Withdrawals
+        auto w_reqs = AdminWithdrawalManager::fetch();
+        std::vector<WithdrawalRequest> slint_w_reqs;
+        for (const auto &r: w_reqs) {
+            slint_w_reqs.push_back({
+                slint::SharedString(r.student_id), slint::SharedString(r.course_code), slint::SharedString(r.reason)
+            });
+        }
+        ui->set_pending_withdrawals(std::make_shared<slint::VectorModel<WithdrawalRequest> >(slint_w_reqs));
+
+        // Fetch and format Excuses
+        auto e_reqs = AdminExcuseManager::fetch();
+        std::vector<ExcuseRequest> slint_e_reqs;
+        for (const auto &r: e_reqs) {
+            slint_e_reqs.push_back({
+                slint::SharedString(r.student_id), slint::SharedString(r.course_code), slint::SharedString(r.week),
+                slint::SharedString(r.reason)
+            });
+        }
+        ui->set_pending_excuses(std::make_shared<slint::VectorModel<ExcuseRequest> >(slint_e_reqs));
+    };
+
+    ui->on_submit_withdrawal_req([&](slint::SharedString code, slint::SharedString reason) {
+        StudentWithdrawalManager::submit(current_id, std::string(code), std::string(reason));
+        std::cout << "Withdrawal Submitted: " << code << std::endl;
+    });
+
+    ui->on_submit_excuse_req([&](slint::SharedString code, slint::SharedString week, slint::SharedString reason) {
+        StudentExcuseManager::submit(current_id, std::string(code), std::string(week), std::string(reason));
+        std::cout << "Excuse Submitted: " << code << std::endl;
+    });
+
+    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
+        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
+        refresh_admin_requests(); // Refresh the table instantly!
+    });
+
+    ui->on_admin_handle_excuse(
+        [&](slint::SharedString id, slint::SharedString course, slint::SharedString week, bool approved) {
+            AdminExcuseManager::process(std::string(id), std::string(course), std::string(week), approved);
+            refresh_admin_requests(); // Refresh the table instantly!
+        });
+
+
+    // =========================================================
+    // 2. LOGIN & UI LOGIC
+    // =========================================================
 
     ui->on_check_credentials([&](const slint::SharedString &id, const slint::SharedString &pass, int role) {
         string string_id = string(id);
@@ -59,41 +117,34 @@ int main() {
                 auto courses_model = std::make_shared<slint::VectorModel<CourseInfo> >(std_courses);
                 ui->set_my_courses(courses_model);
 
+                std::vector<slint::SharedString> codes_only;
+                for (const auto &course: std_courses) {
+                    codes_only.push_back(course.course_code);
+                }
+                auto codes_model = std::make_shared<slint::VectorModel<slint::SharedString> >(codes_only);
+
+                // 3. Send the string list to the UI
+                ui->set_my_course_codes(codes_model);
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
                 std::vector<CourseInfo> available_vec;
                 auto iterator = global_request_manager->get_available_courses_inorder();
-                while(iterator->has_next()) {
-                    Course& c = iterator->next();
+                while (iterator->has_next()) {
+                    Course &c = iterator->next();
                     available_vec.push_back({slint::SharedString(c.code), slint::SharedString(c.name)});
                 }
-                std::cout << "DEBUG: C++ found " << available_vec.size() << " courses!" << std::endl;
-                if (available_vec.empty()) {
-                    std::cout << "Injecting a fake course to test the UI..." << std::endl;
-                    available_vec.push_back({slint::SharedString("TEST101"), slint::SharedString("Debug Course")});
-                    available_vec.push_back({slint::SharedString("TEST102"), slint::SharedString("Another Debug Course")});
-                }
-                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_vec));
-                auto available_model = std::make_shared<slint::VectorModel<CourseInfo>>(available_vec);
-                ui->set_available_courses(available_model);
 
-                // Notice we just capture '&, ui' here now
+                ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo> >(available_vec));
+
                 ui->on_request_course([&, ui](slint::SharedString course_code) {
                     if (global_request_manager) {
-                        // 1. Convert Slint string to standard C++ string
                         string code_str = string(course_code);
-
-                        // 2. Find the underscore to separate the Code from the Action
                         size_t underscore_pos = code_str.find_last_of('_');
-
-                        // 3. Extract just the course code (e.g., "ENG011" instead of "ENG011_Req")
                         string clean_code = (underscore_pos != string::npos)
-                                            ? code_str.substr(0, underscore_pos)
-                                            : code_str;
+                                                ? code_str.substr(0, underscore_pos)
+                                                : code_str;
 
-                        // 4. Process the request
                         bool success = global_request_manager->request_course(clean_code);
 
-                        // 5. Update UI
                         if (success) {
                             ui->set_status_message("Course " + slint::SharedString(clean_code) + " Requested!");
                         } else {
@@ -101,53 +152,45 @@ int main() {
                         }
                     }
                 });
-
-
             } else if (role == 2) {
                 // Teacher Logic
                 auto &teacher = Teacher_Profile::get_instance();
-                // Load the profile using the email (which is the current_id for teachers)
                 teacher.load_profile(current_id);
                 current_email = teacher.get_email();
+
                 string pfp_path = ImageManager::get_user_pfp_path(current_id);
                 auto img = slint::Image::load_from_path(pfp_path.c_str());
                 ui->set_user_profile_pic(img);
-                // Set common profile info
+
                 ui->set_user_name(teacher.get_name().c_str());
                 ui->set_user_email(current_email.c_str());
 
-                //converting vectors to models for slint
                 std::vector<slint::SharedString> display_list;
                 for (const auto &course_str: teacher.get_courses_taught()) {
                     display_list.push_back(slint::SharedString(course_str));
                 }
                 auto display_model = std::make_shared<slint::VectorModel<slint::SharedString> >(display_list);
-
-                // send the courses to the UI
                 ui->set_teacher_profile_display_list(display_model);
 
-                // Keep main.cpp clean - delegate entirely to the Manager
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());
-
                 teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
             } else if (role == 3) {
                 // Admin Logic
                 auto &admin = Admin_Profile::get_instance();
-
-                // FIX: Use current_id because current_email is empty here!
                 admin.load_profile(current_id);
 
-                // Now that the profile is loaded, update the UI
                 ui->set_user_name(admin.get_name().c_str());
                 ui->set_user_email(admin.get_email().c_str());
                 ui->set_admin_position(admin.get_position().c_str());
 
-                // Load the profile picture using the email/ID
                 string pfp_path = ImageManager::get_user_pfp_path(current_id);
                 auto img = slint::Image::load_from_path(pfp_path.c_str());
                 ui->set_user_profile_pic(img);
 
                 adminManager.initUI(ui.operator->());
+
+                // Now safely call the function we defined at the top!
+                refresh_admin_requests();
             }
 
             ui->set_active_panel(role);
@@ -193,7 +236,13 @@ int main() {
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
     });
+    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
+        // The Manager now handles BOTH the request database and the student database[cite: 3]
+        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
 
+        // Refresh the UI display
+        refresh_admin_requests();
+    });
     ui->run();
     return 0;
 }
