@@ -22,7 +22,7 @@ export component Main_App inherits Window {
     in-out property <[CourseInfo]> requested_courses;
     in-out property <bool> request_submitted: false;
     in-out property <string> status_message;
-    callback request_course(string);
+    callback request_course(string, string, string, string, string);
 
     in-out property <[CourseInfo]> available_courses; in-out property <[StudentAttendanceData]> students_data;
     callback load_students(string, int); callback save_attendance([StudentAttendanceData], string, int);
@@ -69,7 +69,7 @@ export component Main_App inherits Window {
             requested_courses <=> root.requested_courses;
             request_submitted <=> root.request_submitted;
             status_message <=> root.status_message;
-            request_course(code) => { root.request_course(code); }
+            request_course(code, ld, ls, td, ts) => { root.request_course(code, ld, ls, td, ts); }
             Logout_value <=> root.Logout_value;
 
             // --- The proper encapsulated wiring for Student Requests ---

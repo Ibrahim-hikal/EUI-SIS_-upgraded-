@@ -51,8 +51,13 @@ public:
     // Evaluates the student's history to build a list of allowed courses
     vector<Course> get_eligible_courses() const;
 
+    bool has_time_conflict(const string &l_day, const string &l_time, const string &t_day, const string &t_time) const;
+
     // Attempts to add a course to the student's request list
-    bool register_course(const string& course_code);
+    bool register_course(const string& course_code, const string& l_day, const string& l_time, const string& t_day, const string& t_time);
+
+    // --- NEW: Backend handles its own saving ---
+    void save_requests_to_csv();
 
 private:
     // --- Internal Storage ---

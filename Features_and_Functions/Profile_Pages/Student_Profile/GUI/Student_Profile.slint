@@ -40,7 +40,7 @@ export component Student_Profile inherits Rectangle {
     callback Logout;
     callback change_picture();
     callback load_available_courses();
-    callback request_course(string);
+    callback request_course(string,string,string,string,string);
     callback remove_requested_course(string);
     callback submit_course_requests();
     callback clear_selections();
@@ -335,9 +335,7 @@ export component Student_Profile inherits Rectangle {
                     faculty: root.user_Faculty;
                     available_courses: root.available_courses;
                     requested_courses: root.requested_courses;
-                    request_course(code) => {
-                        root.request_course(code);
-                    }
+                    request_course(code, ld, ls, td, ts) => { root.request_course(code, ld, ls, td, ts); }
                     load_available_courses() => {
                         root.load_available_courses();
                     }
