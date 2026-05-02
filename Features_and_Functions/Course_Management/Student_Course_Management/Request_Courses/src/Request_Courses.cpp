@@ -212,15 +212,16 @@ unique_ptr<CourseTreeIterator> Request_Courses::get_available_courses_levelorder
 
 Course* Request_Courses::find_course(const string& course_code) { return available_courses_tree.search(course_code); }
 
-bool Request_Courses::request_course(const string& course_code) {
+bool Request_Courses::request_course(const string& course_code, const string& l_day, const string& l_time, const string& t_day, const string& t_time) {
     if (registered_count >= MAX_COURSES_PER_SEMESTER) return false;
-    Course* target_course = find_course(course_code);
-    if (target_course == nullptr) return false;
 
-    // USE THE POINTER TO MODIFY THIS SPECIFIC STUDENT!
-    bool success = student->register_course(course_code);
-    if (success) registered_count++;
-    
+    // Attempt to register with the custom times
+    bool success = student->register_course(course_code, l_day, l_time, t_day, t_time);
+
+    if (success) {
+        registered_count++;
+        student->save_requests_to_csv();
+    }
     return success;
 }
 

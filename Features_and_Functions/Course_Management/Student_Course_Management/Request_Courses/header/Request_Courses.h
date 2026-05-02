@@ -67,7 +67,7 @@ public:
     std::unique_ptr<CourseTreeIterator> get_available_courses_levelorder();
 
     Course* find_course(const std::string& course_code);
-    bool request_course(const std::string& course_code);
+    bool request_course(const std::string& course_code, const std::string& l_day, const std::string& l_time, const std::string& t_day, const std::string& t_time);
     int get_available_courses_count() const;
     Student* get_student() const { return student; }
 };

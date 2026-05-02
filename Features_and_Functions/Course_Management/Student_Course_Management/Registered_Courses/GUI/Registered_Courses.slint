@@ -1,5 +1,6 @@
 import { ScrollView } from "std-widgets.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+import { CustomDropdown } from "../../../../Shared_GUI/Custom_dropdown.slint";
 
 export component Registered_Courses_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
@@ -24,10 +25,10 @@ export component Registered_Courses_Panel inherits Rectangle {
                 for course in my_courses: Rectangle {
                     background: #f4f6f9;
                     border-radius: 10px * root.ui-scale;
-                    padding: 15px * root.ui-scale;
 
                     HorizontalLayout {
                         VerticalLayout {
+                            padding: 15px * root.ui-scale;
                             spacing: 8px * root.ui-scale;
                             Text { text: course.course_code + " - " + course.course_name; color:black; font-size: 18px * root.ui-scale; font-weight: 700; }
                             Text { text: "Instructor: " + course.instructor_name; font-size: 16px * root.ui-scale; color: #555; }

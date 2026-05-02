@@ -98,15 +98,47 @@ vector<Course> Student::get_eligible_courses() const {
 // ==========================================
 // REGISTRATION
 // ==========================================
-bool Student::register_course(const string& course_code) {
-    // Check against the student's specific eligible list
+bool Student::has_time_conflict(const string& l_day, const string& l_time, const string& t_day, const string& t_time) const {
+    string new_lec = l_day + " " + l_time;
+    string new_tut = t_day + " " + t_time;
+
+    // 1. Check Pending Requested Courses
+    for (const auto& c : requestedCourses) {
+        string exist_lec = c.lectureDay + " " + c.lectureTime;
+        string exist_tut = c.tutorialDay + " " + c.tutorialTime;
+        if (new_lec == exist_lec || new_lec == exist_tut ||
+            new_tut == exist_lec || new_tut == exist_tut) {
+            return true;
+            }
+    }
+
+    // 2. Check Already Registered Courses (Quick string search)
+    if (registeredCourses.find(new_lec) != string::npos) return true;
+    if (registeredCourses.find(new_tut) != string::npos) return true;
+
+    return false;
+}
+
+bool Student::register_course(const string& course_code, const string& l_day, const string& l_time, const string& t_day, const string& t_time) {
+    // Before adding the course, we check for a time clash!
+    if (has_time_conflict(l_day, l_time, t_day, t_time)) {
+        return false;
+    }
+
     for (const auto& c : get_eligible_courses()) {
         if (c.code == course_code) {
-            requestedCourses.push_back(c);
+            Course new_request = c;
+            // Inject the custom selected times chosen by the student in the UI
+            new_request.lectureDay = l_day;
+            new_request.lectureTime = l_time;
+            new_request.tutorialDay = t_day;
+            new_request.tutorialTime = t_time;
+
+            requestedCourses.push_back(new_request);
             return true;
         }
     }
-    return false; // Course not found or not eligible
+    return false;
 }
 
 void Student::load_data() {
@@ -148,9 +180,90 @@ void Student::load_data() {
             if (cols.size() > 3) this->failedCourses = cols[3];
             if (cols.size() > 4) this->registeredCourses = cols[4];
 
+            if (cols.size() > 5 && !cols[5].empty()) {
+                string reqStr = cols[5];
+                size_t pos = 0;
+                while ((pos = reqStr.find('_', pos)) != string::npos) {
+                    size_t next_pos = reqStr.find('_', pos + 1);
+                    string segment = (next_pos == string::npos) ? reqStr.substr(pos + 1) : reqStr.substr(pos + 1, next_pos - pos - 1);
+
+                    size_t bPos = segment.find("\\\\");
+                    size_t sPos = segment.find("//");
+
+                    if (bPos != string::npos && sPos != string::npos) {
+                        Course c;
+                        c.code = segment.substr(0, bPos);
+
+                        // Pull the name from the master list so the UI displays it correctly
+                        for (const auto& mc : get_mutable_courses()) {
+                            if (mc.code == c.code) { c.name = mc.name; break; }
+                        }
+
+                        string fLec = segment.substr(bPos + 2, sPos - (bPos + 2));
+                        string fTut = segment.substr(sPos + 2);
+
+                        size_t lS = fLec.find(' ');
+                        if (lS != string::npos) { c.lectureDay = fLec.substr(0, lS); c.lectureTime = fLec.substr(lS + 1); }
+
+                        size_t tS = fTut.find(' ');
+                        if (tS != string::npos) { c.tutorialDay = fTut.substr(0, tS); c.tutorialTime = fTut.substr(tS + 1); }
+
+                        this->requestedCourses.push_back(c);
+                    }
+                    pos++;
+                }
+            }
+
             std::cout << "SUCCESS: Loaded data for student " << this->id << std::endl;
             break; // Stop searching once we find them
         }
     }
     file.close();
+}
+// ==========================================
+// FILE I/O
+// ==========================================
+void Student::save_requests_to_csv() {
+    std::ifstream fileIn("Databases/Data_on_Each_Student.csv");
+    if (!fileIn.is_open()) return;
+    std::vector<std::string> lines;
+    std::string line;
+
+    while (std::getline(fileIn, line)) {
+        if (line.empty()) continue;
+        bool has_cr = (line.back() == '\r');
+        if (has_cr) line.pop_back();
+
+        // Custom split to ignore commas inside quotes
+        std::vector<std::string> cols;
+        std::string current;
+        bool in_quotes = false;
+        for (char c : line) {
+            if (c == '"') in_quotes = !in_quotes;
+            else if (c == ',' && !in_quotes) { cols.push_back(current); current.clear(); }
+            else current += c;
+        }
+        cols.push_back(current);
+
+        // Update this specific student's record
+        if (!cols.empty() && cols[0] == this->id) {
+            std::string reqStr = "";
+            for (const auto& c : this->requestedCourses) {
+                reqStr += "_" + c.code + "\\\\" + c.lectureDay + " " + c.lectureTime + "//" + c.tutorialDay + " " + c.tutorialTime;
+            }
+            while (cols.size() <= 5) cols.push_back(""); // Ensure column 5 exists
+            cols[5] = reqStr; // Replace requested courses column
+
+            line = "";
+            for (size_t i = 0; i < cols.size(); ++i) {
+                line += cols[i] + (i < cols.size() - 1 ? "," : "");
+            }
+        }
+        lines.push_back(line + (has_cr ? "\r" : ""));
+    }
+    fileIn.close();
+
+    // Overwrite the database
+    std::ofstream fileOut("Databases/Data_on_Each_Student.csv");
+    for (const auto& l : lines) fileOut << l << "\n";
 }

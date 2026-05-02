@@ -1,198 +1,224 @@
-import { TabWidget, ScrollView } from "std-widgets.slint";
+import { TabWidget, ScrollView, ComboBox } from "std-widgets.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
+import { CustomDropdown } from "../../../../Shared_GUI/Custom_dropdown.slint";
 
 export component Request_Courses inherits Rectangle {
-    //==================== INPUT PROPERTIES ====================
     in property <float> ui-scale: assigned_scale;
     in property <float> assigned_scale: 1.0;
 
-    //==================== IN-OUT PROPERTIES ====================
     in-out property <string> student_id;
     in-out property <string> student_name;
     in-out property <string> faculty;
-
     in-out property <[CourseInfo]> available_courses;
     in-out property <[CourseInfo]> requested_courses;
+    in property <int> already_registered: 0;
 
     in-out property <int> current_page: 0;
     in-out property <int> courses_per_page: 5;
     in-out property <int> max_requests: 5;
     in-out property <string> status_message: "";
     in-out property <bool> request_submitted: false;
-    pure callback get_page_items(int, int, [CourseInfo]) -> [CourseInfo];
-        get_page_items(page, size, total_list) => {
-            return total_list;
-        }
 
-    //==================== OUTPUT PROPERTIES ====================
     out property <int> total_pages: Math.max(1, Math.ceil(available_courses.length / courses_per_page));
-    out property <bool> can_request_more: requested_courses.length < max_requests;
+    out property <bool> can_request_more: (requested_courses.length + already_registered) < max_requests;
 
+    // --- NEW: Popup Window Properties ---
+    property <bool> show_popup: false;
+    property <string> popup_code: "";
+    property <string> selected_lec_day: "Sunday";
+    property <string> selected_lec_slot: "09:00-11:00";
+    property <string> selected_tut_day: "Monday";
+    property <string> selected_tut_slot: "11:00-13:00";
 
-    //==================== CALLBACKS ====================
-    // Core Logic
-        callback request_course(string);          // Triggers C++ find_course and register_course
-        callback load_available_courses();        // Tells C++ to refresh the tree/model
+    // Updated Callback
+    callback request_course(string, string, string, string, string);
+    callback load_available_courses();
+    callback remove_requested_course(string);
+    callback submit_course_requests();
+    callback clear_selections();
 
-        // UI Interactions
-        callback remove_requested_course(string); // If you want to undo a selection
-        callback submit_course_requests();        // Batch submit all choices
-        callback clear_selections();              // Reset local UI state;
-
-
-    //==================== SPECIFICATIONS ====================
     background: white;
     min-height: 600px;
     min-width: 1024px;
 
-    // Main layout container fixing the negative offset and visibility issues
     VerticalLayout {
         padding: 30px * root.ui-scale;
         spacing: 20px * root.ui-scale;
 
-        // --- HEADER SECTION ---
         VerticalLayout {
             spacing: 8px * root.ui-scale;
+            Text { text: "Student ID: " + root.student_id; font-size: 22px * root.ui-scale; color: black; }
+            Text { text: "Student Name: " + root.student_name; font-size: 22px * root.ui-scale; color: black; }
+            Text { text: "Faculty: " + root.faculty; font-size: 22px * root.ui-scale; color: black; }
+
             Text {
-                text: "Student ID: " + root.student_id;
-                font-size: 22px * root.ui-scale; color: black;
-            }
-            Text {
-                text: "Student Name: " + root.student_name;
-                font-size: 22px * root.ui-scale; color: black;
-            }
-            Text {
-                text: "Faculty: " + root.faculty;
-                font-size: 22px * root.ui-scale; color: black;
-            }
-            Text {
-                text: "Registered Courses: " + root.requested_courses.length + "/" + root.max_requests;
+                text: "Total Courses (Registered + Requested): " + (root.requested_courses.length + root.already_registered) + "/" + root.max_requests;
                 font-size: 18px * root.ui-scale;
-                color: root.requested_courses.length >= root.max_requests ? #dc3545 : #28a745;
+                color: (root.requested_courses.length + root.already_registered) >= root.max_requests ? #dc3545 : #28a745;
                 font-weight: 600;
             }
         }
 
-        // Status message area
-        if root.status_message != "" : Text {
+        if root.status_message != "": Text {
             text: root.status_message;
             font-size: 16px * root.ui-scale;
             color: root.request_submitted ? #28a745 : #dc3545;
             horizontal-alignment: center;
         }
 
-        // --- TABLE HEADER ---
         Rectangle {
             height: 45px * root.ui-scale;
             background: #007bff;
             border-radius: 5px;
-
             HorizontalLayout {
                 padding-left: 15px * root.ui-scale;
                 padding-right: 15px * root.ui-scale;
                 Text { text: "Course Code"; font-weight: 700; width: 140px * root.ui-scale; color: white; vertical-alignment: center; }
                 Text { text: "Course Name"; font-weight: 700; width: 300px * root.ui-scale; color: white; vertical-alignment: center; }
-                Text { text: "Actions (Req / Prior / Wait / Quick / Info)"; font-weight: 700; color: white; vertical-alignment: center; }
+                Text { text: "Actions (Req / Wait)"; font-weight: 700; color: white; vertical-alignment: center; }
             }
         }
 
-        // --- TABLE BODY (SCROLLABLE) ---
+        if root.available_courses.length > 0: ScrollView {
+            vertical-stretch: 1;
+            VerticalLayout {
+                spacing: 10px * root.ui-scale;
+                padding-bottom: 20px * root.ui-scale;
 
-                // 1. DEBUG WARNING: If C++ sends 0 courses, this will show up.
-                if root.available_courses.length == 0 : Rectangle {
-                    vertical-stretch: 1;
-                    Text {
-                        text: "No courses loaded! Check if Offered_Courses.csv is in the build folder.";
-                        color: red;
-                        font-size: 18px * root.ui-scale;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
+                for course[i] in root.available_courses: Rectangle {
+                    visible: i >= root.current_page * root.courses_per_page && i < (root.current_page + 1) * root.courses_per_page;
+                    height: self.visible ? 65px * root.ui-scale : 0px;
+                    clip: true;
+                    background: #fcfcfc;
+                    border-radius: 8px; border-width: 1px; border-color: #cccccc;
+                    opacity: ((root.requested_courses.length + root.already_registered) >= root.max_requests && !course.is_requested) ? 0.4 : 1.0;
 
-                // 2. THE ACTUAL TABLE
-                if root.available_courses.length > 0 : ScrollView {
-                    vertical-stretch: 1;
-                    VerticalLayout {
-                        spacing: 10px * root.ui-scale;
-                        padding-bottom: 20px * root.ui-scale;
+                    HorizontalLayout {
+                        padding-left: 15px * root.ui-scale; padding-right: 15px * root.ui-scale; spacing: 15px * root.ui-scale;
+                        Text { text: course.course_code; vertical-alignment: center; width: 140px * root.ui-scale; color: black; }
+                        Text { text: course.course_name; vertical-alignment: center; width: 300px * root.ui-scale; color: black; }
 
-                        // Notice the [i] here! We need the index to know which page we are on.
-                        for course[i] in root.available_courses : Rectangle {
+                        HorizontalLayout {
+                            spacing: 12px * root.ui-scale; alignment: end; horizontal-stretch: 1; padding-right: 10px * root.ui-scale;
 
-                            // PAGINATION LOGIC: Hides courses that aren't on the current page
-                            visible: i >= root.current_page * root.courses_per_page && i < (root.current_page + 1) * root.courses_per_page;
-                            height: self.visible ? 65px * root.ui-scale : 0px;
-                            clip: true;
+                            if course.is_failed: Text { text: "(Failed Prior)"; color: #dc3545; font-size: 14px * root.ui-scale; font-weight: 700; vertical-alignment: center; }
 
-                            background: #fcfcfc;
-                            border-radius: 8px;
-                            border-width: 1px;
-                            border-color: #cccccc;
+                            Rectangle {
+                                width: 85px * root.ui-scale; height: 35px * root.ui-scale; y: 15px * root.ui-scale; border-radius: 4px;
+                                background: course.is_requested ? #6c757d : (req_touch.pressed ? #004a99 : (req_touch.has-hover ? #0056b3 : #007bff));
+                                animate background { duration: 150ms; }
+                                Text { text: course.is_requested ? "Waiting" : "Req"; color: white; font-size: 14px * root.ui-scale; font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
 
-                            HorizontalLayout {
-                                padding-left: 15px * root.ui-scale;
-                                padding-right: 15px * root.ui-scale;
-                                spacing: 15px * root.ui-scale;
-
-                                Text { text: course.course_code; vertical-alignment: center; width: 140px * root.ui-scale; color:black; }
-                                Text { text: course.course_name; vertical-alignment: center; width: 300px * root.ui-scale; color :black; }
-
-                                HorizontalLayout {
-                                    spacing: 8px * root.ui-scale;
-                                    alignment: center;
-                                    horizontal-stretch: 1;
-                                    padding-left: 10px * root.ui-scale;
-                                    Rectangle {
-                                        width: 65px * root.ui-scale; height: 35px * root.ui-scale;
-                                        y: 15px * root.ui-scale;
-                                        background: req_touch.pressed ? #004a99 : (req_touch.has-hover ? #0056b3 : #007bff);
-                                        animate background { duration: 150ms; }
-                                        border-radius: 4px;
-                                        Text { text: "Req"; color: white; font-size: 12px; font-weight: 600; }
-                                        req_touch := TouchArea { clicked => { root.request_course(course.course_code); } }
-                                                                    }
-
+                                req_touch := TouchArea {
+                                    enabled: !course.is_requested && (root.requested_courses.length + root.already_registered) < root.max_requests;
+                                    clicked => {
+                                        // --- OPEN THE POPUP ---
+                                        root.popup_code = course.course_code;
+                                        root.show_popup = true;
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
 
-        // --- FOOTER SECTION (PAGE INDICATOR) ---
         HorizontalLayout {
-            padding: 10px * root.ui-scale;
-            alignment: center;
-            spacing: 30px * root.ui-scale;
-            height: 60px * root.ui-scale;
-
+            padding: 10px * root.ui-scale; alignment: center; spacing: 30px * root.ui-scale; height: 60px * root.ui-scale;
             Rectangle {
-                width: 100px * root.ui-scale; height: 40px * root.ui-scale;
-                background: root.current_page > 0 ? #007bff : #6c757d;
-                border-radius: 5px;
+                width: 100px * root.ui-scale; height: 40px * root.ui-scale; background: root.current_page > 0 ? #007bff : #6c757d; border-radius: 5px;
                 Text { text: "Previous"; color: white; font-weight: 600; }
-                TouchArea {
-                    enabled: root.current_page > 0;
-                    clicked => { root.current_page -= 1; }
-                }
+                TouchArea { enabled: root.current_page > 0; clicked => { root.current_page -= 1; } }
             }
-
-            Text {
-                text: "Page " + (root.current_page + 1) + " of " + root.total_pages;
-                vertical-alignment: center;
-                font-size: 18px * root.ui-scale;
-                font-weight: 600;
-                color: black;
-            }
-
+            Text { text: "Page " + (root.current_page + 1) + " of " + root.total_pages; vertical-alignment: center; font-size: 18px * root.ui-scale; font-weight: 600; color: black; }
             Rectangle {
-                width: 100px * root.ui-scale; height: 40px * root.ui-scale;
-                background: root.current_page < root.total_pages - 1 ? #007bff : #6c757d;
-                border-radius: 5px;
+                width: 100px * root.ui-scale; height: 40px * root.ui-scale; background: root.current_page < root.total_pages - 1 ? #007bff : #6c757d; border-radius: 5px;
                 Text { text: "Next"; color: white; font-weight: 600; }
-                TouchArea {
-                    enabled: root.current_page < root.total_pages - 1;
-                    clicked => { root.current_page += 1; }
+                TouchArea { enabled: root.current_page < root.total_pages - 1; clicked => { root.current_page += 1; } }
+            }
+        }
+    }
+
+    // ===============================================
+    // POPUP WINDOW (Floats over the entire UI)
+    // ===============================================
+if (root.show_popup) : Rectangle {
+        z: 2000;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6); // Dark overlay
+        TouchArea { } // Blocks clicks to the background
+
+        Rectangle {
+            width: 500px * root.ui-scale;
+            height: 420px * root.ui-scale;
+            background: white;
+            border-radius: 15px;
+            clip: false; // <--- VITAL: Allows custom dropdowns to bleed out of the box
+
+            VerticalLayout {
+                padding: 30px * root.ui-scale;
+                spacing: 15px * root.ui-scale;
+
+                Text { text: "Select Slots for " + root.popup_code; font-size: 22px * root.ui-scale; font-weight: 700; color: black; horizontal-alignment: center; }
+
+                // LECTURE SELECTION (Highest Z-Index)
+                Rectangle {
+                    z: 100;
+                    height: 75px * root.ui-scale;
+                    clip: false;
+                    VerticalLayout {
+                        spacing: 8px * root.ui-scale;
+                        Text { text: "Lecture Slot:"; font-size: 16px * root.ui-scale; color: black; font-weight: 600; }
+                        HorizontalLayout {
+                            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale;
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]; current_value <=> root.selected_lec_day; }
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "13:30-15:30", "15:30-17:30"]; current_value <=> root.selected_lec_slot; }
+                        }
+                    }
+                }
+
+                // TUTORIAL SELECTION (Middle Z-Index)
+                Rectangle {
+                    z: 50;
+                    height: 75px * root.ui-scale;
+                    clip: false;
+                    VerticalLayout {
+                        spacing: 8px * root.ui-scale;
+                        Text { text: "Tutorial Slot:"; font-size: 16px * root.ui-scale; color: black; font-weight: 600; }
+                        HorizontalLayout {
+                            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale;
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]; current_value <=> root.selected_tut_day; }
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "13:30-15:30", "15:30-17:30"]; current_value <=> root.selected_tut_slot; }
+                        }
+                    }
+                }
+
+                Rectangle { height: 10px; } // Spacer
+
+                // BUTTONS (Lowest Z-Index)
+                Rectangle {
+                    z: 10;
+                    height: 50px * root.ui-scale;
+                    HorizontalLayout {
+                        alignment: center; spacing: 30px * root.ui-scale; height: 45px * root.ui-scale;
+
+                        Rectangle {
+                            width: 150px * root.ui-scale; background: #dc3545; border-radius: 8px;
+                            Text { text: "Cancel"; color: white; font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
+                            TouchArea { clicked => { root.show_popup = false; } }
+                        }
+                        Rectangle {
+                            width: 150px * root.ui-scale; background: #28a745; border-radius: 8px;
+                            Text { text: "Confirm"; color: white; font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
+                            TouchArea {
+                                clicked => {
+                                    root.show_popup = false;
+                                    root.request_course(root.popup_code, root.selected_lec_day, root.selected_lec_slot, root.selected_tut_day, root.selected_tut_slot);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
