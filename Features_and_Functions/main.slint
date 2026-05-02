@@ -103,14 +103,14 @@ export component Main_App inherits Window {
         }
 
         if (active_panel == 2) : Teacher_Profile {
-                    width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
-                    user_name <=> root.user_name; user_email <=> root.user_email; user_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
-                    teacher_display_list <=> root.teacher_profile_display_list; available_courses <=> root.available_courses;
-                    students_data <=> root.students_data; load_students(course, week) => { root.load_students(course, week); } save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
-                    grades_data <=> root.grades_data; load_grades(course) => { root.load_grades(course); } save_grades(data, course) => { root.save_grades(data, course); }
-                    teacher_schedule_data <=> root.teacher_schedule_data;
-                    Logout_value <=> root.Logout_value;
-                }
+            width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
+            user_name <=> root.user_name; user_email <=> root.user_email; user_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
+            teacher_display_list <=> root.teacher_profile_display_list; available_courses <=> root.available_courses;
+            students_data <=> root.students_data; load_students(course, week) => { root.load_students(course, week); } save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
+            grades_data <=> root.grades_data; load_grades(course) => { root.load_grades(course); } save_grades(data, course) => { root.save_grades(data, course); }
+            teacher_schedule_data <=> root.teacher_schedule_data;
+            Logout_value <=> root.Logout_value;
+        }
 
         if (active_panel == 3) : Admin_Profile {
             width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
