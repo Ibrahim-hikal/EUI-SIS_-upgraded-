@@ -57,6 +57,15 @@ Features_and_Functions/Manage_Members/Admin/Add_Teacher/header.h
 
 Features_and_Functions/Manage_Members/Admin/Assign_Courses/src.cpp
 Features_and_Functions/Manage_Members/Admin/Assign_Courses/header.h
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
 
 )
 
