@@ -1,0 +1,111 @@
+import { Button, LineEdit, VerticalLayout, HorizontalLayout } from "std-widgets.slint";
+
+export component AddStudentWindow inherits Rectangle {
+
+    // =========================
+    // Properties
+    // =========================
+
+    in-out property <string> id_value: "";
+    in-out property <string> name_value: "";
+    in-out property <string> faculty_value: "";
+    in-out property <string> gpa_value: "";
+
+    // =========================
+    // Callbacks
+    // =========================
+
+    callback submit_clicked(string, string, string, string);
+    callback close_clicked();
+
+    // =========================
+    // Window Style
+    // =========================
+
+    width: 400px;
+    height: 500px;
+
+    background: #f8f9fa;
+
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #007bff;
+
+    // =========================
+    // Layout
+    // =========================
+
+    VerticalLayout {
+
+        padding: 25px;
+        spacing: 15px;
+
+        Text {
+            text: "Add Student";
+            font-size: 24px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            color: #007bff;
+        }
+
+        // =========================
+        // Input Fields
+        // =========================
+
+        LineEdit {
+            placeholder-text: "Student ID";
+            text <=> root.id_value;
+        }
+
+        LineEdit {
+            placeholder-text: "Student Name";
+            text <=> root.name_value;
+        }
+
+        LineEdit {
+            placeholder-text: "Faculty";
+            text <=> root.faculty_value;
+        }
+
+        LineEdit {
+            placeholder-text: "GPA";
+            text <=> root.gpa_value;
+        }
+
+        Rectangle {
+            height: 15px;
+            background: transparent;
+        }
+
+        // =========================
+        // Buttons
+        // =========================
+
+        HorizontalLayout {
+
+            spacing: 10px;
+
+            Button {
+                text: "Add Student";
+                primary: true;
+
+                clicked => {
+                    root.submit_clicked(
+                        root.id_value,
+                        root.name_value,
+                        root.faculty_value,
+                        root.gpa_value
+                    );
+                }
+            }
+
+            Button {
+                text: "Cancel";
+
+                clicked => {
+                    root.close_clicked();
+                }
+            }
+        }
+    }
+}
