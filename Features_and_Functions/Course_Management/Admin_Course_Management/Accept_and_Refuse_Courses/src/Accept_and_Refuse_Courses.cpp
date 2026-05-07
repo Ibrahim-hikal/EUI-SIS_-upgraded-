@@ -120,7 +120,7 @@ void AdminCourseManager::saveCurrentDecisions(void* ui_ptr) {
     if (currentStudentIdx < 0 || currentStudentIdx >= (int)students.size()) return;
 
     auto ui = static_cast<Main_App*>(ui_ptr);
-    std::vector<int> decisions(5, 0);
+    vector<int> decisions(5, 0);
 
     if (ui->get_course1_accept_button_pressed()) decisions[0] = 1;
     else if (ui->get_course1_decline_button_pressed()) decisions[0] = -1;

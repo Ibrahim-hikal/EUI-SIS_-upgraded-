@@ -5,7 +5,7 @@ export component CustomDropdown inherits Rectangle {
     in-out property <string> current_value: "Select...";
     in property <float> ui-scale: 1.0;
     property <bool> is_open: false;
-
+    callback selected(string);
     height: 45px * ui-scale;
     clip: false;
     z: is_open ? 1000 : 1;
@@ -82,6 +82,7 @@ export component CustomDropdown inherits Rectangle {
                     clicked => {
                         root.current_value = item;
                         root.is_open = false;
+                        root.selected(item);
                     }
 
                     Rectangle {

@@ -173,7 +173,7 @@ if (root.show_popup) : Rectangle {
                         HorizontalLayout {
                             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale;
                             CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]; current_value <=> root.selected_lec_day; }
-                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "13:30-15:30", "15:30-17:30"]; current_value <=> root.selected_lec_slot; }
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "14:00-16:00" ]; current_value <=> root.selected_lec_slot; }
                         }
                     }
                 }
@@ -188,7 +188,7 @@ if (root.show_popup) : Rectangle {
                         HorizontalLayout {
                             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale;
                             CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]; current_value <=> root.selected_tut_day; }
-                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "13:30-15:30", "15:30-17:30"]; current_value <=> root.selected_tut_slot; }
+                            CustomDropdown { width: 45%; ui-scale: root.ui-scale; model: ["09:00-11:00", "11:00-13:00", "14:00-16:00"]; current_value <=> root.selected_tut_slot; }
                         }
                     }
                 }
