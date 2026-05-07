@@ -1,0 +1,97 @@
+import { Button, LineEdit } from "std-widgets.slint";
+
+export component AddTeacherWindow inherits Rectangle {
+
+    // =========================
+    // Properties
+    // =========================
+
+    in-out property <string> teacher_name: "";
+    in-out property <string> teacher_email: "";
+
+    // =========================
+    // Callbacks
+    // =========================
+
+    callback submit_clicked(string, string);
+    callback close_clicked();
+
+    // =========================
+    // Window Style
+    // =========================
+
+    width: 400px;
+    height: 350px;
+
+    background: #f8f9fa;
+
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #007bff;
+
+    // =========================
+    // Layout
+    // =========================
+
+    VerticalLayout {
+
+        padding: 25px;
+        spacing: 15px;
+
+        Text {
+            text: "Add Teacher";
+            font-size: 24px;
+            font-weight: 700;
+            horizontal-alignment: center;
+            color: #007bff;
+        }
+
+        // =========================
+        // Input Fields
+        // =========================
+
+        LineEdit {
+            placeholder-text: "Teacher Name";
+            text <=> root.teacher_name;
+        }
+
+        LineEdit {
+            placeholder-text: "Teacher Email";
+            text <=> root.teacher_email;
+        }
+
+        Rectangle {
+            height: 15px;
+            background: transparent;
+        }
+
+        // =========================
+        // Buttons
+        // =========================
+
+        HorizontalLayout {
+
+            spacing: 10px;
+
+            Button {
+                text: "Add Teacher";
+                primary: true;
+
+                clicked => {
+                    root.submit_clicked(
+                        root.teacher_name,
+                        root.teacher_email
+                    );
+                }
+            }
+
+            Button {
+                text: "Cancel";
+
+                clicked => {
+                    root.close_clicked();
+                }
+            }
+        }
+    }
+}
