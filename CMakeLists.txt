@@ -49,23 +49,14 @@ add_executable(main_app
         Features_and_Functions/Schedule/Teacher_Schedule/header/Teacher_Schedule_Manager.h
 
 
- Features_and_Functions/Manage_Members/Admin/Add_Student/src.cpp
-Features_and_Functions/Manage_Members/Admin/Add_Student/header.h
+Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
 
-Features_and_Functions/Manage_Members/Admin/Add_Teacher/src.cpp
-Features_and_Functions/Manage_Members/Admin/Add_Teacher/header.h
+Features_and_Functions/Manage_Members/Admin/Add_Teachers/src/Add_Teachers.cpp
+Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h
 
-Features_and_Functions/Manage_Members/Admin/Assign_Courses/src.cpp
-Features_and_Functions/Manage_Members/Admin/Assign_Courses/header.h
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+Features_and_Functions/Manage_Members/Admin/Assign_Courses/src/Assign_Courses.cpp
+Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h
 
 )
 
