@@ -3,7 +3,8 @@ import { Login_Page } from "../Features_and_Functions/Login_Page/GUI/Login_page.
 import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
 import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
-import { StudentAttendanceData, CourseInfo, StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { StudentAttendanceData , CourseInfo , StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+
 
 import { Student_Course_Withdrawal } from "Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
 import { Student_Attendance_Excuses } from "Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
@@ -26,6 +27,11 @@ export component Main_App inherits Window {
     in-out property <string> admin_position;
 
     in-out property <[CourseInfo]> requested_courses;
+    in property <[CourseInfo]> passed_courses ;
+    in property <[CourseInfo]> failed_courses ;
+    in property <string> enrollment_name: "";
+    in property <string> enrollment_id: "";
+    in property <string> enrollment_gpa: "";
     in-out property <bool> request_submitted: false;
     in-out property <string> status_message;
     callback request_course(string, string, string, string, string);
@@ -100,6 +106,12 @@ export component Main_App inherits Window {
             registered_course_codes <=> root.my_course_codes;
             submit_withdrawal_req(code, reason) => { root.submit_withdrawal_req(code, reason); }
             submit_excuse_req(code, week, reason) => { root.submit_excuse_req(code, week, reason); }
+
+            //--Previous Enrollments section--
+            passed_courses : root.passed_courses;
+            failed_courses : root.failed_courses;
+
+
         }
 
         if (active_panel == 2) : Teacher_Profile {

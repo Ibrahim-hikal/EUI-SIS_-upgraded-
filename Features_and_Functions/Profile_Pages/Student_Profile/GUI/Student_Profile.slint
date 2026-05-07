@@ -1,6 +1,7 @@
 import { ST_Profile } from "Student_Profile_sub.slint";
 import { Registered_Courses_Panel } from "../../../Course_Management/Student_Course_Management/Registered_Courses/GUI/Registered_Courses.slint";
 import { Request_Courses } from "../../../Course_Management/Student_Course_Management/Request_Courses/GUI/Request_Courses.slint";
+import { Previous_Enrollments } from "../../../Course_Management/Student_Course_Management/Previous_Enrollments/GUI/Previous_Enrollments.slint";
 import { CourseInfo } from "../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { ScrollView } from "std-widgets.slint";
 
@@ -21,6 +22,8 @@ export component Student_Profile inherits Rectangle {
     in-out property <[CourseInfo]> my_courses;
     in-out property <[CourseInfo]> available_courses;
     in-out property <[CourseInfo]> requested_courses;
+    in-out property <[CourseInfo]> passed_courses;
+    in-out property <[CourseInfo]> failed_courses;
     in-out property <[CourseInfo]> course_code;
     in property <float> assigned_scale: 1.0;
     in property <float> ui-scale: assigned_scale;
@@ -338,6 +341,16 @@ export component Student_Profile inherits Rectangle {
                 if (root.manage-courses-tab == 1): Registered_Courses_Panel {
                     ui-scale: root.ui-scale;
                     my_courses: root.my_courses;
+                }
+
+                if (root.manage-courses-tab == 2): Previous_Enrollments {
+                    ui-scale: root.ui-scale;
+                    passed_courses: root.passed_courses;
+                    failed_courses: root.failed_courses;
+                    student_name: root.user_name;
+                    student_id: root.user_id;
+                    student_gpa: root.student_gpa;
+
                 }
             }
         }
