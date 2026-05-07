@@ -1,22 +1,19 @@
-import { Button, LineEdit} from "std-widgets.slint";
 import { Button, LineEdit } from "std-widgets.slint";
 
-export component AddStudentWindow inherits Rectangle {
+export component AssignCoursesWindow inherits Rectangle {
 
     // =========================
     // Properties
     // =========================
 
-    in-out property <string> id_value: "";
-    in-out property <string> name_value: "";
-    in-out property <string> faculty_value: "";
-    in-out property <string> gpa_value: "";
+    in-out property <string> teacher_email: "";
+    in-out property <string> course_name: "";
 
     // =========================
     // Callbacks
     // =========================
 
-    callback submit_clicked(string, string, string, string);
+    callback assign_clicked(string, string);
     callback close_clicked();
 
     // =========================
@@ -24,7 +21,7 @@ export component AddStudentWindow inherits Rectangle {
     // =========================
 
     width: 400px;
-    height: 500px;
+    height: 350px;
 
     background: #f8f9fa;
 
@@ -42,7 +39,7 @@ export component AddStudentWindow inherits Rectangle {
         spacing: 15px;
 
         Text {
-            text: "Add Student";
+            text: "Assign Course";
             font-size: 24px;
             font-weight: 700;
             horizontal-alignment: center;
@@ -54,23 +51,13 @@ export component AddStudentWindow inherits Rectangle {
         // =========================
 
         LineEdit {
-            placeholder-text: "Student ID";
-            text <=> root.id_value;
+            placeholder-text: "Teacher Email";
+            text <=> root.teacher_email;
         }
 
         LineEdit {
-            placeholder-text: "Student Name";
-            text <=> root.name_value;
-        }
-
-        LineEdit {
-            placeholder-text: "Faculty";
-            text <=> root.faculty_value;
-        }
-
-        LineEdit {
-            placeholder-text: "GPA";
-            text <=> root.gpa_value;
+            placeholder-text: "Course Name";
+            text <=> root.course_name;
         }
 
         Rectangle {
@@ -87,20 +74,21 @@ export component AddStudentWindow inherits Rectangle {
             spacing: 10px;
 
             Button {
-                text: "Add Student";
+
+                text: "Assign Course";
                 primary: true;
 
                 clicked => {
-                    root.submit_clicked(
-                        root.id_value,
-                        root.name_value,
-                        root.faculty_value,
-                        root.gpa_value
+
+                    root.assign_clicked(
+                        root.teacher_email,
+                        root.course_name
                     );
                 }
             }
 
             Button {
+
                 text: "Cancel";
 
                 clicked => {
