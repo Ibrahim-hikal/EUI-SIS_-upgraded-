@@ -356,7 +356,7 @@ export component Student_Profile inherits Rectangle {
         }
 
         // --- ADDED: NEW CENTERED LAYOUT FOR ACADEMIC REQUESTS ---
-if (selected-menu-item == 2): ScrollView {
+        if (selected-menu-item == 2): ScrollView {
             width: 100%;
             height: 100%;
 
@@ -392,21 +392,21 @@ if (selected-menu-item == 2): ScrollView {
         }
 
         if (selected-menu-item == 3) : VerticalLayout {
-                    width: 100%; height: 100%;
+            width: 100%; height: 100%;
 
-                    // Adjust the top padding specifically to move it higher
-                    padding-top: 7px * root.ui-scale;
+            // Adjust the top padding specifically to move it higher
+            padding-top: 7px * root.ui-scale;
 
-                    // Keep the side padding so it doesn't touch the left/right edges
-                    padding-left: 40px * root.ui-scale;
-                    padding-right: 40px * root.ui-scale;
-                    padding-bottom: 40px * root.ui-scale;
+            // Keep the side padding so it doesn't touch the left/right edges
+            padding-left: 40px * root.ui-scale;
+            padding-right: 40px * root.ui-scale;
+            padding-bottom: 40px * root.ui-scale;
 
-                    Student_Schedule {
-                        ui-scale: root.ui-scale;
-                        schedule_slots: root.student_schedule_data;
-                    }
-                }
+            Student_Schedule {
+                ui-scale: root.ui-scale;
+                schedule_slots: root.student_schedule_data;
+            }
+        }
     }
 
     // --- LOGOUT CONFIRMATION POPUP ---

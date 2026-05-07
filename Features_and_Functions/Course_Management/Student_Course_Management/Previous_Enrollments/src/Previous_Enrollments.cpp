@@ -1,57 +1,50 @@
 #include "../header/Previous_Enrollments.h"
-
 #include <fstream>
 #include <sstream>
-#include <vector>
-#include <main.h>
+#include <iostream>
 
-// Logic to load data from CSV and send it to the Slint UI properties
-void load_enrollment_data(auto ui_handle, std::string student_id) {
-    std::ifstream file("Databases/Data_on_Each_Student.csv");
+PreviousEnrollments::PreviousEnrollments(const std::string& csv_file) : csv_file_path("Databases/Data_on_Each_Student.csv") {}
+
+std::vector<std::string> PreviousEnrollments::getCourses(const std::string& course_str) {
+    if (course_str == "-1" || course_str.empty()) return {};
+    std::vector<std::string> courses;
+    courses.push_back(course_str);
+    return courses;
+}
+
+void PreviousEnrollments::load_student_data(Main_App* ui, const std::string& student_id) {
+    std::ifstream file(csv_file_path);
     std::string line;
+    std::vector<std::string> passed, failed;
 
-    if (!file.is_open()) return;
+    if (std::getline(file, line)) {
+        while (std::getline(file, line)) {
+            std::stringstream ss(line);
+            std::string id, name, passed_str, failed_str;
 
-    // Skip the header row
-    std::getline(file, line);
+            std::getline(ss, id, ','); std::getline(ss, name, ',');
+            std::getline(ss, passed_str, ','); std::getline(ss, failed_str, ',');
 
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string id, name, passed_str, failed_str;
-
-        // Column mapping: 0:ID, 1:Name, 2:Passed, 3:Failed
-        std::getline(ss, id, ',');
-        if (id == student_id) {
-            std::getline(ss, name, ',');
-            std::getline(ss, passed_str, ',');
-            std::getline(ss, failed_str, ',');
-
-            // Lambda function to split course strings (handles single or multiple courses)
-            auto parse_courses = [](std::string raw) {
-                std::vector<CourseInfo> list;
-                if (raw == "-1" || raw.empty()) return list;
-
-                std::stringstream rss(raw);
-                std::string code;
-                // Splitting by '^' or ',' if multiple courses exist
-                while (std::getline(rss, code, '^')) {
-                    list.push_back({
-                        slint::SharedString(code),           // .code
-                        slint::SharedString("Course " + code) // .name
-                    });
-                }
-                return list;
-            };
-
-            // Convert vectors to Slint Models
-            auto passed_model = std::make_shared<slint::VectorModel<CourseInfo>>(parse_courses(passed_str));
-            auto failed_model = std::make_shared<slint::VectorModel<CourseInfo>>(parse_courses(failed_str));
-
-            // Push the models to the UI properties
-            ui_handle->set_passed_courses(passed_model);
-            ui_handle->set_failed_courses(failed_model);
-            break;
+            if (id == student_id) {
+                passed = getCourses(passed_str);
+                failed = getCourses(failed_str);
+                break;
+            }
         }
     }
-    file.close();
+
+    auto passed_model = std::make_shared<slint::VectorModel<CourseInfo>>();
+    for (const auto& c : passed) {
+        CourseInfo info; info.course_code = slint::SharedString(c);
+        passed_model->push_back(info);
+    }
+
+    auto failed_model = std::make_shared<slint::VectorModel<CourseInfo>>();
+    for (const auto& c : failed) {
+        CourseInfo info; info.course_code = slint::SharedString(c);
+        failed_model->push_back(info);
+    }
+
+    ui->set_passed_courses(passed_model);
+    ui->set_failed_courses(failed_model);
 }

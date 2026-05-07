@@ -21,6 +21,10 @@ export component Admin_Profile inherits Rectangle {
     in-out property <int> Logout_value: 0;
     callback Logout;
 
+    // --- End Semester Logic ---
+    property <bool> show_end_sem_confirmation: false;
+    callback admin_end_semester();
+
     // --- Profile Data ---
     in-out property <string> User_name;
     in-out property <image> User_profile_pic;
@@ -85,7 +89,7 @@ export component Admin_Profile inherits Rectangle {
     background: white;
 
     HorizontalLayout {
-        z: 0; // Ensures base layout stays below the popup
+        z: 0;
 
         // --- SIDEBAR MENU ---
         Selection_menu := Rectangle {
@@ -112,7 +116,7 @@ export component Admin_Profile inherits Rectangle {
             Manage_ar_button := Rectangle {
                 width: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
                 height: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 250px * root.ui-scale; border-radius: 10px;
+                x: 10px * root.ui-scale; y: 230px * root.ui-scale; border-radius: 10px;
                 background: Manage_ar_button_touch_area.pressed ? #003d80 : (selected-menu-item == 1 ? #007bff : #64647a);
                 animate background, width, height { duration: 200ms; easing: ease-in-out; }
                 Text { text: "Academic Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
@@ -122,7 +126,7 @@ export component Admin_Profile inherits Rectangle {
             Manage_members_button := Rectangle {
                 width: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
                 height: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 350px * root.ui-scale; border-radius: 10px;
+                x: 10px * root.ui-scale; y: 310px * root.ui-scale; border-radius: 10px;
                 background: Manage_members_button_touch_area.pressed ? #003d80 : (selected-menu-item == 2 ? #007bff : #64647a);
                 animate background, width, height { duration: 200ms; easing: ease-in-out; }
                 Text { text: "Manage Members"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
@@ -132,7 +136,7 @@ export component Admin_Profile inherits Rectangle {
             Requesting_courses_button := Rectangle {
                 width: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
                 height: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 450px * root.ui-scale; border-radius: 10px;
+                x: 10px * root.ui-scale; y: 390px * root.ui-scale; border-radius: 10px;
                 background: Requesting_courses_button_touch_area.pressed ? #003d80 : (selected-menu-item == 3 ? #007bff : #64647a);
                 animate background, width, height { duration: 200ms; easing: ease-in-out; }
                 Text { text: "Course Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
@@ -142,17 +146,28 @@ export component Admin_Profile inherits Rectangle {
             Notifications_button := Rectangle {
                 width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
                 height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 550px * root.ui-scale; border-radius: 10px;
+                x: 10px * root.ui-scale; y: 470px * root.ui-scale; border-radius: 10px;
                 background: Notifications_button_touch_area.pressed ? #003d80 : (selected-menu-item == 4 ? #007bff : #64647a);
                 animate background, width, height { duration: 200ms; easing: ease-in-out; }
                 Text { text: "Notifications"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
                 Notifications_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 4; } }
             }
 
+            // --- NEW END SEMESTER BUTTON ---
+            End_Semester_button := Rectangle {
+                width: End_Semester_touch_area.has-hover ? 245px * root.ui-scale : 240px * root.ui-scale;
+                height: End_Semester_touch_area.has-hover ? 63px * root.ui-scale : 60px * root.ui-scale;
+                x: 10px * root.ui-scale; y: 550px * root.ui-scale; border-radius: 10px;
+                background: End_Semester_touch_area.pressed ? #7a0000 : #c0392b;
+                animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "END SEMESTER"; font-size: 21px * root.ui-scale; font-weight: 800; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                End_Semester_touch_area := TouchArea { clicked => { root.show_end_sem_confirmation = true; } }
+            }
+
             Logout_icon := Image {
                 source: @image-url("exit.svg");
                 width: 50px * root.ui-scale; height: 50px * root.ui-scale;
-                x: 20px * root.ui-scale; y: 680px * root.ui-scale;
+                x: 20px * root.ui-scale; y: 695px * root.ui-scale;
                 colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000);
                 animate colorize { duration: 200ms; easing: ease-in-out; }
                 Logout_touch_area := TouchArea {
@@ -168,7 +183,6 @@ export component Admin_Profile inherits Rectangle {
             width: parent.width - Selection_menu.width;
             height: parent.height;
 
-            // TAB 0: Profile
             if (selected-menu-item == 0): AD_Profile {
                 width: 100%; height: 100%;
                 ui-scale: max(1 , min(root.ui-scale, self.width / 1020px));
@@ -179,7 +193,6 @@ export component Admin_Profile inherits Rectangle {
                 change_picture => { root.change_picture(); }
             }
 
-            // TAB 1: Academic Requests
             if (selected-menu-item == 1) : ScrollView {
                 width: 100%; height: 100%;
                 VerticalLayout {
@@ -203,7 +216,6 @@ export component Admin_Profile inherits Rectangle {
                 }
             }
 
-            // TAB 3: Course Requests (Accept/Refuse)
             if (selected-menu-item == 3): Accept_and_Refuse_Courses {
                 width: 100%; height: 100%;
                 ui-scale: min(root.ui-scale, self.width / 1020px);
@@ -231,11 +243,62 @@ export component Admin_Profile inherits Rectangle {
     }
 
     // ==========================================
+    // END SEMESTER CONFIRMATION POPUP (2-Step)
+    // ==========================================
+    if (root.show_end_sem_confirmation) : Rectangle {
+        z: 101;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        TouchArea { } // Blocks input below
+
+        Rectangle {
+            width: 450px * root.ui-scale;
+            height: 250px * root.ui-scale;
+            background: #d0d2d6;
+            border-radius: 15px;
+            border-color: #727275;
+            border-width: 2px;
+
+            Text {
+                text: "You are about to end the semester.\nAre you sure?";
+                font-size: 18px * root.ui-scale;
+                font-weight: 700;
+                color: #ff0000;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                y: 60px * root.ui-scale;
+            }
+
+            Yes_button_sem := Rectangle {
+                width: 120px * root.ui-scale; height: 45px * root.ui-scale;
+                x: 90px * root.ui-scale; y: 160px * root.ui-scale;
+                border-radius: 10px;
+                background: Yes_touch_sem.pressed ? #5a0000 : #c0392b;
+                Text { text: "Confirm"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                Yes_touch_sem := TouchArea {
+                    clicked => {
+                        root.show_end_sem_confirmation = false;
+                        root.admin_end_semester();
+                    }
+                }
+            }
+
+            No_button_sem := Rectangle {
+                width: 120px * root.ui-scale; height: 45px * root.ui-scale;
+                x: 240px * root.ui-scale; y: 160px * root.ui-scale;
+                border-radius: 10px;
+                background: No_touch_sem.pressed ? #2c3e50 : #34495e;
+                Text { text: "Cancel"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
+                No_touch_sem := TouchArea { clicked => { root.show_end_sem_confirmation = false; } }
+            }
+        }
+    }
+
+    // ==========================================
     // LOGOUT CONFIRMATION POPUP
     // ==========================================
     if (root.Logout_value == 1) : Rectangle {
-        z: 100; // <--- THIS FIXES THE INVISIBLE POPUP BUG
-
+        z: 100;
         width: 400px * root.ui-scale;
         height: 200px * root.ui-scale;
         x: (root.width - self.width) / 2;

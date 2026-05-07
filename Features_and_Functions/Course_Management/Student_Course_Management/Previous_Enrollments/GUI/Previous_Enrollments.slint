@@ -1,67 +1,43 @@
 import { ScrollView } from "std-widgets.slint";
-import { CourseInfo } from "../../../../Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
+import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
 export component Previous_Enrollments inherits Rectangle {
-    in-out property <float> ui-scale: 1.0;
-    in-out property <[CourseInfo]> passed_courses;
-    in-out property <[CourseInfo]> failed_courses ;
-    in-out property <string> student_name: "";
-    in-out property <string> student_id: "";
-    in-out property <string> student_gpa: "";
-    background: #fdfdfd;
+    in property <[CourseInfo]> passed_courses;
+    in property <[CourseInfo]> failed_courses;
+    in property <string> student_name;
+    in property <string> student_id;
+    in property <string> student_gpa;
+    in property <float> ui-scale: 1.0;
 
-    VerticalLayout {
-        padding: 50px * ui-scale;
-        spacing: 15px * ui-scale;
+    HorizontalLayout {
+        spacing: 20px * root.ui-scale;
+        padding: 20px * root.ui-scale;
 
-       // Display the Student Info at the top
-        HorizontalLayout {
-        Text { text: "Academic History for: " + root.student_name; font-size: 20px; font-weight: 700; color : #000000; vertical-alignment: center; }
-        Rectangle { width: 20px; } // Spacer
-        Text { text: "ID: " + root.student_id; color: #000000; vertical-alignment: center; font-weight: 700; font-size: 19px * ui-scale;}
-        }
-        Text { text: "Cumulative GPA: " + root.student_gpa; color: #1a237e; font-weight: 700;font-size: 18px * ui-scale; }
-
-        Text { text: "Passed Courses"; color: #2e7d32; font-weight: 700; font-size: 18px * ui-scale; }
-        Rectangle {
-            background: #f1f8e9; border-radius: 8px; height: 150px;
-
-                VerticalLayout {
-                    padding: 10px; spacing: 5px;
-
-                    for course in root.passed_courses: Rectangle {
-                        height: 60px; // Force a large height to see if they appear
-                        background: white;
-                        border-width: 2px;
-                        border-color: green; // Green border so we can see the box
-
-                        Text {
-                            text: "DEBUG: " + course.course_name; // Add DEBUG text
-                            color: black;
-                        }
-                    }
-                }
-
-        }
-
-        Text { text: "Failed / Retake Required"; color: #c62828; font-weight: 700; font-size: 18px * ui-scale; }
-        Rectangle {
-            background: #ffebee; border-radius: 8px; height: 150px;
+        VerticalLayout {
+            spacing: 10px * root.ui-scale;
+            Text { text: "Passed Courses"; color: black; font-weight: 700; font-size: 16px * root.ui-scale; horizontal-alignment: center; }
             ScrollView {
                 VerticalLayout {
-                    padding: 10px; spacing: 5px;
+                    spacing: 5px * root.ui-scale;
+                    for course in root.passed_courses: Rectangle {
+                        height: 40px * root.ui-scale; background: #00ff00 ; border-radius: 4px;
+                        Text { text: course.course_code; color: black; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                }
+            }
+        }
 
-                        for course in root.failed_courses: Rectangle {
-                            height: 60px; // Force a large height to see if they appear
-                            background: white;
-                            border-width: 2px;
-                            border-color: red; // Red border so we can see the box
+        VerticalLayout {
+            spacing: 10px * root.ui-scale;
+            Text { text: "Failed Courses"; color: black; font-weight: 700; font-size: 16px * root.ui-scale; horizontal-alignment: center; }
+            ScrollView {
+                VerticalLayout {
+                    spacing: 5px * root.ui-scale;
+                    for course in root.failed_courses: Rectangle {
+                        height: 40px * root.ui-scale; border-color: #F44336; border-radius: 4px;
+                        Text { text: course.course_code; color: black; horizontal-alignment: center; vertical-alignment: center; }
 
-                            Text {
-                                text: "DEBUG: " + course.course_name; // Add DEBUG text
-                                color: black;
-                            }
-                        }
+                    }
                 }
             }
         }

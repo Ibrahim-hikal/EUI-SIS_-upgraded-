@@ -65,7 +65,7 @@ export component Main_App inherits Window {
     in-out property <bool> Submit_Button_Pressed: false; in-out property <bool> show_warning: false; in-out property <bool> no_course_requests; in-out property <bool> is_next_student_available; in-out property <bool> is_previous_student_available;
 
     out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
-    callback check_credentials(string, string, int); callback change_picture(); callback logout(); callback admin_next_student(); callback admin_previous_student(); callback admin_submit_decisions();
+    callback admin_end_semester(); callback check_credentials(string, string, int); callback change_picture(); callback logout(); callback admin_next_student(); callback admin_previous_student(); callback admin_submit_decisions();
 
     min-height: 600px; min-width: 1024px; preferred-height: 768px; preferred-width: 1024px; max-height: 840px; max-width: 1300px; title: "EUI - SIS"; background: #f0f0f0;
 
@@ -142,6 +142,7 @@ export component Main_App inherits Window {
             pending_excuses <=> root.pending_excuses;
             admin_handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); }
             admin_handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); }
+            admin_end_semester => { root.admin_end_semester(); }
         if (active_panel == 1 && root.student_active_tab == 2) : Rectangle {
             x: 270px * root.global_scale; width: parent.width - self.x; height: parent.height; background: white;
             ScrollView {

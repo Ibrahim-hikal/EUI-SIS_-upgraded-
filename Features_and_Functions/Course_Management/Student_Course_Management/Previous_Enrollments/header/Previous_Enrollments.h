@@ -1,16 +1,14 @@
-//------------Previous Enrollments .h File-------------
-
-#ifndef PROJECT_PREVIOUS_ENROLLMENTS_H
-#define PROJECT_PREVIOUS_ENROLLMENTS_H
-
+#pragma once
 #include <string>
+#include <vector>
+#include "main.h"
 
-class Main_App;
-
-class EnrollmentManager {
+class PreviousEnrollments {
 public:
+    PreviousEnrollments(const std::string& csv_file);
+    void load_student_data(Main_App* ui, const std::string& student_id);
 
-    static void loadStudentData(const std::string& targetID, Main_App* ui);
+private:
+    std::string csv_file_path;
+    std::vector<std::string> getCourses(const std::string& course_str);
 };
-
-#endif //PROJECT_PREVIOUS_ENROLLMENTS_H
