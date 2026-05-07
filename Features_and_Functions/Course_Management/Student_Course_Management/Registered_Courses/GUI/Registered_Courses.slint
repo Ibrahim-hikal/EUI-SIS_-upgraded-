@@ -81,7 +81,8 @@ export component Registered_Courses_Panel inherits Rectangle {
                                     animate y { duration: 300ms; easing: ease-in-out; }
 
                                     Text {
-                                        text: "Overall Grade";
+                                        // Update this line:
+                                        text: course.has_final_grade ? "Overall Grade" : "Course Work Grade";
                                         horizontal-alignment: center;
                                         font-size: 14px * root.ui-scale;
                                         color: #e65100;
@@ -114,7 +115,7 @@ export component Registered_Courses_Panel inherits Rectangle {
                                     Text {
                                         text: course.detailed_grades;
                                         horizontal-alignment: center;
-                                        font-size: 12px * root.ui-scale;
+                                        font-size: 15px * root.ui-scale;
                                         color: #e65100;
                                         wrap: word-wrap;
                                     }

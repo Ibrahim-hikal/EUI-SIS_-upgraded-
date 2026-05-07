@@ -12,8 +12,7 @@ private:
     std::string student_id;
     std::vector<std::string> parse_csv_line(const std::string& line) const;
     std::string calculate_total_attendance(const std::string& course_code) const;
-    std::string calculate_total_grade(const std::string& course_code, std::string& out_details) const;
-
+    std::string calculate_total_grade(const std::string& course_code, std::string& out_details, bool& out_has_final) const;
 public:
     explicit RegisteredCoursesManager(std::string id);
     slint::SharedVector<CourseInfo> get_registered_courses_with_attendance() const;

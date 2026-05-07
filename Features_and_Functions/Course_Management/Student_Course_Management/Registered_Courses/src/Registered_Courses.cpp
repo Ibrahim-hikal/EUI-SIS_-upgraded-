@@ -39,13 +39,14 @@ string RegisteredCoursesManager::calculate_total_attendance(const string& course
                     if (cols[col_idx] == "1") present_count++;
                 }
             }
-            return "Present: " + to_string(present_count) + " / " + to_string(total_recorded_weeks) + " weeks";
+            return "" + to_string(present_count) + " / " + to_string(total_recorded_weeks) + " weeks";
         }
     }
-    return "0 / 0 weeks";
+    return "No Record";
 }
 
-string RegisteredCoursesManager::calculate_total_grade(const string& course_code, string& out_details) const {
+string RegisteredCoursesManager::calculate_total_grade(const string& course_code, string& out_details, bool& out_has_final) const {
+    out_has_final = false;
     ifstream file("Databases/Courses/" + course_code + "/Grades.csv");
     if (!file.is_open()) return "No Data";
 
@@ -53,7 +54,7 @@ string RegisteredCoursesManager::calculate_total_grade(const string& course_code
     getline(file, line); // Skip header
 
     int max_weights[] = {0, 5, 5, 5, 5, 25, 15, 40};
-    string labels[] = {"", "Quiz 1", "Quiz 2", "Ass 1", "Ass 2", "Midterm", "Project", "Final"};
+    string labels[] = {"", "Quiz 1", "Quiz 2", "Assignment 1", "Assignment 2", "Midterm", "Project", "Final"};
 
     auto format_num = [](double val) {
         string str = to_string(val);
@@ -75,6 +76,9 @@ string RegisteredCoursesManager::calculate_total_grade(const string& course_code
                         double val = stod(cols[i]);
                         current_total += val;
                         current_max += max_weights[i];
+
+                        if (i == 7) out_has_final = true;
+
                         if (!details.empty()) details += "\n";
                         details += labels[i] + ": " + cols[i] + "/" + to_string(max_weights[i]);
                     } catch (...) {}
@@ -82,7 +86,7 @@ string RegisteredCoursesManager::calculate_total_grade(const string& course_code
             }
 
             out_details = details.empty() ? "No grades entered." : details;
-            if (current_max == 0) return "0 / 0";
+            if (current_max == 0) return "No Grades Entered";
 
             string overall = format_num(current_total) + " / " + format_num(current_max);
             if (!cols[9].empty() && cols[9] != " ") overall += " (" + cols[9] + ")";
@@ -143,7 +147,9 @@ slint::SharedVector<CourseInfo> RegisteredCoursesManager::get_registered_courses
 
         // Inject the attendance calculation
         string details_str;
-        info.grade_summary = slint::SharedString(calculate_total_grade(code, details_str));
+        bool has_final = false;
+        info.grade_summary = slint::SharedString(calculate_total_grade(code, details_str, has_final));
+        info.has_final_grade = has_final;
         info.attendance_summary = slint::SharedString(calculate_total_attendance(code));
         info.detailed_grades = slint::SharedString(details_str);
         result_list.push_back(info);
