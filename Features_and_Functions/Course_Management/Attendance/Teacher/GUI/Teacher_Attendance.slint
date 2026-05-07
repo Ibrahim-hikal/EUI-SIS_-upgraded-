@@ -1,72 +1,60 @@
-import { ComboBox, ScrollView, CheckBox, Button } from "std-widgets.slint";
+import { ScrollView, CheckBox } from "std-widgets.slint";
 import { StudentAttendanceData } from "../../Shared/GUI/Shared_Structs.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
-component CustomComboBox inherits Rectangle {
+// Import your custom dropdown!
+import { CustomDropdown } from "../../../../Shared_GUI/Custom_dropdown.slint";
+
+// ==========================================
+// COURSE DROPDOWN (Mapped for CourseInfo)
+// ==========================================
+component CourseDropdown inherits Rectangle {
     in property <[CourseInfo]> model;
-    in-out property <string> current-value;
+    in-out property <string> current_value: "Select...";
     in property <float> ui-scale: 1.0;
+    property <bool> is_open: false;
     callback selected(string);
 
-    property <bool> is_open: false;
-
-    width: 250px * root.ui-scale;
-    height: 40px * root.ui-scale;
+    height: 45px * ui-scale;
+    clip: false;
+    z: is_open ? 1000 : 1;
 
     Rectangle {
-        width: 100%;
-        height: 100%;
-        background: #FFFFFF;
-        border-color: CourseSelectorTouchArea.has-hover? #007bff: #707070;
-        border-width: 2px;
-        border-radius: 4px * root.ui-scale;
-
-        Text {
-            text: root.current-value;
-            color: black;
-            vertical-alignment: center;
-            x: 15px * root.ui-scale;
-            font-weight: 600;
+        width: 100%; height: 100%;
+        background: #FFFFFF; border-radius: 6px * ui-scale; border-width: 2px;
+        border-color: drop_touch.has-hover ? #007bff : #727275;
+        HorizontalLayout {
+            padding-left: 15px * ui-scale; padding-right: 15px * ui-scale;
+            Text { text: root.current_value; color: black; vertical-alignment: center; font-size: 16px * ui-scale; font-weight: 600; }
+            Text { text: root.is_open ? "▲" : "▼"; color: #555; horizontal-alignment: right; vertical-alignment: center; }
         }
-
-        Text {
-            text: "v";
-            color: black;
-            vertical-alignment: center;
-            horizontal-alignment: right;
-            x: parent.width - 20px * root.ui-scale;
-        }
-
-        CourseSelectorTouchArea:= TouchArea{
-            clicked => { root.is_open = !root.is_open; }
-        }
+        drop_touch := TouchArea { clicked => { root.is_open = !root.is_open; } }
     }
 
-    if root.is_open: Rectangle {
-        y: root.height + 2px;
-        width: 100%;
-        background: #FFFFFF;
-        border-color: #007bff;
-        border-width: 2px;
-        border-radius: 4px * root.ui-scale;
+    if is_open : TouchArea {
+        x: -5000px; y: -5000px; width: 10000px; height: 10000px; z: 900;
+        clicked => { root.is_open = false; }
+    }
 
-        VerticalLayout {
-            for item in root.model: Rectangle {
-                height: 40px * root.ui-scale;
-                background: item_touch.has-hover ? #e0e0e0 : #FFFFFF;
-
-                Text {
-                    text: item.course_code;
-                    color: black;
-                    vertical-alignment: center;
-                    x: 15px * root.ui-scale;
-                }
-
-                item_touch := TouchArea {
+    if is_open : Rectangle {
+        x: 0; y: parent.height + 4px; width: parent.width;
+        height: Math.min(160px * ui-scale, root.model.length * 40px * ui-scale);
+        background: white; border-radius: 6px * ui-scale; border-width: 2px; border-color: #007bff;
+        clip: true; z: 1100;
+        ScrollView {
+            width: 100%; height: 100%;
+            VerticalLayout {
+                spacing: 0; alignment: start;
+                for item in root.model : TouchArea {
+                    height: 40px * ui-scale;
                     clicked => {
-                        root.current-value = item.course_code;
+                        root.current_value = item.course_code;
                         root.is_open = false;
                         root.selected(item.course_code);
+                    }
+                    Rectangle {
+                        height: 100%; background: parent.has-hover ? #e9ecef : white;
+                        Text { x: 15px * ui-scale; text: item.course_code; color: black; vertical-alignment: center; font-size: 14px * ui-scale; }
                     }
                 }
             }
@@ -74,112 +62,101 @@ component CustomComboBox inherits Rectangle {
     }
 }
 
+// ==========================================
+// MAIN PANEL (Fixed with Absolute Positioning)
+// ==========================================
 export component Teacher_Attendance_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
     in property <[CourseInfo]> available_courses;
     in property <[string]> available_weeks: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"];
     in property <[StudentAttendanceData]> students_data;
 
-    out property <string> selected_course: "";
+    out property <string> selected_course: "Select Course";
     in-out property <int> selected_week: 1;
 
     callback load_students(string, int);
     callback save_attendance([StudentAttendanceData], string, int);
 
-
-
     background: white;
 
-    VerticalLayout {
-        padding: 20px * root.ui-scale;
+    // 1. TITLE
+    Text {
+        text: "Manage Course Attendance";
+        color:black; font-size: 24px * root.ui-scale; font-weight: 700;
+        x: 20px * root.ui-scale;
+        y: 20px * root.ui-scale;
+    }
+
+    // 2. SCROLLVIEW TABLE (Z-Index: 0)
+    ScrollView {
+        x: 20px * root.ui-scale;
+        y: 130px * root.ui-scale;
+        width: parent.width - 40px * root.ui-scale;
+        height: parent.height - 230px * root.ui-scale;
+        z: 0;
+
+        VerticalLayout {
+            spacing: 10px * root.ui-scale;
+            for student[i] in students_data: Rectangle {
+                height: 50px * root.ui-scale;
+                background: #f4f6f9; border-radius: 8px * root.ui-scale;
+                HorizontalLayout {
+                    padding: 10px * root.ui-scale;
+                    spacing: 20px * root.ui-scale;
+
+                    Text { text: student.id; color:black; width: 100px * root.ui-scale; vertical-alignment: center; font-weight: 600; }
+                    Text { text: student.name; color:black; width: 200px * root.ui-scale; vertical-alignment: center; }
+                    Rectangle { }
+                    Text { text: "Present:"; vertical-alignment: center; color: #666; }
+                    CheckBox { checked: student.present; toggled => { student.present = !student.present; } }
+                }
+            }
+        }
+    }
+
+    // 3. SUBMIT BUTTON (Z-Index: 0)
+    Submit_Button := Rectangle {
+        width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
+        height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        y: parent.height - 85px * root.ui-scale;
+        background: Submit_Button_Touch.pressed? #00ff44 : #218838;
+        border-radius: 15px * root.ui-scale;
+        animate width, height, background { duration: 150ms; easing: ease-in; }
+
+        Text { text: "Submit"; color: black; font-size: 22px * root.ui-scale; }
+        Submit_Button_Touch:= TouchArea {
+            clicked=>{root.save_attendance(root.students_data,root.selected_course,root.selected_week);}
+        }
+    }
+
+    // 4. DROPDOWNS (Z-Index: 100 - Will now perfectly float over everything else!)
+    HorizontalLayout {
+        x: 20px * root.ui-scale;
+        y: 70px * root.ui-scale;
         spacing: 20px * root.ui-scale;
+        height: 45px * root.ui-scale;
+        z: 100;
 
-        Text { text: "Manage Course Attendance"; color:black; font-size: 24px * root.ui-scale; font-weight: 700; }
-
-        HorizontalLayout {
-            spacing: 20px * root.ui-scale;
-            height: 40px * root.ui-scale;
-            z: 100; // Keep dropdown menu on top
-
-            // FIX 2: Replaced the standard ComboBox with our CustomComboBox for courses
-            CustomComboBox {
-                model: available_courses;
-                current-value: root.selected_course;
-                ui-scale: root.ui-scale;
-                selected(val) => {
-                    root.selected_course = val;
-                    root.load_students(val, root.selected_week);
-                }
-            }
-
-            // Standard ComboBox is fine here because available_weeks is an array of strings
-            ComboBox {
-                model: available_weeks;
-                current-value: "1";
-                selected(val) => {
-                    root.selected_week = val.to-float();
-                    root.load_students(root.selected_course, root.selected_week);
-                }
+        CourseDropdown {
+            width: 250px * root.ui-scale;
+            model: available_courses;
+            current_value: root.selected_course;
+            ui-scale: root.ui-scale;
+            selected(val) => {
+                root.selected_course = val;
+                root.load_students(val, root.selected_week);
             }
         }
 
-        ScrollView {
-            z: 0;
-            VerticalLayout {
-                spacing: 10px * root.ui-scale;
-                for student[i] in students_data: Rectangle {
-                    height: 50px * root.ui-scale;
-                    background: #f4f6f9; border-radius: 8px * root.ui-scale;
-                    HorizontalLayout {
-                        padding: 10px * root.ui-scale;
-                        spacing: 20px * root.ui-scale;
-
-                        Text {
-                            text: student.id;
-                            color:black;
-                            width: 100px * root.ui-scale;
-                            vertical-alignment: center;
-                            font-weight: 600;
-                        }
-
-                        Text {
-                            text: student.name;
-                            color:black;
-                            width: 200px * root.ui-scale;
-                            vertical-alignment: center;
-                        }
-
-                        Rectangle { }
-
-                        Text {
-                            text: "Present:";
-                            vertical-alignment: center;
-                            color: #666;
-                        }
-
-                        CheckBox {
-                            checked: student.present;
-                            toggled => { student.present = !student.present; }
-                        }
-                    }
-                }
-            }
-        }
-
-        Submit_Button := Rectangle {
-            width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
-            height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-            x: (parent.width - self.width) / 2;
-            background: Submit_Button_Touch.pressed? #00ff44 : #218838;
-            border-radius: 15px * root.ui-scale;
-            animate width, height, background { duration: 150ms; easing: ease-in; }
-
-            Text { text: "Submit";
-                   color: black;
-                   font-size: 22px * root.ui-scale;
-            }
-            Submit_Button_Touch:= TouchArea {
-                clicked=>{root.save_attendance(root.students_data,root.selected_course,root.selected_week);}
+        CustomDropdown {
+            width: 150px * root.ui-scale;
+            model: available_weeks;
+            current_value: "1";
+            ui-scale: root.ui-scale;
+            selected(val) => {
+                root.selected_week = val.to-float();
+                root.load_students(root.selected_course, root.selected_week);
             }
         }
     }
