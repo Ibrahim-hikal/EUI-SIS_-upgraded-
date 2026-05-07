@@ -48,6 +48,16 @@ add_executable(main_app
         Features_and_Functions/Schedule/Teacher_Schedule/src/Teacher_Schedule_Manager.cpp
         Features_and_Functions/Schedule/Teacher_Schedule/header/Teacher_Schedule_Manager.h
 
+
+ Features_and_Functions/Manage_Members/Admin/Add_Student/src.cpp
+Features_and_Functions/Manage_Members/Admin/Add_Student/header.h
+
+Features_and_Functions/Manage_Members/Admin/Add_Teacher/src.cpp
+Features_and_Functions/Manage_Members/Admin/Add_Teacher/header.h
+
+Features_and_Functions/Manage_Members/Admin/Assign_Courses/src.cpp
+Features_and_Functions/Manage_Members/Admin/Assign_Courses/header.h
+
 )
 
 # 3. Add Slint files
