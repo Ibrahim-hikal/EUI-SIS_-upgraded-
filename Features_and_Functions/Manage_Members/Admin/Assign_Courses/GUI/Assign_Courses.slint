@@ -1,98 +1,102 @@
-import { Button, LineEdit } from "std-widgets.slint";
+import { CustomDropdown } from "../../../../Shared_GUI/Custom_dropdown.slint";
+
+component CustomLineEdit inherits Rectangle {
+    in-out property <string> text;
+    in property <string> placeholder;
+    in property <float> ui-scale: 1.0;
+    callback edited();
+
+    height: 45px * ui-scale; background: #FFFFFF; border-radius: 6px * ui-scale; border-width: 2px;
+    border-color: input.has-focus ? #007bff : #ced4da; animate border-color { duration: 150ms; }
+
+    input := TextInput {
+        width: parent.width - 30px * root.ui-scale; height: parent.height; x: 15px * root.ui-scale;
+        vertical-alignment: center; font-size: 16px * root.ui-scale; color: black; text <=> root.text; single-line: true;
+        edited => { root.edited(); }
+    }
+    if (root.text == "") : Text { x: 15px * root.ui-scale; text: root.placeholder; color: #6c757d; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+}
 
 export component AssignCoursesWindow inherits Rectangle {
-
-    // =========================
-    // Properties
-    // =========================
+    in property <float> ui-scale: 1.0;
 
     in-out property <string> teacher_email: "";
-    in-out property <string> course_name: "";
+    in-out property <string> course_code: "";
 
-    // =========================
-    // Callbacks
-    // =========================
+    // NEW DROPDOWN PROPERTIES
+    in-out property <string> l1_val: "None";
+    in-out property <string> l2_val: "None";
+    in-out property <string> t1_val: "None";
+    in-out property <string> t2_val: "None";
+    property <[string]> times: ["None", "Sunday 09:00-11:00", "Sunday 11:00-13:00", "Sunday 14:00-16:00", "Monday 09:00-11:00", "Monday 11:00-13:00", "Monday 14:00-16:00", "Tuesday 09:00-11:00", "Tuesday 11:00-13:00", "Tuesday 14:00-16:00", "Wednesday 09:00-11:00", "Wednesday 11:00-13:00", "Wednesday 14:00-16:00", "Thursday 09:00-11:00", "Thursday 11:00-13:00", "Thursday 14:00-16:00"];
 
-    callback assign_clicked(string, string);
-    callback close_clicked();
+    property <string> teacher_name: "";
+    property <string> course_name: "";
+    in property <string> status_message: "";
 
-    // =========================
-    // Window Style
-    // =========================
+    callback check_teacher(string) -> string;
+    callback check_course(string) -> string;
+    callback submit_clicked(string, string, string, string, string, string); // Now takes 6 arguments
 
-    width: 400px;
-    height: 350px;
+    width: 600px * root.ui-scale; height: 680px * root.ui-scale; // Taller for the dropdowns
+    background: #f8f9fa; border-radius: 12px * root.ui-scale; border-width: 2px; border-color: #007bff;
 
-    background: #f8f9fa;
-
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: #007bff;
-
-    // =========================
-    // Layout
-    // =========================
+    property <bool> is_valid: root.teacher_name != "" && root.teacher_name != "Not Found" && root.course_name != "" && root.course_name != "Not Found";
 
     VerticalLayout {
+        padding: 30px * root.ui-scale; spacing: 20px * root.ui-scale;
 
-        padding: 25px;
-        spacing: 15px;
-
-        Text {
-            text: "Assign Course";
-            font-size: 24px;
-            font-weight: 700;
-            horizontal-alignment: center;
-            color: #007bff;
-        }
-
-        // =========================
-        // Input Fields
-        // =========================
-
-        LineEdit {
-            placeholder-text: "Teacher Email";
-            text <=> root.teacher_email;
-        }
-
-        LineEdit {
-            placeholder-text: "Course Name";
-            text <=> root.course_name;
-        }
-
-        Rectangle {
-            height: 15px;
-            background: transparent;
-        }
-
-        // =========================
-        // Buttons
-        // =========================
+        Text { text: "Assign Course & Schedule"; font-size: 26px * root.ui-scale; font-weight: 700; horizontal-alignment: center; color: #007bff; z: 1000; }
 
         HorizontalLayout {
-
-            spacing: 10px;
-
-            Button {
-
-                text: "Assign Course";
-                primary: true;
-
-                clicked => {
-
-                    root.assign_clicked(
-                        root.teacher_email,
-                        root.course_name
-                    );
-                }
+            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 200;
+            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Teacher Email"; text <=> root.teacher_email; edited => { root.teacher_name = root.check_teacher(root.teacher_email); } }
+            Rectangle { border-radius: 6px * root.ui-scale; background: #e9ecef; border-width: 1px; border-color: #ced4da;
+                Text { text: root.teacher_name == "" ? "Teacher Name..." : root.teacher_name; color: root.teacher_name == "Not Found" ? red : (root.teacher_name == "" ? #6c757d : #28a745); font-weight: 600; horizontal-alignment: center; vertical-alignment: center; font-size: 14px * root.ui-scale; }
             }
+        }
 
-            Button {
+        HorizontalLayout {
+            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 190;
+            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Course Code"; text <=> root.course_code; edited => { root.course_name = root.check_course(root.course_code); } }
+            Rectangle { border-radius: 6px * root.ui-scale; background: #e9ecef; border-width: 1px; border-color: #ced4da;
+                Text { text: root.course_name == "" ? "Course Name..." : root.course_name; color: root.course_name == "Not Found" ? red : (root.course_name == "" ? #6c757d : #28a745); font-weight: 600; horizontal-alignment: center; vertical-alignment: center; font-size: 14px * root.ui-scale; }
+            }
+        }
 
-                text: "Cancel";
+        Text { text: "Lecture Slots"; font-size: 16px * root.ui-scale; font-weight: 600; color: #333; z: 180; }
+        HorizontalLayout {
+            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 150;
+            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l1_val; selected(val) => { root.l1_val = val; } } }
+            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l2_val; selected(val) => { root.l2_val = val; } } }
+        }
 
+        Text { text: "Tutorial Slots"; font-size: 16px * root.ui-scale; font-weight: 600; color: #333; z: 140; }
+        HorizontalLayout {
+            spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 100;
+            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t1_val; selected(val) => { root.t1_val = val; } } }
+            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t2_val; selected(val) => { root.t2_val = val; } } }
+        }
+
+        if (root.status_message != "") : Rectangle {
+            height: 70px * root.ui-scale; background: #d4edda; border-radius: 8px * root.ui-scale; border-width: 2px; border-color: #c3e6cb; z: 50;
+            Text { text: root.status_message; color: #155724; font-size: 15px * root.ui-scale; font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
+        }
+
+        Rectangle { vertical-stretch: 1; background: transparent; z: 10; }
+
+        Rectangle {
+            height: 50px * root.ui-scale; z: 5;
+            background: root.is_valid ? (submit_touch.pressed ? #004a99 : (submit_touch.has-hover ? #0056b3 : #007bff)) : #6c757d;
+            border-radius: 8px * root.ui-scale; animate background { duration: 150ms; }
+            Text { text: "Assign Course"; color: white; font-weight: 600; font-size: 16px * root.ui-scale; horizontal-alignment: center; vertical-alignment: center; }
+            submit_touch := TouchArea {
                 clicked => {
-                    root.close_clicked();
+                    if (root.is_valid) {
+                        root.submit_clicked(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val);
+                        root.teacher_email = ""; root.course_code = ""; root.teacher_name = ""; root.course_name = "";
+                        root.l1_val = "None"; root.l2_val = "None"; root.t1_val = "None"; root.t2_val = "None";
+                    }
                 }
             }
         }

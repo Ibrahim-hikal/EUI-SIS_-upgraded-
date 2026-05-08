@@ -7,9 +7,11 @@ using namespace std;
 
 class Add_Teacher {
 public:
-    static void add_teacher(
-        const string& name,
-        const string& email
+    // Now accepts first name, last name, and password, and returns a success message
+    static string add_teacher(
+        const string& first_name,
+        const string& last_name,
+        const string& password
     );
 };
 

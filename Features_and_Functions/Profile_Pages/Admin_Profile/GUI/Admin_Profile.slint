@@ -1,73 +1,49 @@
-import { Accept_and_Refuse_Courses } from "../../../Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/GUI/Accept_and_Refuse_Courses.slint";
-import { AD_Profile } from "Admin_Profile_Sub.slint";
 import { ScrollView } from "std-widgets.slint";
-import { AddStudentWindow } from "../../../Manage_Members/Admin/Add_Students/GUI/Add_Students.slint";
+import { AD_Profile } from "Admin_Profile_Sub.slint";
+import { Accept_and_Refuse_Courses } from "../../../Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/GUI/Accept_and_Refuse_Courses.slint";
 import { AssignCoursesWindow } from "../../../Manage_Members/Admin/Assign_Courses/GUI/Assign_Courses.slint";
 import { AddTeacherWindow } from "../../../Manage_Members/Admin/Add_Teachers/GUI/Add_Teachers.slint";
-// Imports for Academic Requests
 import { Admin_Course_Withdrawal, WithdrawalRequest } from "../../../Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
 import { Admin_Attendance_Excuses, ExcuseRequest } from "../../../Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
+import { AddStudentWindow } from "../../../Manage_Members/Admin/Add_Students/GUI/Add_Students.slint";
 
 export component Admin_Profile inherits Rectangle {
-    // ==========================================
-    // PROPERTIES & CALLBACKS
-    // ==========================================
-
-    // --- UI Scale & Core Navigation ---
     in property <float> assigned_scale: 1.0;
     in property <float> ui-scale: assigned_scale;
     property <int> selected-menu-item: 0;
     in-out property <int> active_tab <=> selected-menu-item;
     in-out property <int> Logout_value: 0;
     callback Logout;
-
-    // --- End Semester Logic ---
     property <bool> show_end_sem_confirmation: false;
     callback admin_end_semester();
-
-    // --- Profile Data ---
-    in-out property <string> User_name;
-    in-out property <image> User_profile_pic;
-    in-out property <string> User_email;
-    in-out property <string> admin_position;
+    in-out property <string> User_name; in-out property <image> User_profile_pic; in-out property <string> User_email; in-out property <string> admin_position;
     callback change_picture();
+    in-out property <[WithdrawalRequest]> pending_withdrawals; in-out property <[ExcuseRequest]> pending_excuses;
+    callback admin_handle_withdrawal(string, string, bool); callback admin_handle_excuse(string, string, string, bool);
 
-    // --- Academic Requests (Withdrawals & Excuses) ---
-    in-out property <[WithdrawalRequest]> pending_withdrawals;
-    in-out property <[ExcuseRequest]> pending_excuses;
-    callback admin_handle_withdrawal(string, string, bool);
-    callback admin_handle_excuse(string, string, string, bool);
+    // ---> ADD STUDENT PROPERTIES <---
+    in property <string> add_student_status_message: "";
+    in property <string> next_student_id: "Loading...";
+    callback add_student_submit(string, string, string);
 
-    // --- Accept & Refuse Courses Data ---
-    in-out property <string> student_id;
-    in-out property <string> student_name;
-    in-out property <string> faculty;
+    // ---> MANAGE MEMBERS SUB-MENU & TEACHER PROPERTIES <---
+    property <int> MM_selected: 0; // 0=Student, 1=Teacher, 2=Courses
+    in property <string> add_teacher_status_message: "";
+    callback add_teacher_submit(string, string, string);
 
-    in-out property <bool> course1_accept_button_pressed: false;
-    in-out property <bool> course2_accept_button_pressed: false;
-    in-out property <bool> course3_accept_button_pressed: false;
-    in-out property <bool> course4_accept_button_pressed: false;
-    in-out property <bool> course5_accept_button_pressed: false;
-
-    in-out property <bool> course1_decline_button_pressed: false;
-    in-out property <bool> course2_decline_button_pressed: false;
-    in-out property <bool> course3_decline_button_pressed: false;
-    in-out property <bool> course4_decline_button_pressed: false;
-    in-out property <bool> course5_decline_button_pressed: false;
-
+    in-out property <string> student_id; in-out property <string> student_name; in-out property <string> faculty;
+    in-out property <bool> course1_accept_button_pressed: false; in-out property <bool> course2_accept_button_pressed: false; in-out property <bool> course3_accept_button_pressed: false; in-out property <bool> course4_accept_button_pressed: false; in-out property <bool> course5_accept_button_pressed: false;
+    in-out property <bool> course1_decline_button_pressed: false; in-out property <bool> course2_decline_button_pressed: false; in-out property <bool> course3_decline_button_pressed: false; in-out property <bool> course4_decline_button_pressed: false; in-out property <bool> course5_decline_button_pressed: false;
     in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day; in-out property <string> c1_t_slot;
     in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot; in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
     in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day; in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
     in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
     in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
-
     in-out property <bool> Submit_Button_Pressed: false;
     in-out property <bool> show_warning: false;
     in-out property <bool> no_course_requests: false;
     in-out property <bool> is_next_student_available: false;
     in-out property <bool> is_previous_student_available;
-    in-out property <bool> is_submitted: false;
-
     callback submit_decisions();
     callback next_student();
     callback previous_student();
@@ -77,280 +53,144 @@ export component Admin_Profile inherits Rectangle {
     callback admin_previous_student();
     callback admin_submit_decisions();
 
-    // ==========================================
-    // WINDOW SETUP
-    // ==========================================
-    min-height: 600px;
-    min-width: 1200px;
-    preferred-height: 768px;
-    preferred-width: 1200px;
-    max-height: 840px;
-    max-width: 1300px;
-    background: white;
+    callback check_teacher_email(string) -> string;
+    callback check_assign_course(string) -> string;
+    callback assign_course_submit(string, string, string, string, string, string);
+    in property <string> assign_course_status_message: "";
+
+
+    min-height: 600px; min-width: 1200px; preferred-height: 768px; preferred-width: 1200px; max-height: 840px; max-width: 1300px; background: white;
 
     HorizontalLayout {
         z: 0;
-
-        // --- SIDEBAR MENU ---
         Selection_menu := Rectangle {
-            width: 270px * root.ui-scale;
-            border-bottom-right-radius: 15px;
-            border-top-right-radius: 15px;
-            border-color: #727275;
-            border-width: 2px;
-            background: #d0d2d6;
-
+            width: 270px * root.ui-scale; border-bottom-right-radius: 15px; border-top-right-radius: 15px; border-color: #727275; border-width: 2px; background: #d0d2d6;
             University_logo := Image { source: @image-url("Uni-Logo.png"); width: 200px * root.ui-scale; height: 75px * root.ui-scale; x: 30px * root.ui-scale; y: 20px * root.ui-scale; }
             Seperator_line := Rectangle { width: 220px * root.ui-scale; height: 2px * root.ui-scale; x: 20px * root.ui-scale; y: 110px * root.ui-scale; background: #727275; }
 
-            Profile_button := Rectangle {
-                width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 150px * root.ui-scale; border-radius: 10px;
-                background: Profile_Button_touch_area.pressed ? #003d80 : (selected-menu-item == 0 ? #007bff : #64647a);
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "Profile"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Profile_Button_touch_area := TouchArea { clicked => { root.selected-menu-item = 0; } }
-            }
-
-            Manage_ar_button := Rectangle {
-                width: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 230px * root.ui-scale; border-radius: 10px;
-                background: Manage_ar_button_touch_area.pressed ? #003d80 : (selected-menu-item == 1 ? #007bff : #64647a);
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "Academic Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Manage_ar_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 1; } }
-            }
-
-            Manage_members_button := Rectangle {
-                width: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 310px * root.ui-scale; border-radius: 10px;
-                background: Manage_members_button_touch_area.pressed ? #003d80 : (selected-menu-item == 2 ? #007bff : #64647a);
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "Manage Members"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Manage_members_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 2; } }
-            }
-
-            Requesting_courses_button := Rectangle {
-                width: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 390px * root.ui-scale; border-radius: 10px;
-                background: Requesting_courses_button_touch_area.pressed ? #003d80 : (selected-menu-item == 3 ? #007bff : #64647a);
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "Course Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Requesting_courses_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 3; } }
-            }
-
-            Notifications_button := Rectangle {
-                width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 470px * root.ui-scale; border-radius: 10px;
-                background: Notifications_button_touch_area.pressed ? #003d80 : (selected-menu-item == 4 ? #007bff : #64647a);
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "Notifications"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Notifications_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 4; } }
-            }
-
-            // --- NEW END SEMESTER BUTTON ---
-            End_Semester_button := Rectangle {
-                width: End_Semester_touch_area.has-hover ? 245px * root.ui-scale : 240px * root.ui-scale;
-                height: End_Semester_touch_area.has-hover ? 63px * root.ui-scale : 60px * root.ui-scale;
-                x: 10px * root.ui-scale; y: 550px * root.ui-scale; border-radius: 10px;
-                background: End_Semester_touch_area.pressed ? #7a0000 : #c0392b;
-                animate background, width, height { duration: 200ms; easing: ease-in-out; }
-                Text { text: "END SEMESTER"; font-size: 21px * root.ui-scale; font-weight: 800; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                End_Semester_touch_area := TouchArea { clicked => { root.show_end_sem_confirmation = true; } }
-            }
-
-            Logout_icon := Image {
-                source: @image-url("exit.svg");
-                width: 50px * root.ui-scale; height: 50px * root.ui-scale;
-                x: 20px * root.ui-scale; y: 695px * root.ui-scale;
-                colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000);
-                animate colorize { duration: 200ms; easing: ease-in-out; }
-                Logout_touch_area := TouchArea {
-                    width: 50px * root.ui-scale; height: 50px * root.ui-scale;
-                    clicked => { root.Logout_value = 1; }
-                }
-            }
+            Profile_button := Rectangle { width: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 0 || Profile_Button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 150px * root.ui-scale; border-radius: 10px; background: Profile_Button_touch_area.pressed ? #003d80 : (selected-menu-item == 0 ? #007bff : #64647a); animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "Profile"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Profile_Button_touch_area := TouchArea { clicked => { root.selected-menu-item = 0; } } }
+            Manage_ar_button := Rectangle { width: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 1 || Manage_ar_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 230px * root.ui-scale; border-radius: 10px; background: Manage_ar_button_touch_area.pressed ? #003d80 : (selected-menu-item == 1 ? #007bff : #64647a); animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "Academic Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Manage_ar_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 1; } } }
+            Manage_members_button := Rectangle { width: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 2 || Manage_members_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 310px * root.ui-scale; border-radius: 10px; background: Manage_members_button_touch_area.pressed ? #003d80 : (selected-menu-item == 2 ? #007bff : #64647a); animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "Manage Members"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Manage_members_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 2; } } }
+            Requesting_courses_button := Rectangle { width: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 3 || Requesting_courses_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 390px * root.ui-scale; border-radius: 10px; background: Requesting_courses_button_touch_area.pressed ? #003d80 : (selected-menu-item == 3 ? #007bff : #64647a); animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "Course Requests"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Requesting_courses_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 3; } } }
+            Notifications_button := Rectangle { width: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 245px * root.ui-scale : 240px * root.ui-scale; height: (selected-menu-item == 4 || Notifications_button_touch_area.has-hover) ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 470px * root.ui-scale; border-radius: 10px; background: Notifications_button_touch_area.pressed ? #003d80 : (selected-menu-item == 4 ? #007bff : #64647a); animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "Notifications"; font-size: 23px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Notifications_button_touch_area := TouchArea { clicked => { root.selected-menu-item = 4; } } }
+            End_Semester_button := Rectangle { width: End_Semester_touch_area.has-hover ? 245px * root.ui-scale : 240px * root.ui-scale; height: End_Semester_touch_area.has-hover ? 63px * root.ui-scale : 60px * root.ui-scale; x: 10px * root.ui-scale; y: 550px * root.ui-scale; border-radius: 10px; background: End_Semester_touch_area.pressed ? #7a0000 : #c0392b; animate background, width, height { duration: 200ms; easing: ease-in-out; }
+                Text { text: "END SEMESTER"; font-size: 21px * root.ui-scale; font-weight: 800; color: white; horizontal-alignment: center; vertical-alignment: center; } End_Semester_touch_area := TouchArea { clicked => { root.show_end_sem_confirmation = true; } } }
+            Logout_icon := Image { source: @image-url("exit.svg"); width: 50px * root.ui-scale; height: 50px * root.ui-scale; x: 20px * root.ui-scale; y: 695px * root.ui-scale; colorize: Logout_touch_area.pressed ? #9c0c1b : (Logout_touch_area.has-hover ? #ff0000 : #000000); animate colorize { duration: 200ms; easing: ease-in-out; }
+                Logout_touch_area := TouchArea { width: 50px * root.ui-scale; height: 50px * root.ui-scale; clicked => { root.Logout_value = 1; } } }
         }
 
-        // --- CONTENT AREA ---
         Content_Area := Rectangle {
-            background: white;
-            width: parent.width - Selection_menu.width;
-            height: parent.height;
+            background: white; width: parent.width - Selection_menu.width; height: parent.height;
 
             if (selected-menu-item == 0): AD_Profile {
-                width: 100%; height: 100%;
-                ui-scale: max(1 , min(root.ui-scale, self.width / 1020px));
-                User_name <=> root.User_name;
-                User_profile_pic <=> root.User_profile_pic;
-                User_email <=> root.User_email;
-                admin_position <=> root.admin_position;
-                change_picture => { root.change_picture(); }
+                width: 100%; height: 100%; ui-scale: max(1, min(root.ui-scale, self.width / 1020px));
+                User_name <=> root.User_name; User_profile_pic <=> root.User_profile_pic; User_email <=> root.User_email; admin_position <=> root.admin_position; change_picture => { root.change_picture(); }
             }
 
-            if (selected-menu-item == 1) : ScrollView {
+            if (selected-menu-item == 1): ScrollView {
                 width: 100%; height: 100%;
                 VerticalLayout {
                     padding: 40px * root.ui-scale; spacing: 40px * root.ui-scale; alignment: start;
-                    HorizontalLayout {
-                        alignment: center;
-                        Admin_Course_Withdrawal {
-                            width: 800px * root.ui-scale; ui-scale: root.ui-scale;
-                            requests <=> root.pending_withdrawals;
-                            handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); }
-                        }
+                    HorizontalLayout { alignment: center; Admin_Course_Withdrawal { width: 800px * root.ui-scale; ui-scale: root.ui-scale; requests <=> root.pending_withdrawals; handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); } } }
+                    HorizontalLayout { alignment: center; Admin_Attendance_Excuses { width: 800px * root.ui-scale; ui-scale: root.ui-scale; requests <=> root.pending_excuses; handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); } } }
+                }
+            }
+
+            // ---> MANAGE MEMBERS SUB-MENU <---
+            if (selected-menu-item == 2): VerticalLayout {
+                width: 100%; height: 100%;
+                padding-top: 25px * root.ui-scale;
+                spacing: 20px * root.ui-scale;
+
+                // 1. The 3 Top Buttons
+                HorizontalLayout {
+                    height: 50px * root.ui-scale;
+                    spacing: 15px * root.ui-scale;
+                    alignment: center;
+
+                    Rectangle {
+                        width: 200px * root.ui-scale; border-radius: 8px * root.ui-scale;
+                        background: root.MM_selected == 0 ? #007bff : #6c757d;
+                        animate background { duration: 150ms; }
+                        Text { text: "Add Student"; color: white; font-size: 16px * root.ui-scale; font-weight: 700; horizontal-alignment: center; vertical-alignment: center; }
+                        TouchArea { clicked => { root.MM_selected = 0; } }
                     }
-                    HorizontalLayout {
-                        alignment: center;
-                        Admin_Attendance_Excuses {
-                            width: 800px * root.ui-scale; ui-scale: root.ui-scale;
-                            requests <=> root.pending_excuses;
-                            handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); }
-                        }
+
+                    Rectangle {
+                        width: 200px * root.ui-scale; border-radius: 8px * root.ui-scale;
+                        background: root.MM_selected == 1 ? #007bff : #6c757d;
+                        animate background { duration: 150ms; }
+                        Text { text: "Add Teacher"; color: white; font-size: 16px * root.ui-scale; font-weight: 700; horizontal-alignment: center; vertical-alignment: center; }
+                        TouchArea { clicked => { root.MM_selected = 1; } }
+                    }
+
+                    Rectangle {
+                        width: 200px * root.ui-scale; border-radius: 8px * root.ui-scale;
+                        background: root.MM_selected == 2 ? #007bff : #6c757d;
+                        animate background { duration: 150ms; }
+                        Text { text: "Assign Courses"; color: white; font-size: 16px * root.ui-scale; font-weight: 700; horizontal-alignment: center; vertical-alignment: center; }
+                        TouchArea { clicked => { root.MM_selected = 2; } }
+                    }
+                }
+
+                // 2. The Dynamic Panels Below
+                Rectangle {
+                    vertical-stretch: 1;
+
+                    if (root.MM_selected == 0) : AddStudentWindow {
+                        width: 100%; height: 100%;
+                        ui-scale: min(root.ui-scale, self.width / 1020px);
+                        status_message: root.add_student_status_message;
+                        next_student_id: root.next_student_id;
+                        submit_clicked(name, fac, pass) => { root.add_student_submit(name, fac, pass); }
+                    }
+
+                    if (root.MM_selected == 1) : AddTeacherWindow {
+                        width: 100%; height: 100%;
+                        ui-scale: min(root.ui-scale, self.width / 1020px);
+                        status_message: root.add_teacher_status_message;
+                        submit_clicked(fn, ln, pass) => { root.add_teacher_submit(fn, ln, pass); }
+                    }
+
+                    if (root.MM_selected == 2) : AssignCoursesWindow {
+                        width: 100%; height: 100%;
+                        ui-scale: min(root.ui-scale, self.width / 1020px);
+                        status_message: root.assign_course_status_message;
+                        check_teacher(email) => { return root.check_teacher_email(email); }
+                        check_course(code) => { return root.check_assign_course(code); }
+                        submit_clicked(email, code, l1, l2, t1, t2) => { root.assign_course_submit(email, code, l1, l2, t1, t2); }
                     }
                 }
             }
 
             if (selected-menu-item == 3): Accept_and_Refuse_Courses {
-                width: 100%; height: 100%;
-                ui-scale: min(root.ui-scale, self.width / 1020px);
-                student_id <=> root.student_id; student_name <=> root.student_name; faculty <=> root.faculty;
-                Submit_Button_Pressed <=> root.Submit_Button_Pressed; show_warning <=> root.show_warning;
-                no_course_requests <=> root.no_course_requests;
-                is_next_student_available <=> root.is_next_student_available;
-                is_previous_student_available <=> root.is_previous_student_available;
-                course1_accept_button_pressed <=> root.course1_accept_button_pressed; course2_accept_button_pressed <=> root.course2_accept_button_pressed;
-                course3_accept_button_pressed <=> root.course3_accept_button_pressed; course4_accept_button_pressed <=> root.course4_accept_button_pressed;
-                course5_accept_button_pressed <=> root.course5_accept_button_pressed;
-                course1_decline_button_pressed <=> root.course1_decline_button_pressed; course2_decline_button_pressed <=> root.course2_decline_button_pressed;
-                course3_decline_button_pressed <=> root.course3_decline_button_pressed; course4_decline_button_pressed <=> root.course4_decline_button_pressed;
-                course5_decline_button_pressed <=> root.course5_decline_button_pressed;
+                width: 100%; height: 100%; ui-scale: min(root.ui-scale, self.width / 1020px);
+                student_id <=> root.student_id; student_name <=> root.student_name; faculty <=> root.faculty; Submit_Button_Pressed <=> root.Submit_Button_Pressed; show_warning <=> root.show_warning; no_course_requests <=> root.no_course_requests; is_next_student_available <=> root.is_next_student_available; is_previous_student_available <=> root.is_previous_student_available;
+                course1_accept_button_pressed <=> root.course1_accept_button_pressed; course2_accept_button_pressed <=> root.course2_accept_button_pressed; course3_accept_button_pressed <=> root.course3_accept_button_pressed; course4_accept_button_pressed <=> root.course4_accept_button_pressed; course5_accept_button_pressed <=> root.course5_accept_button_pressed;
+                course1_decline_button_pressed <=> root.course1_decline_button_pressed; course2_decline_button_pressed <=> root.course2_decline_button_pressed; course3_decline_button_pressed <=> root.course3_decline_button_pressed; course4_decline_button_pressed <=> root.course4_decline_button_pressed; course5_decline_button_pressed <=> root.course5_decline_button_pressed;
                 c1_code <=> root.c1_code; c1_name <=> root.c1_name; c1_l_day <=> root.c1_l_day; c1_l_slot <=> root.c1_l_slot; c1_t_day <=> root.c1_t_day; c1_t_slot <=> root.c1_t_slot;
                 c2_code <=> root.c2_code; c2_name <=> root.c2_name; c2_l_day <=> root.c2_l_day; c2_l_slot <=> root.c2_l_slot; c2_t_day <=> root.c2_t_day; c2_t_slot <=> root.c2_t_slot;
                 c3_code <=> root.c3_code; c3_name <=> root.c3_name; c3_l_day <=> root.c3_l_day; c3_l_slot <=> root.c3_l_slot; c3_t_day <=> root.c3_t_day; c3_t_slot <=> root.c3_t_slot;
                 c4_code <=> root.c4_code; c4_name <=> root.c4_name; c4_l_day <=> root.c4_l_day; c4_l_slot <=> root.c4_l_slot; c4_t_day <=> root.c4_t_day; c4_t_slot <=> root.c4_t_slot;
                 c5_code <=> root.c5_code; c5_name <=> root.c5_name; c5_l_day <=> root.c5_l_day; c5_l_slot <=> root.c5_l_slot; c5_t_day <=> root.c5_t_day; c5_t_slot <=> root.c5_t_slot;
-                next_student => { root.admin_next_student(); }
-                previous_student => { root.admin_previous_student(); }
-                submit_decisions => { root.admin_submit_decisions(); }
+                next_student => { root.admin_next_student(); } previous_student => { root.admin_previous_student(); } submit_decisions => { root.admin_submit_decisions(); }
             }
         }
     }
 
-    // ==========================================
-    // END SEMESTER CONFIRMATION POPUP (2-Step)
-    // ==========================================
-    if (root.show_end_sem_confirmation) : Rectangle {
-        z: 101;
-        width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        TouchArea { } // Blocks input below
+    if (root.show_end_sem_confirmation): Rectangle { z: 101; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); TouchArea { }
+        Rectangle { width: 450px * root.ui-scale; height: 250px * root.ui-scale; background: #d0d2d6; border-radius: 15px; border-color: #727275; border-width: 2px;
+            Text { text: "You are about to end the semester.\nAre you sure?"; font-size: 18px * root.ui-scale; font-weight: 700; color: #ff0000; horizontal-alignment: center; vertical-alignment: center; y: 60px * root.ui-scale; }
+            Yes_button_sem := Rectangle { width: 120px * root.ui-scale; height: 45px * root.ui-scale; x: 90px * root.ui-scale; y: 160px * root.ui-scale; border-radius: 10px; background: Yes_touch_sem.pressed ? #5a0000 : #c0392b; Text { text: "Confirm"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } Yes_touch_sem := TouchArea { clicked => { root.show_end_sem_confirmation = false; root.admin_end_semester(); } } }
+            No_button_sem := Rectangle { width: 120px * root.ui-scale; height: 45px * root.ui-scale; x: 240px * root.ui-scale; y: 160px * root.ui-scale; border-radius: 10px; background: No_touch_sem.pressed ? #2c3e50 : #34495e; Text { text: "Cancel"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; } No_touch_sem := TouchArea { clicked => { root.show_end_sem_confirmation = false; } } } } }
 
-        Rectangle {
-            width: 450px * root.ui-scale;
-            height: 250px * root.ui-scale;
-            background: #d0d2d6;
-            border-radius: 15px;
-            border-color: #727275;
-            border-width: 2px;
-
-            Text {
-                text: "You are about to end the semester.\nAre you sure?";
-                font-size: 18px * root.ui-scale;
-                font-weight: 700;
-                color: #ff0000;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-                y: 60px * root.ui-scale;
-            }
-
-            Yes_button_sem := Rectangle {
-                width: 120px * root.ui-scale; height: 45px * root.ui-scale;
-                x: 90px * root.ui-scale; y: 160px * root.ui-scale;
-                border-radius: 10px;
-                background: Yes_touch_sem.pressed ? #5a0000 : #c0392b;
-                Text { text: "Confirm"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                Yes_touch_sem := TouchArea {
-                    clicked => {
-                        root.show_end_sem_confirmation = false;
-                        root.admin_end_semester();
-                    }
-                }
-            }
-
-            No_button_sem := Rectangle {
-                width: 120px * root.ui-scale; height: 45px * root.ui-scale;
-                x: 240px * root.ui-scale; y: 160px * root.ui-scale;
-                border-radius: 10px;
-                background: No_touch_sem.pressed ? #2c3e50 : #34495e;
-                Text { text: "Cancel"; font-size: 18px * root.ui-scale; font-weight: 700; color: white; horizontal-alignment: center; vertical-alignment: center; }
-                No_touch_sem := TouchArea { clicked => { root.show_end_sem_confirmation = false; } }
-            }
-        }
-    }
-
-    // ==========================================
-    // LOGOUT CONFIRMATION POPUP
-    // ==========================================
-    if (root.Logout_value == 1) : Rectangle {
-        z: 100;
-        width: 400px * root.ui-scale;
-        height: 200px * root.ui-scale;
-        x: (root.width - self.width) / 2;
-        y: (root.height - self.height) / 2;
-        background: #d0d2d6;
-        border-radius: 15px;
-        border-color: #727275;
-        border-width: 2px;
-
-        Confirmation_text := Text {
-            text: "Are you sure you want to logout?";
-            font-size: 20px * root.ui-scale;
-            font-weight: 600;
-            color: #000000;
-            horizontal-alignment: center;
-            vertical-alignment: center;
-            y: 40px * root.ui-scale;
-        }
-        Yes_button := Rectangle {
-            width: 100px * root.ui-scale;
-            height: 40px * root.ui-scale;
-            x: 80px * root.ui-scale;
-            y: 120px * root.ui-scale;
-            border-radius: 10px;
-            background: Yes_touch.pressed ? darkred : (Yes_touch.has-hover ? red : #007bff);
-            animate background { duration: 200ms; easing: ease-in-out; }
-            Text {
-                text: "Yes"; font-size: 18px * root.ui-scale; font-weight: 600; color: white;
-                horizontal-alignment: center; vertical-alignment: center;
-            }
-            Yes_touch := TouchArea {
-                clicked => {
-                    root.Logout_value = 2;
-                    root.Logout();
-                }
-            }
-        }
-        No_button := Rectangle {
-            width: 100px * root.ui-scale;
-            height: 40px * root.ui-scale;
-            x: 220px * root.ui-scale;
-            y: 120px * root.ui-scale;
-            border-radius: 10px;
-            background: No_touch.pressed ? #003d80 : (No_touch.has-hover ? #104682 : #007bff);
-            animate background { duration: 200ms; easing: ease-in-out; }
-            Text {
-                text: "No"; font-size: 18px * root.ui-scale; font-weight: 600; color: white;
-                horizontal-alignment: center; vertical-alignment: center;
-            }
-            No_touch := TouchArea {
-                clicked => { root.Logout_value = 0; }
-            }
-        }
-    }
+    if (root.Logout_value == 1): Rectangle { z: 100; width: 400px * root.ui-scale; height: 200px * root.ui-scale; x: (root.width - self.width) / 2; y: (root.height - self.height) / 2; background: #d0d2d6; border-radius: 15px; border-color: #727275; border-width: 2px;
+        Confirmation_text := Text { text: "Are you sure you want to logout?"; font-size: 20px * root.ui-scale; font-weight: 600; color: #000000; horizontal-alignment: center; vertical-alignment: center; y: 40px * root.ui-scale; }
+        Yes_button := Rectangle { width: 100px * root.ui-scale; height: 40px * root.ui-scale; x: 80px * root.ui-scale; y: 120px * root.ui-scale; border-radius: 10px; background: Yes_touch.pressed ? darkred : (Yes_touch.has-hover ? red : #007bff); animate background { duration: 200ms; easing: ease-in-out; } Text { text: "Yes"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; } Yes_touch := TouchArea { clicked => { root.Logout_value = 2; root.Logout(); } } }
+        No_button := Rectangle { width: 100px * root.ui-scale; height: 40px * root.ui-scale; x: 220px * root.ui-scale; y: 120px * root.ui-scale; border-radius: 10px; background: No_touch.pressed ? #003d80 : (No_touch.has-hover ? #104682 : #007bff); animate background { duration: 200ms; easing: ease-in-out; } Text { text: "No"; font-size: 18px * root.ui-scale; font-weight: 600; color: white; horizontal-alignment: center; vertical-alignment: center; } No_touch := TouchArea { clicked => { root.Logout_value = 0; } } } }
 }

@@ -5,11 +5,16 @@
 
 using namespace std;
 
-class Assign_Courses {
+class Assign_Course {
 public:
-    static void assign_course(
-        const string& teacher_email,
-        const string& course_name
+    static string get_teacher_name(const string& email);
+    static string get_course_name(const string& code);
+
+    // Now accepts the 4 new dropdown parameters!
+    static string assign_course(
+        const string& email, const string& code,
+        const string& l1, const string& l2,
+        const string& t1, const string& t2
     );
 };
 

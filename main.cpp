@@ -23,7 +23,9 @@
 #include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/header/Admin_Course_Withdrawal.h"
 #include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h"
 #include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/header/Admin_Attendance_Excuses.h"
-
+#include "Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h"
+#include "Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h"
+#include "Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h"
 using namespace std;
 
 std::unique_ptr<Request_Courses> global_request_manager;
@@ -78,16 +80,24 @@ int main() {
     ui->on_admin_handle_excuse(
         [&](slint::SharedString id, slint::SharedString course, slint::SharedString week, bool approved) {
             AdminExcuseManager::process(std::string(id), std::string(course), std::string(week), approved);
-            refresh_admin_requests(); // Refresh the table instantly!
+            refresh_admin_requests();
         });
+
     ui->on_admin_end_semester([&]() {
         Admin_Profile::get_instance().end_semester();
     });
+    ui->on_admin_check_teacher_email([&](slint::SharedString email) -> slint::SharedString {
+        return slint::SharedString(Assign_Course::get_teacher_name(string(email)));
+    });
 
+    ui->on_admin_check_assign_course([&](slint::SharedString code) -> slint::SharedString {
+        return slint::SharedString(Assign_Course::get_course_name(string(code)));
+    });
 
-    // =========================================================
-    // 2. LOGIN & UI LOGIC
-    // =========================================================
+    ui->on_admin_assign_course_submit([&](slint::SharedString email, slint::SharedString code, slint::SharedString l1, slint::SharedString l2, slint::SharedString t1, slint::SharedString t2) {
+        string success_msg = Assign_Course::assign_course(string(email), string(code), string(l1), string(l2), string(t1), string(t2));
+        ui->set_assign_course_status_message(slint::SharedString(success_msg));
+    });
 
     ui->on_check_credentials([&](const slint::SharedString &id, const slint::SharedString &pass, int role) {
         string string_id = string(id);
@@ -132,8 +142,8 @@ int main() {
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
                 // LOAD PREVIOUS ENROLLMENTS
-                    PreviousEnrollmentsManager pe_manager(current_id);
-                    pe_manager.load_student_data(ui.operator->());
+                PreviousEnrollments pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
+                pe.load_student_data(ui.operator->(), current_id);
 
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;
@@ -202,7 +212,7 @@ int main() {
                         if (student_ptr->
                             has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
                             ui->set_status_message("Conflict: Time slot overlaps with an existing schedule.");
-                            return; // Stop here!
+                            return;
                         }
 
                         // 2. Try to register (will fail if limit 5 reached)
@@ -255,9 +265,10 @@ int main() {
                 ui->set_user_profile_pic(img);
 
                 adminManager.initUI(ui.operator->());
-
-                // Now safely call the function we defined at the top!
                 refresh_admin_requests();
+
+                // ---> THE CLEAN REACTIVE ID SETTER! <---
+                ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
             }
 
             ui->set_active_panel(role);
@@ -278,7 +289,16 @@ int main() {
     ui->on_admin_previous_student([&]() { adminManager.prevStudent(ui.operator->()); });
     ui->on_admin_submit_decisions([&]() { adminManager.submitDecisions(ui.operator->()); });
 
-    // Profile Pic Callbacks
+    // ---> THE CLEAN REACTIVE SUBMIT BUTTON! <---
+    ui->on_admin_add_student_submit([&](slint::SharedString name, slint::SharedString fac , slint::SharedString pass) {
+        string success_string = Add_Student::add_student(string(name), string(fac) , string(pass));
+        ui->set_add_student_status_message(slint::SharedString(success_string));
+        ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
+    });
+    ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name , slint::SharedString pass) {
+        string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name) , string(pass));
+        ui->set_add_teacher_status_message(slint::SharedString(success_string));
+    });
     ui->on_change_picture([&]() {
         string source = ImageManager::select_image_dialog();
         if (source.empty()) return;

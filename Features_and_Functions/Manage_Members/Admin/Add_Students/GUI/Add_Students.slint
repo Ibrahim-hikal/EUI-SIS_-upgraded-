@@ -1,112 +1,73 @@
-import { Button, LineEdit} from "std-widgets.slint";
-import { Button, LineEdit } from "std-widgets.slint";
+import { CustomDropdown } from "../../../../Shared_GUI/Custom_dropdown.slint";
+
+component CustomLineEdit inherits Rectangle {
+    in-out property <string> text;
+    in property <string> placeholder;
+    in property <float> ui-scale: 1.0;
+
+    height: 45px * ui-scale; background: #FFFFFF; border-radius: 6px * ui-scale; border-width: 2px;
+    border-color: input.has-focus ? #007bff : #ced4da; animate border-color { duration: 150ms; }
+
+    input := TextInput {
+        width: parent.width - 30px * root.ui-scale; height: parent.height; x: 15px * root.ui-scale;
+        vertical-alignment: center; font-size: 16px * root.ui-scale; color: black; text <=> root.text; single-line: true;
+    }
+
+    if (root.text == "") : Text { x: 15px * root.ui-scale; text: root.placeholder; color: #6c757d; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+}
 
 export component AddStudentWindow inherits Rectangle {
-
-    // =========================
-    // Properties
-    // =========================
-
-    in-out property <string> id_value: "";
+    in property <float> ui-scale: 1.0;
     in-out property <string> name_value: "";
-    in-out property <string> faculty_value: "";
-    in-out property <string> gpa_value: "";
+    in-out property <string> faculty_value: "Engineering";
+    in-out property <string> password_value: "";
+    in property <string> status_message: "";
 
-    // =========================
-    // Callbacks
-    // =========================
+    // ---> 1. READS THE STANDARD PROPERTY <---
+    in property <string> next_student_id: "Loading...";
 
-    callback submit_clicked(string, string, string, string);
+    callback submit_clicked(string, string, string);
     callback close_clicked();
 
-    // =========================
-    // Window Style
-    // =========================
-
-    width: 400px;
-    height: 500px;
-
-    background: #f8f9fa;
-
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: #007bff;
-
-    // =========================
-    // Layout
-    // =========================
+    width: 450px * root.ui-scale; height: 570px * root.ui-scale; background: #f8f9fa; border-radius: 12px * root.ui-scale;
+    border-width: 2px; border-color: #007bff;
 
     VerticalLayout {
+        padding: 30px * root.ui-scale;
+        spacing: 20px * root.ui-scale;
 
-        padding: 25px;
-        spacing: 15px;
+        Text { text: "Add New Student"; font-size: 26px * root.ui-scale; font-weight: 700; horizontal-alignment: center; color: #007bff; }
 
         Text {
-            text: "Add Student";
-            font-size: 24px;
-            font-weight: 700;
-            horizontal-alignment: center;
-            color: #007bff;
+            // ---> 2. DISPLAYS IT <---
+            text: "Assigned ID: " + root.next_student_id;
+            font-size: 18px * root.ui-scale; font-weight: 600; horizontal-alignment: center; color: #333;
         }
 
-        // =========================
-        // Input Fields
-        // =========================
-
-        LineEdit {
-            placeholder-text: "Student ID";
-            text <=> root.id_value;
-        }
-
-        LineEdit {
-            placeholder-text: "Student Name";
-            text <=> root.name_value;
-        }
-
-        LineEdit {
-            placeholder-text: "Faculty";
-            text <=> root.faculty_value;
-        }
-
-        LineEdit {
-            placeholder-text: "GPA";
-            text <=> root.gpa_value;
-        }
+        CustomLineEdit { ui-scale: root.ui-scale; placeholder: "Student Full Name"; text <=> root.name_value; }
+        CustomLineEdit { ui-scale: root.ui-scale; placeholder: "Set Password"; text <=> root.password_value; }
 
         Rectangle {
-            height: 15px;
-            background: transparent;
+            height: 45px * root.ui-scale;
+            clip: false; z: 100;
+            CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: ["Engineering", "Computer Science", "Digital Arts", "Business"]; current_value: root.faculty_value;
+            selected(val) => { root.faculty_value = val; } }
         }
 
-        // =========================
-        // Buttons
-        // =========================
+        if (root.status_message != "") : Rectangle {
+            height: 90px * root.ui-scale;
+            background: #d4edda; border-radius: 8px * root.ui-scale; border-width: 2px; border-color: #c3e6cb;
+            Text { text: root.status_message; color: #155724; font-size: 15px * root.ui-scale;
+            font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
+        }
 
-        HorizontalLayout {
+        Rectangle { vertical-stretch: 1; background: transparent; }
 
-            spacing: 10px;
-
-            Button {
-                text: "Add Student";
-                primary: true;
-
-                clicked => {
-                    root.submit_clicked(
-                        root.id_value,
-                        root.name_value,
-                        root.faculty_value,
-                        root.gpa_value
-                    );
-                }
-            }
-
-            Button {
-                text: "Cancel";
-
-                clicked => {
-                    root.close_clicked();
-                }
-            }
+        Rectangle {
+            height: 50px * root.ui-scale;
+            background: submit_touch.pressed ? #004a99 : (submit_touch.has-hover ? #0056b3 : #007bff); border-radius: 8px * root.ui-scale; animate background { duration: 150ms; }
+            Text { text: "Create Student"; color: white; font-weight: 600; font-size: 16px * root.ui-scale; horizontal-alignment: center; vertical-alignment: center; }
+            submit_touch := TouchArea { clicked => { root.submit_clicked(root.name_value, root.faculty_value, root.password_value); } }
         }
     }
 }
