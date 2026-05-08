@@ -73,6 +73,7 @@ int main() {
     });
 
     ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
+        // The Manager now handles BOTH the request database and the student database
         AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
         refresh_admin_requests();
     });
@@ -141,9 +142,9 @@ int main() {
                 studentScheduleManager.initUI(ui.operator->());
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
-                // LOAD PREVIOUS ENROLLMENTS
-                PreviousEnrollments pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
-                pe.load_student_data(ui.operator->(), current_id);
+                // LOAD PREVIOUS ENROLLMENTS (FIXED)
+                PreviousEnrollmentsManager pe(current_id);
+                pe.load_student_data(ui.operator->());
 
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;
@@ -323,13 +324,7 @@ int main() {
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
     });
-    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
-        // The Manager now handles BOTH the request database and the student database
-        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
 
-        // Refresh the UI display
-        refresh_admin_requests();
-    });
     ui->run();
     return 0;
 }
