@@ -22,8 +22,6 @@ export component Student_Profile inherits Rectangle {
     in-out property <[CourseInfo]> my_courses;
     in-out property <[CourseInfo]> available_courses;
     in-out property <[CourseInfo]> requested_courses;
-    in-out property <[CourseInfo]> passed_courses;
-    in-out property <[CourseInfo]> failed_courses;
     in-out property <[CourseInfo]> course_code;
     in property <float> assigned_scale: 1.0;
     in property <float> ui-scale: assigned_scale;
@@ -41,8 +39,10 @@ export component Student_Profile inherits Rectangle {
     callback request_courses_clicked(string, string, string);
     in-out property <int> active_tab <=> selected-menu-item;
     in-out property <[string]> registered_course_codes;
-
     in-out property <[CourseSlot]> student_schedule_data;
+    in-out property <[CourseInfo]> passed_courses;
+    in-out property <[CourseInfo]> failed_courses;
+
 
     callback submit_withdrawal_req(string, string);
     callback submit_excuse_req(string, string, string);
@@ -344,13 +344,9 @@ export component Student_Profile inherits Rectangle {
                 }
 
                 if (root.manage-courses-tab == 2): Previous_Enrollments {
-                    ui-scale: root.ui-scale;
-                    passed_courses: root.passed_courses;
-                    failed_courses: root.failed_courses;
-                    student_name: root.user_name;
-                    student_id: root.user_id;
-                    student_gpa: root.student_gpa;
-
+                        ui-scale: root.ui-scale;
+                        passed_courses: root.passed_courses;
+                        failed_courses: root.failed_courses;
                 }
             }
         }

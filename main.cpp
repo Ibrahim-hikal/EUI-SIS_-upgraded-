@@ -132,8 +132,8 @@ int main() {
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
                 // LOAD PREVIOUS ENROLLMENTS
-                PreviousEnrollments pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
-                pe.load_student_data(ui.operator->(), current_id);
+                    PreviousEnrollmentsManager pe_manager(current_id);
+                    pe_manager.load_student_data(ui.operator->());
 
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;

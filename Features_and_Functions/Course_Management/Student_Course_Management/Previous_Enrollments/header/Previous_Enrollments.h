@@ -1,14 +1,17 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "main.h"
+#include <slint.h>
 
-class PreviousEnrollments {
-public:
-    PreviousEnrollments(const std::string& csv_file);
-    void load_student_data(Main_App* ui, const std::string& student_id);
+class Main_App; // Forward declare to pass the UI pointer
 
+class PreviousEnrollmentsManager {
 private:
-    std::string csv_file_path;
-    std::vector<std::string> getCourses(const std::string& course_str);
+    std::string student_id;
+    std::vector<std::string> parse_csv_line(const std::string& line) const;
+    std::vector<std::string> split_courses(const std::string& course_str) const;
+    void calculate_total_grade(const std::string& course_code, std::string& out_details, bool& out_has_grades) const;
+public:
+    explicit PreviousEnrollmentsManager(std::string id);
+    void load_student_data(Main_App* ui);
 };

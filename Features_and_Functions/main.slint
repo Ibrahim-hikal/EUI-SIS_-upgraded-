@@ -26,9 +26,9 @@ export component Main_App inherits Window {
     in-out property <int> Logout_value: 0;
     in-out property <string> admin_position;
 
+    in property <[CourseInfo]> passed_courses;
+    in property <[CourseInfo]> failed_courses;
     in-out property <[CourseInfo]> requested_courses;
-    in property <[CourseInfo]> passed_courses ;
-    in property <[CourseInfo]> failed_courses ;
     in property <string> enrollment_name: "";
     in property <string> enrollment_id: "";
     in property <string> enrollment_gpa: "";
@@ -108,8 +108,8 @@ export component Main_App inherits Window {
             submit_excuse_req(code, week, reason) => { root.submit_excuse_req(code, week, reason); }
 
             //--Previous Enrollments section--
-            passed_courses : root.passed_courses;
-            failed_courses : root.failed_courses;
+            passed_courses: root.passed_courses;
+            failed_courses: root.failed_courses;
 
 
         }
