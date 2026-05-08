@@ -2,14 +2,26 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
-// ---> THE SIMPLE CLEANER <---
-// Strips invisible \r and spaces from the ends of strings
-void clean_str(string& str) {
-    while(!str.empty() && (str.back() == '\r' || str.back() == '\n' || str.back() == ' ')) str.pop_back();
-    while(!str.empty() && str.front() == ' ') str.erase(0, 1);
+// ---> THE ULTRA-ROBUST MATCHER <---
+// Strips all spaces, invisible characters, and ignores uppercase/lowercase
+static inline bool is_exact_match(string a, string b) {
+    a.erase(remove_if(a.begin(), a.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), a.end());
+    b.erase(remove_if(b.begin(), b.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), b.end());
+    transform(a.begin(), a.end(), a.begin(), [](unsigned char c){ return tolower(c); });
+    transform(b.begin(), b.end(), b.begin(), [](unsigned char c){ return tolower(c); });
+    return a == b;
+}
+
+// Just trims the edges for displaying nicely on the UI
+static inline string trim_edges(const string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (string::npos == first) return "";
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
 }
 
 void Teacher_Profile::load_profile(const string& target_email) {
@@ -25,10 +37,10 @@ void Teacher_Profile::load_profile(const string& target_email) {
         while (getline(login_file, line)) {
             stringstream ss(line);
             vector<string> cols;
-            // Clean every cell as we read it
-            while (getline(ss, cell, ',')) { clean_str(cell); cols.push_back(cell); }
+            while (getline(ss, cell, ',')) { cols.push_back(trim_edges(cell)); }
 
-            if (cols.size() >= 4 && cols[0] == target_email) {
+            // USE THE ROBUST MATCHER!
+            if (cols.size() >= 4 && is_exact_match(cols[0], target_email)) {
                 this->name = cols[3];
                 break;
             }
@@ -43,11 +55,10 @@ void Teacher_Profile::load_profile(const string& target_email) {
         while (getline(courses_file, line)) {
             stringstream ss(line);
             vector<string> cols;
-            // Clean every cell as we read it
-            while (getline(ss, cell, ',')) { clean_str(cell); cols.push_back(cell); }
+            while (getline(ss, cell, ',')) { cols.push_back(trim_edges(cell)); }
 
-            // Perfect string matching because the \r is gone!
-            if (cols.size() >= 5 && cols[4] == this->name) {
+            // USE THE ROBUST MATCHER!
+            if (cols.size() >= 5 && is_exact_match(cols[4], this->name)) {
                 string display_course = cols[0] + " - " + cols[3];
                 this->courses_taught.push_back(display_course);
             }

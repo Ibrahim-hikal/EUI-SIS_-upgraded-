@@ -142,8 +142,8 @@ int main() {
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
                 // LOAD PREVIOUS ENROLLMENTS
-                PreviousEnrollments pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
-                pe.load_student_data(ui.operator->(), current_id);
+                PreviousEnrollmentsManager pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
+                pe.load_student_data(ui.operator->());
 
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;
@@ -298,6 +298,9 @@ int main() {
     ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name , slint::SharedString pass) {
         string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name) , string(pass));
         ui->set_add_teacher_status_message(slint::SharedString(success_string));
+    });
+    ui->on_admin_validate_assign_schedule([&](slint::SharedString email, slint::SharedString code, slint::SharedString l1, slint::SharedString l2, slint::SharedString t1, slint::SharedString t2) -> slint::SharedString {
+        return slint::SharedString(Assign_Course::check_conflicts(string(email), string(code), string(l1), string(l2), string(t1), string(t2)));
     });
     ui->on_change_picture([&]() {
         string source = ImageManager::select_image_dialog();

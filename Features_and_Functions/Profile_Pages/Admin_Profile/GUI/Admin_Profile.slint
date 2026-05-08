@@ -57,7 +57,7 @@ export component Admin_Profile inherits Rectangle {
     callback check_assign_course(string) -> string;
     callback assign_course_submit(string, string, string, string, string, string);
     in property <string> assign_course_status_message: "";
-
+    callback validate_assign_schedule(string, string, string, string, string, string) -> string;
 
     min-height: 600px; min-width: 1200px; preferred-height: 768px; preferred-width: 1200px; max-height: 840px; max-width: 1300px; background: white;
 
@@ -164,6 +164,7 @@ export component Admin_Profile inherits Rectangle {
                         check_teacher(email) => { return root.check_teacher_email(email); }
                         check_course(code) => { return root.check_assign_course(code); }
                         submit_clicked(email, code, l1, l2, t1, t2) => { root.assign_course_submit(email, code, l1, l2, t1, t2); }
+                        validate_schedule(email, code, l1, l2, t1, t2) => { return root.validate_assign_schedule(email, code, l1, l2, t1, t2); }
                     }
                 }
             }

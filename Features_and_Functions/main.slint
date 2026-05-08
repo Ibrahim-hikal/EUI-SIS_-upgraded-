@@ -91,6 +91,7 @@ export component Main_App inherits Window {
         callback admin_check_assign_course(string) -> string;
         callback admin_assign_course_submit(string, string, string, string, string, string);
         in property <string> assign_course_status_message: "";
+        callback admin_validate_assign_schedule(string, string, string, string, string, string) -> string;
 
     min-height: 600px;
     min-width: 1024px;
@@ -180,6 +181,7 @@ export component Main_App inherits Window {
             check_teacher_email(email) => { return root.admin_check_teacher_email(email); }
             check_assign_course(code) => { return root.admin_check_assign_course(code); }
             assign_course_submit(email, code, l1, l2, t1, t2) => { root.admin_assign_course_submit(email, code, l1, l2, t1, t2); }
+            validate_assign_schedule(email, code, l1, l2, t1, t2) => { return root.admin_validate_assign_schedule(email, code, l1, l2, t1, t2); }
         }
 
         if (active_panel == 1 && root.student_active_tab == 2) : Rectangle {
@@ -204,5 +206,4 @@ export component Main_App inherits Window {
             }
         }
     }
-}
 }

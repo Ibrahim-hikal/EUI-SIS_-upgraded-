@@ -23,7 +23,6 @@ export component AssignCoursesWindow inherits Rectangle {
     in-out property <string> teacher_email: "";
     in-out property <string> course_code: "";
 
-    // NEW DROPDOWN PROPERTIES
     in-out property <string> l1_val: "None";
     in-out property <string> l2_val: "None";
     in-out property <string> t1_val: "None";
@@ -34,14 +33,19 @@ export component AssignCoursesWindow inherits Rectangle {
     property <string> course_name: "";
     in property <string> status_message: "";
 
+    // ---> NEW LIVE CHECKER PROPERTIES <---
+    property <string> schedule_error: "";
+    callback validate_schedule(string, string, string, string, string, string) -> string;
+
     callback check_teacher(string) -> string;
     callback check_course(string) -> string;
-    callback submit_clicked(string, string, string, string, string, string); // Now takes 6 arguments
+    callback submit_clicked(string, string, string, string, string, string);
 
-    width: 600px * root.ui-scale; height: 680px * root.ui-scale; // Taller for the dropdowns
+    width: 600px * root.ui-scale; height: 680px * root.ui-scale;
     background: #f8f9fa; border-radius: 12px * root.ui-scale; border-width: 2px; border-color: #007bff;
 
-    property <bool> is_valid: root.teacher_name != "" && root.teacher_name != "Not Found" && root.course_name != "" && root.course_name != "Not Found";
+    // LOCKED IF THERE IS A SCHEDULE ERROR
+    property <bool> is_valid: root.teacher_name != "" && root.teacher_name != "Not Found" && root.course_name != "" && root.course_name != "Not Found" && root.schedule_error == "";
 
     VerticalLayout {
         padding: 30px * root.ui-scale; spacing: 20px * root.ui-scale;
@@ -50,7 +54,12 @@ export component AssignCoursesWindow inherits Rectangle {
 
         HorizontalLayout {
             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 200;
-            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Teacher Email"; text <=> root.teacher_email; edited => { root.teacher_name = root.check_teacher(root.teacher_email); } }
+            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Teacher Email"; text <=> root.teacher_email;
+                edited => {
+                    root.teacher_name = root.check_teacher(root.teacher_email);
+                    root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val);
+                }
+            }
             Rectangle { border-radius: 6px * root.ui-scale; background: #e9ecef; border-width: 1px; border-color: #ced4da;
                 Text { text: root.teacher_name == "" ? "Teacher Name..." : root.teacher_name; color: root.teacher_name == "Not Found" ? red : (root.teacher_name == "" ? #6c757d : #28a745); font-weight: 600; horizontal-alignment: center; vertical-alignment: center; font-size: 14px * root.ui-scale; }
             }
@@ -58,7 +67,12 @@ export component AssignCoursesWindow inherits Rectangle {
 
         HorizontalLayout {
             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 190;
-            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Course Code"; text <=> root.course_code; edited => { root.course_name = root.check_course(root.course_code); } }
+            CustomLineEdit { width: 250px * root.ui-scale; ui-scale: root.ui-scale; placeholder: "Course Code"; text <=> root.course_code;
+                edited => {
+                    root.course_name = root.check_course(root.course_code);
+                    root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val);
+                }
+            }
             Rectangle { border-radius: 6px * root.ui-scale; background: #e9ecef; border-width: 1px; border-color: #ced4da;
                 Text { text: root.course_name == "" ? "Course Name..." : root.course_name; color: root.course_name == "Not Found" ? red : (root.course_name == "" ? #6c757d : #28a745); font-weight: 600; horizontal-alignment: center; vertical-alignment: center; font-size: 14px * root.ui-scale; }
             }
@@ -67,15 +81,15 @@ export component AssignCoursesWindow inherits Rectangle {
         Text { text: "Lecture Slots"; font-size: 16px * root.ui-scale; font-weight: 600; color: #333; z: 180; }
         HorizontalLayout {
             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 150;
-            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l1_val; selected(val) => { root.l1_val = val; } } }
-            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l2_val; selected(val) => { root.l2_val = val; } } }
+            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l1_val; selected(val) => { root.l1_val = val; root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val); } } }
+            Rectangle { width: 250px * root.ui-scale; z: 150; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.l2_val; selected(val) => { root.l2_val = val; root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val); } } }
         }
 
         Text { text: "Tutorial Slots"; font-size: 16px * root.ui-scale; font-weight: 600; color: #333; z: 140; }
         HorizontalLayout {
             spacing: 15px * root.ui-scale; height: 45px * root.ui-scale; z: 100;
-            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t1_val; selected(val) => { root.t1_val = val; } } }
-            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t2_val; selected(val) => { root.t2_val = val; } } }
+            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t1_val; selected(val) => { root.t1_val = val; root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val); } } }
+            Rectangle { width: 250px * root.ui-scale; z: 100; clip: false; CustomDropdown { ui-scale: root.ui-scale; width: 100%; model: root.times; current_value: root.t2_val; selected(val) => { root.t2_val = val; root.schedule_error = root.validate_schedule(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val); } } }
         }
 
         if (root.status_message != "") : Rectangle {
@@ -85,16 +99,25 @@ export component AssignCoursesWindow inherits Rectangle {
 
         Rectangle { vertical-stretch: 1; background: transparent; z: 10; }
 
+        // ---> THE RED CONFLICT WARNING <---
+        if (root.schedule_error != "") : Text {
+            text: root.schedule_error;
+            color: #d9534f;
+            font-size: 14px * root.ui-scale;
+            font-weight: 700;
+            horizontal-alignment: center;
+        }
+
         Rectangle {
             height: 50px * root.ui-scale; z: 5;
             background: root.is_valid ? (submit_touch.pressed ? #004a99 : (submit_touch.has-hover ? #0056b3 : #007bff)) : #6c757d;
             border-radius: 8px * root.ui-scale; animate background { duration: 150ms; }
-            Text { text: "Assign Course"; color: white; font-weight: 600; font-size: 16px * root.ui-scale; horizontal-alignment: center; vertical-alignment: center; }
+            Text { text: "Assign Course & Update DBs"; color: white; font-weight: 600; font-size: 16px * root.ui-scale; horizontal-alignment: center; vertical-alignment: center; }
             submit_touch := TouchArea {
                 clicked => {
                     if (root.is_valid) {
                         root.submit_clicked(root.teacher_email, root.course_code, root.l1_val, root.l2_val, root.t1_val, root.t2_val);
-                        root.teacher_email = ""; root.course_code = ""; root.teacher_name = ""; root.course_name = "";
+                        root.teacher_email = ""; root.course_code = ""; root.teacher_name = ""; root.course_name = ""; root.schedule_error = "";
                         root.l1_val = "None"; root.l2_val = "None"; root.t1_val = "None"; root.t2_val = "None";
                     }
                 }
