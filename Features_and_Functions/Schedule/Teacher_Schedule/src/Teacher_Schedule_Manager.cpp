@@ -7,10 +7,20 @@
 
 using namespace std;
 
-// ---> THE SIMPLE CLEANER <---
-void clean_str_sch(string& str) {
-    while(!str.empty() && (str.back() == '\r' || str.back() == '\n' || str.back() == ' ')) str.pop_back();
-    while(!str.empty() && str.front() == ' ') str.erase(0, 1);
+// ---> THE ULTRA-ROBUST MATCHER <---
+static inline bool is_exact_match(string a, string b) {
+    a.erase(remove_if(a.begin(), a.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), a.end());
+    b.erase(remove_if(b.begin(), b.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), b.end());
+    transform(a.begin(), a.end(), a.begin(), [](unsigned char c){ return tolower(c); });
+    transform(b.begin(), b.end(), b.begin(), [](unsigned char c){ return tolower(c); });
+    return a == b;
+}
+
+static inline string trim_edges(const string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (string::npos == first) return "";
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
 }
 
 TeacherScheduleManager::TeacherScheduleManager() {}
@@ -19,10 +29,10 @@ std::vector<std::string> TeacherScheduleManager::split_csv_line(const std::strin
     std::vector<std::string> result; std::string current; bool in_quotes = false;
     for (char c : line) {
         if (c == '"') { in_quotes = !in_quotes; }
-        else if (c == ',' && !in_quotes) { clean_str_sch(current); result.push_back(current); current.clear(); }
+        else if (c == ',' && !in_quotes) { result.push_back(trim_edges(current)); current.clear(); }
         else { current += c; }
     }
-    clean_str_sch(current); result.push_back(current); return result;
+    result.push_back(trim_edges(current)); return result;
 }
 
 int TeacherScheduleManager::map_day_to_index(const std::string& day_str) {
@@ -62,8 +72,7 @@ void TeacherScheduleManager::parse_slots(const std::string& code, const std::str
 }
 
 void TeacherScheduleManager::load_teacher_schedule(const std::string& teacher_name) {
-    current_teacher_name = teacher_name;
-    clean_str_sch(current_teacher_name); // Clean the input name!
+    current_teacher_name = trim_edges(teacher_name);
     current_schedule.clear();
 
     std::ifstream file("Databases/Offered_Courses.csv");
@@ -79,8 +88,8 @@ void TeacherScheduleManager::load_teacher_schedule(const std::string& teacher_na
             std::string code = cols[0];
             std::string instructor = cols[4];
 
-            // Direct comparison works perfectly now!
-            if (instructor == current_teacher_name) {
+            // USE THE ROBUST MATCHER!
+            if (is_exact_match(instructor, current_teacher_name)) {
                 parse_slots(code, cols[5], "Lecture");
                 parse_slots(code, cols[6], "Tutorial");
             }

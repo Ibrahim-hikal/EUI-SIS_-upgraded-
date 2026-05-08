@@ -10,12 +10,10 @@ public:
     static string get_teacher_name(const string& email);
     static string get_course_name(const string& code);
 
-    // Now accepts the 4 new dropdown parameters!
-    static string assign_course(
-        const string& email, const string& code,
-        const string& l1, const string& l2,
-        const string& t1, const string& t2
-    );
+    // NEW: Real-time conflict checker
+    static string check_conflicts(const string& email, const string& code, const string& l1, const string& l2, const string& t1, const string& t2);
+
+    static string assign_course(const string& email, const string& code, const string& l1, const string& l2, const string& t1, const string& t2);
 };
 
 #endif

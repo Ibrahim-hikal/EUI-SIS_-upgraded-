@@ -324,7 +324,13 @@ int main() {
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
     });
+    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
+        // The Manager now handles BOTH the request database and the student database
+        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
 
+        // Refresh the UI display
+        refresh_admin_requests();
+    });
     ui->run();
     return 0;
 }

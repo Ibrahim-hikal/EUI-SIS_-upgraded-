@@ -23,6 +23,9 @@ void Admin_Profile::load_profile(const string &current_email) {
     if (file.is_open()) {
         getline(file, line);
         while (getline(file, line)) {
+            if (line.empty()) continue;
+            if (line.back() == '\r') line.pop_back(); // Clean \r
+
             stringstream ss(line);
             vector<string> cols;
             while (getline(ss, cell, ',')) cols.push_back(cell);
@@ -47,10 +50,14 @@ void Admin_Profile::end_semester() {
     vector<string> lines;
     string header;
     getline(file_in, header);
+    if (!header.empty() && header.back() == '\r') header.pop_back();
     lines.push_back(header);
 
     string line;
     while (getline(file_in, line)) {
+        if (line.empty()) continue;
+        if (line.back() == '\r') line.pop_back(); // Fix the corruption bug!
+
         stringstream ss(line);
         string cell;
         vector<string> cols;
@@ -63,100 +70,111 @@ void Admin_Profile::end_semester() {
         string failed_str = cols[3];
         string reg_str = cols[4];
 
-        if (reg_str == "-1" || reg_str.empty()) {
-            lines.push_back(line);
-            continue;
-        }
-
-        // 1. Parse Registered Courses (splitting by _ and taking code before \)
-        vector<string> current_reg;
-        stringstream reg_ss(reg_str);
-        string token;
-        while (getline(reg_ss, token, '_')) {
-            if (token.empty()) continue;
-            size_t slash = token.find('\\');
-            current_reg.push_back((slash != string::npos) ? token.substr(0, slash) : token);
-        }
-
-        // 2. Calculate baseline points from history (3.0 for passed, 0.0 for failed)
-        double total_points = 0.0;
-        int total_count = 0;
-
-        auto count_history = [&](string s, double pts) {
-            if (s == "-1" || s.empty()) return;
-            stringstream ss_h(s);
-            string h;
-            while (getline(ss_h, h, '_')) {
-                if (!h.empty()) { total_points += pts; total_count++; }
+        if (reg_str != "-1" && !reg_str.empty()) {
+            // 1. Parse Registered Courses
+            vector<string> current_reg;
+            stringstream reg_ss(reg_str);
+            string token;
+            while (getline(reg_ss, token, '_')) {
+                if (token.empty()) continue;
+                size_t slash = token.find('\\');
+                current_reg.push_back((slash != string::npos) ? token.substr(0, slash) : token);
             }
-        };
-        count_history(passed_str, 3.0);
-        count_history(failed_str, 0.0);
 
-        string new_passed = (passed_str == "-1") ? "" : passed_str;
-        string new_failed = (failed_str == "-1") ? "" : failed_str;
+            // 2. Calculate baseline points from history
+            double total_points = 0.0;
+            int total_count = 0;
 
-        // 3. Process current registered courses
-        for (const string& course_code : current_reg) {
-            string grades_path = "";
-            // Find the correct Grades.csv in the nested structure
-            for (const auto& entry : std::filesystem::recursive_directory_iterator("Databases/Courses")) {
-                if (entry.is_regular_file() && entry.path().filename() == "Grades.csv" && entry.path().parent_path().filename() == course_code) {
-                    grades_path = entry.path().string();
-                    break;
+            auto count_history = [&](string s, double pts) {
+                if (s == "-1" || s.empty()) return;
+                stringstream ss_h(s);
+                string h;
+                while (getline(ss_h, h, '_')) {
+                    if (!h.empty()) { total_points += pts; total_count++; }
                 }
-            }
+            };
+            count_history(passed_str, 3.0);
+            count_history(failed_str, 0.0);
 
-            double mark = -1.0; // Default to fail
-            if (!grades_path.empty()) {
-                ifstream g_file(grades_path);
-                string g_line;
-                getline(g_file, g_line); // Skip header
-                while (getline(g_file, g_line)) {
-                    stringstream g_ss(g_line);
-                    string g_cell;
-                    vector<string> g_cols;
-                    while (getline(g_ss, g_cell, ',')) g_cols.push_back(g_cell);
-                    if (!g_cols.empty() && g_cols[0] == id) {
-                        if (g_cols.size() >= 9 && !g_cols[8].empty()) {
-                            try { mark = stod(g_cols[8]); } catch(...) { mark = -1.0; }
+            string new_passed = (passed_str == "-1") ? "" : passed_str;
+            string new_failed = (failed_str == "-1") ? "" : failed_str;
+
+            // 3. Process current registered courses with SAFETY SHIELD
+            for (const string& course_code : current_reg) {
+                string grades_path = "";
+
+                // Anti-Crash Shield: Only search if the directory actually exists!
+                try {
+                    if (std::filesystem::exists("Databases/Courses")) {
+                        for (const auto& entry : std::filesystem::recursive_directory_iterator("Databases/Courses")) {
+                            if (entry.is_regular_file() && entry.path().filename() == "Grades.csv" && entry.path().parent_path().filename() == course_code) {
+                                grades_path = entry.path().string();
+                                break;
+                            }
                         }
-                        break;
+                    }
+                } catch (...) {
+                    // Ignore missing folders silently instead of crashing
+                }
+
+                double mark = -1.0;
+                if (!grades_path.empty()) {
+                    ifstream g_file(grades_path);
+                    string g_line;
+                    getline(g_file, g_line);
+                    while (getline(g_file, g_line)) {
+                        if (g_line.empty()) continue;
+                        if (g_line.back() == '\r') g_line.pop_back();
+
+                        stringstream g_ss(g_line);
+                        string g_cell;
+                        vector<string> g_cols;
+                        while (getline(g_ss, g_cell, ',')) g_cols.push_back(g_cell);
+                        if (!g_cols.empty() && g_cols[0] == id) {
+                            if (g_cols.size() >= 9 && !g_cols[8].empty()) {
+                                try { mark = stod(g_cols[8]); } catch(...) { mark = -1.0; }
+                            }
+                            break;
+                        }
                     }
                 }
+
+                total_count++;
+                if (mark >= 60.0) {
+                    if (!new_passed.empty()) new_passed += "_";
+                    new_passed += course_code;
+                    if (mark >= 97) total_points += 4.0;
+                    else if (mark >= 93) total_points += 4.0;
+                    else if (mark >= 89) total_points += 3.7;
+                    else if (mark >= 84) total_points += 3.3;
+                    else if (mark >= 80) total_points += 3.0;
+                    else if (mark >= 76) total_points += 2.7;
+                    else if (mark >= 73) total_points += 2.3;
+                    else if (mark >= 70) total_points += 2.0;
+                    else if (mark >= 67) total_points += 1.7;
+                    else if (mark >= 64) total_points += 1.3;
+                    else if (mark >= 60) total_points += 1.0;
+                } else {
+                    if (!new_failed.empty()) new_failed += "_";
+                    new_failed += course_code;
+                }
             }
 
-            total_count++;
-            if (mark >= 60.0) {
-                if (!new_passed.empty()) new_passed += "_";
-                new_passed += course_code;
-                // Scale Mapping
-                if (mark >= 97) total_points += 4.0;
-                else if (mark >= 93) total_points += 4.0;
-                else if (mark >= 89) total_points += 3.7;
-                else if (mark >= 84) total_points += 3.3;
-                else if (mark >= 80) total_points += 3.0;
-                else if (mark >= 76) total_points += 2.7;
-                else if (mark >= 73) total_points += 2.3;
-                else if (mark >= 70) total_points += 2.0;
-                else if (mark >= 67) total_points += 1.7;
-                else if (mark >= 64) total_points += 1.3;
-                else if (mark >= 60) total_points += 1.0;
-            } else {
-                if (!new_failed.empty()) new_failed += "_";
-                new_failed += course_code;
-                total_points += 0.0;
-            }
+            cols[2] = new_passed.empty() ? "-1" : new_passed;
+            cols[3] = new_failed.empty() ? "-1" : new_failed;
+
+            double final_gpa = (total_count > 0) ? (total_points / total_count) : 0.0;
+            stringstream gpa_ss;
+            gpa_ss << fixed << setprecision(2) << final_gpa;
+            cols[10] = gpa_ss.str();
         }
 
-        cols[2] = new_passed.empty() ? "-1" : new_passed;
-        cols[3] = new_failed.empty() ? "-1" : new_failed;
-        cols[4] = "-1"; // Clear registered courses
-
-        double final_gpa = (total_count > 0) ? (total_points / total_count) : 0.0;
-        stringstream gpa_ss;
-        gpa_ss << fixed << setprecision(2) << final_gpa;
-        cols[10] = gpa_ss.str();
+        // ---> COMPLETE WIPE FOR NEW SEMESTER <---
+        cols[4] = "-1"; // Clear Registered
+        cols[5] = "-1"; // Clear Requested
+        cols[6] = "";   // Clear Excuse Requests
+        cols[7] = "0";  // Clear Total Excuses Accepted
+        cols[8] = "";   // Clear Withdrawal Requests
 
         string updated_line = "";
         for (size_t i = 0; i < cols.size(); ++i) {
@@ -166,7 +184,18 @@ void Admin_Profile::end_semester() {
     }
     file_in.close();
 
-    ofstream file_out(student_db);
+    ofstream file_out(student_db, ios::trunc);
     for (const auto& l : lines) file_out << l << "\n";
     file_out.close();
+
+    // ---> NUKE THE GLOBAL REQUEST DATABASES <---
+    try {
+        ofstream wOut("Databases/Course_Withdrawals.csv", ios::trunc);
+        if (wOut.is_open()) wOut.close();
+
+        ofstream eOut("Databases/Attendance_Excuses.csv", ios::trunc);
+        if (eOut.is_open()) eOut.close();
+    } catch (...) {}
+
+    cout << "Semester Ended Successfully! Databases cleared for the new term." << endl;
 }
