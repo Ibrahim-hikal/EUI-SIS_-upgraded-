@@ -2,7 +2,7 @@ Code,Prerequesite 1,Prerequesite 2,Name,Instructor,Offered Lecture Slots,Offered
 PHM112,PHM012,-1,Ordinary Differential Equations,Ahmed Ahmed,Sunday 11:00-13:00 Tuesday 11:00-13:00,Sunday 14:00-16:00 Tuesday 14:00-16:00 Thursday 09:00-11:00,3
 ENG011,-1,-1,Innovation I,Test Admin,Sunday 09:00-11:00 Sunday 14:00-16:00,Sunday 11:00-13:00 Monday 09:00-11:00,2
 ENG012,ENG011,-1,Innovation II,Ahmed Mahmoud,Monday 14:00-16:00 Wednesday 14:00-16:00,Wednesday 09:00-11:00 Tuesday 14:00-16:00,2
-PHM041,-1,-1,General Chemistry,Ali Ali,Thursday 11:00-13:00 Wednesday 14:00-16:00,Thursday 09:00-11:00 Monday 09:00-11:00 Wednesday 14:00-16:00,3
+PHM041,-1,-1,General Chemistry,Ahmed Mahmoud,Sunday 09:00-11:00 Sunday 14:00-16:00,Sunday 09:00-11:00 Sunday 11:00-13:00,3
 CSE021,-1,-1,Intro To Computer Programming,Fatma Ahmed,Monday 11:00-13:00 Wednesday 11:00-13:00,Tuesday 11:00-13:00 Thursday 11:00-13:00 Monday 14:00-16:00,3
 HUM011,-1,-1,English Language,Hadeer Momen,Monday 09:00-11:00 Wednesday 09:00-11:00,Tuesday 09:00-11:00 Thursday 09:00-11:00 Sunday 14:00-16:00,3
 ECE231,ECE101,PHM112,Signals And Systems,Islam Tawkeel,Monday 09:00-11:00 Wednesday 09:00-11:00,Tuesday 09:00-11:00 Thursday 09:00-11:00 Sunday 14:00-16:00,3
