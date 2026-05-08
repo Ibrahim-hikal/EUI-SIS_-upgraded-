@@ -1,6 +1,7 @@
 ID,Name,Passed Courses,Failed Courses,Registered Courses,Requested Courses,Excuse Requested?,Total Excuses Accepted,Withdrawal Requests,Faculty,GPA
-24-101229,Ahmed Samy,HUM011,PHM011_PHM012_CSE123_ENG012_PHM041,-1,,26/4 Sport Tournament^CSE102|5/1/2026|fever|Approved,2,CSE021^CSE101|bad grades|Approved,Engineering,0.62
+24-101229,Ahmed Samy,CSE012_HUM011,PHM011_PHM012_CSE123_ENG012_PHM041,-1_ENG012\\Sunday 09:00-11:00//Monday 11:00-13:00,,26/4 Sport Tournament^CSE102|5/1/2026|fever|Approved,2.0,CSE021^CSE101|bad grades|Approved,Engineering,0.96
 24-100455,Mohamed Adel,PHM031_CSE021,PHM041,-1,,PHM011|week 9|car accident|Rejected,,ENG011|insufficient gpa|Rejected,Computing,2.57
-24-422209,Omar Ahmed,HUM012,PHM011_PHM031,-1,,Sick Leave^ECE101|3/5|broken arm|Approved,1,CSE101|failed midterm|Approved,Computing,1.33
+24-422209,Omar Ahmed,HUM012,PHM011_PHM031,-1,,Sick Leave^ECE101|3/5|broken arm|Approved,1.0,CSE101|failed midterm|Approved,Computing,1.33
 24-101455,Ibrahim Hikal,PHM012_PHM111_HUM011_PHM112,PHM011,-1,,,,,Engineering,1.66
 24-101230,Sara Ali,PHM031_ECE101_ENG012,CSE021,-1,,ENG012|week6|volleyball match|Rejected,,PHM041|coursework under 60|Rejected,Engineering,2.75
+26-101001,Ali Ali,,,,,,0,,Engineering,
