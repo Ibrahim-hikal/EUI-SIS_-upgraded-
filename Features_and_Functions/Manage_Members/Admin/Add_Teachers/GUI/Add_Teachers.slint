@@ -1,96 +1,63 @@
-import { Button, LineEdit } from "std-widgets.slint";
+component CustomLineEdit inherits Rectangle {
+    in-out property <string> text;
+    in property <string> placeholder;
+    in property <float> ui-scale: 1.0;
+
+    height: 45px * ui-scale; background: #FFFFFF; border-radius: 6px * ui-scale; border-width: 2px;
+    border-color: input.has-focus ? #007bff : #ced4da; animate border-color { duration: 150ms; }
+
+    input := TextInput {
+        width: parent.width - 30px * root.ui-scale; height: parent.height; x: 15px * root.ui-scale;
+        vertical-alignment: center; font-size: 16px * root.ui-scale; color: black; text <=> root.text; single-line: true;
+    }
+
+    if (root.text == "") : Text { x: 15px * root.ui-scale; text: root.placeholder; color: #6c757d; vertical-alignment: center; font-size: 16px * root.ui-scale; }
+}
 
 export component AddTeacherWindow inherits Rectangle {
+    in property <float> ui-scale: 1.0;
 
-    // =========================
-    // Properties
-    // =========================
+    in-out property <string> first_name: "";
+    in-out property <string> last_name: "";
+    in-out property <string> password_value: "";
 
-    in-out property <string> teacher_name: "";
-    in-out property <string> teacher_email: "";
+    in property <string> status_message: "";
 
-    // =========================
-    // Callbacks
-    // =========================
+    callback submit_clicked(string, string, string);
 
-    callback submit_clicked(string, string);
-    callback close_clicked();
-
-    // =========================
-    // Window Style
-    // =========================
-
-    width: 400px;
-    height: 350px;
-
+    width: 450px * root.ui-scale;
+    height: 520px * root.ui-scale;
     background: #f8f9fa;
-
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: #007bff;
-
-    // =========================
-    // Layout
-    // =========================
+    border-radius: 12px * root.ui-scale;
+    border-width: 2px; border-color: #007bff;
 
     VerticalLayout {
+        padding: 30px * root.ui-scale; spacing: 20px * root.ui-scale;
 
-        padding: 25px;
-        spacing: 15px;
+        Text { text: "Add New Teacher"; font-size: 26px * root.ui-scale; font-weight: 700; horizontal-alignment: center; color: #007bff; }
 
+        // ---> DYNAMIC EMAIL PREVIEW <---
         Text {
-            text: "Add Teacher";
-            font-size: 24px;
-            font-weight: 700;
-            horizontal-alignment: center;
-            color: #007bff;
+            text: root.first_name != "" && root.last_name != "" ? "Email: " + root.first_name + "." + root.last_name + "@eui.edu.eg" : "Email: ...";
+            font-size: 16px * root.ui-scale; font-weight: 600; horizontal-alignment: center; color: #333;
         }
 
-        // =========================
-        // Input Fields
-        // =========================
+        CustomLineEdit { ui-scale: root.ui-scale; placeholder: "First Name"; text <=> root.first_name; }
+        CustomLineEdit { ui-scale: root.ui-scale; placeholder: "Last Name"; text <=> root.last_name; }
+        CustomLineEdit { ui-scale: root.ui-scale; placeholder: "Set Password"; text <=> root.password_value; }
 
-        LineEdit {
-            placeholder-text: "Teacher Name";
-            text <=> root.teacher_name;
+        if (root.status_message != "") : Rectangle {
+            height: 90px * root.ui-scale; background: #d4edda; border-radius: 8px * root.ui-scale; border-width: 2px; border-color: #c3e6cb;
+            Text { text: root.status_message; color: #155724; font-size: 15px * root.ui-scale; font-weight: 600; horizontal-alignment: center; vertical-alignment: center; }
         }
 
-        LineEdit {
-            placeholder-text: "Teacher Email";
-            text <=> root.teacher_email;
-        }
+        Rectangle { vertical-stretch: 1; background: transparent; }
 
         Rectangle {
-            height: 15px;
-            background: transparent;
-        }
-
-        // =========================
-        // Buttons
-        // =========================
-
-        HorizontalLayout {
-
-            spacing: 10px;
-
-            Button {
-                text: "Add Teacher";
-                primary: true;
-
-                clicked => {
-                    root.submit_clicked(
-                        root.teacher_name,
-                        root.teacher_email
-                    );
-                }
-            }
-
-            Button {
-                text: "Cancel";
-
-                clicked => {
-                    root.close_clicked();
-                }
+            height: 50px * root.ui-scale; background: submit_touch.pressed ? #004a99 : (submit_touch.has-hover ? #0056b3 : #007bff); border-radius: 8px * root.ui-scale; animate background { duration: 150ms; }
+            Text { text: "Create Teacher"; color: white; font-weight: 600; font-size: 16px * root.ui-scale; horizontal-alignment: center; vertical-alignment: center; }
+            submit_touch := TouchArea {
+                clicked => { root.submit_clicked(root.first_name, root.last_name, root.password_value); }
             }
         }
     }

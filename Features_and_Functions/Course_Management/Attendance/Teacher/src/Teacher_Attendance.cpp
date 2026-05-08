@@ -4,22 +4,19 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <algorithm>
 
 using namespace std;
 
-// --- NEW HELPER: Trims invisible spaces and line breaks ---
-static inline string trim_spaces(const string& str) {
-    size_t first = str.find_first_not_of(" \t\r\n");
-    if (string::npos == first) return "";
-    size_t last = str.find_last_not_of(" \t\r\n");
-    return str.substr(first, (last - first + 1));
+// ---> THE SIMPLE CLEANER <---
+void clean_str_att(string& str) {
+    while(!str.empty() && (str.back() == '\r' || str.back() == '\n' || str.back() == ' ')) str.pop_back();
+    while(!str.empty() && str.front() == ' ') str.erase(0, 1);
 }
 
 void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     this->teacher_name = name;
+    clean_str_att(this->teacher_name); // Make sure the teacher name is clean!
 
-    // 1. Fetch available courses and pass to UI
     auto courses_vec = get_available_courses();
     vector<CourseInfo> std_courses;
     for (int i = 0; i < courses_vec.size(); ++i) {
@@ -32,85 +29,54 @@ void TeacherAttendanceManager::initUI(Main_App* ui, const string& name) {
     auto courses_model = make_shared<slint::VectorModel<CourseInfo>>(std_courses);
     ui->set_available_courses(courses_model);
 
-    // 2. Register the load students callback
     ui->on_load_students([this, ui](slint::SharedString course, int week) {
         string course_str(course.data());
-        course_str.erase(remove(course_str.begin(), course_str.end(), '\r'), course_str.end());
-        course_str.erase(remove(course_str.begin(), course_str.end(), '\n'), course_str.end());
-
+        clean_str_att(course_str);
         auto vec = this->get_students_for_week(course_str, week);
         vector<StudentAttendanceData> std_vec;
-        for (int i = 0; i < vec.size(); ++i) {
-            std_vec.push_back(vec[i]);
-        }
+        for (int i = 0; i < vec.size(); ++i) std_vec.push_back(vec[i]);
         auto model = make_shared<slint::VectorModel<StudentAttendanceData>>(std_vec);
         ui->set_students_data(model);
     });
 
-    // 3. Auto-load the first course's students if available
-    if (!std_courses.empty()) {
-        ui->invoke_load_students(std_courses[0].course_code, 1);
-    }
+    if (!std_courses.empty()) ui->invoke_load_students(std_courses[0].course_code, 1);
 
-    // 4. Register the save attendance callback
     ui->on_save_attendance([this](shared_ptr<slint::Model<StudentAttendanceData>> data, slint::SharedString course, int week) {
         slint::SharedVector<StudentAttendanceData> vec;
         for (int i = 0; i < data->row_count(); ++i) {
-            if (auto row = data->row_data(i)) {
-                vec.push_back(*row);
-            }
+            if (auto row = data->row_data(i)) vec.push_back(*row);
         }
         string course_str(course.data());
-        course_str.erase(remove(course_str.begin(), course_str.end(), '\r'), course_str.end());
-        course_str.erase(remove(course_str.begin(), course_str.end(), '\n'), course_str.end());
-
+        clean_str_att(course_str);
         bool success = this->save_attendance(course_str, week, vec);
-        if(success) {
-            cout << "Attendance for " << course_str << " Week " << week << " saved successfully!" << endl;
-        } else {
-            cout << "Failed to save attendance." << endl;
-        }
+        if(success) cout << "Attendance saved!" << endl;
     });
 }
 
 vector<string> TeacherAttendanceManager::parse_csv_line(const string& line) const {
-    vector<string> result;
-    string current;
-    bool in_quotes = false;
+    vector<string> result; string current; bool in_quotes = false;
     for (char c : line) {
-        if (c == '\r') continue;
         if (c == '"') { in_quotes = !in_quotes; }
-        else if (c == ',' && !in_quotes) { result.push_back(current); current.clear(); }
+        else if (c == ',' && !in_quotes) { clean_str_att(current); result.push_back(current); current.clear(); }
         else { current += c; }
     }
-    result.push_back(current);
-    return result;
+    clean_str_att(current); result.push_back(current); return result;
 }
 
 slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available_courses() const {
     slint::SharedVector<slint::SharedString> courses;
-
     ifstream file("Databases/Offered_Courses.csv");
-    if (!file.is_open()) {
-        cout << "CRITICAL ERROR: TeacherAttendanceManager could not open Offered_Courses.csv!" << endl;
-        return courses;
-    }
+    if (!file.is_open()) return courses;
 
     string line;
-    getline(file, line); // Skip header
+    getline(file, line);
     while (getline(file, line)) {
         if (line.empty()) continue;
         vector<string> cols = parse_csv_line(line);
 
-        if (cols.size() > 4) {
-            //trim all invisible spaces before comparing names
-            string instructor = trim_spaces(cols[4]);
-            string target_name = trim_spaces(teacher_name);
-
-            if (instructor == target_name) {
-                // Also trim the course code just to be safe
-                courses.push_back(slint::SharedString(trim_spaces(cols[0])));
-            }
+        // Simple == match works because we cleaned the string!
+        if (cols.size() > 4 && cols[4] == teacher_name) {
+            courses.push_back(slint::SharedString(cols[0]));
         }
     }
     return courses;
@@ -118,11 +84,9 @@ slint::SharedVector<slint::SharedString> TeacherAttendanceManager::get_available
 
 slint::SharedVector<StudentAttendanceData> TeacherAttendanceManager::get_students_for_week(const string& course_code, int week) const {
     slint::SharedVector<StudentAttendanceData> students;
-    string filepath = "Databases/Courses/" + course_code + "/Attendance.csv";
-    ifstream file(filepath);
+    ifstream file("Databases/Courses/" + course_code + "/Attendance.csv");
     if (!file.is_open()) return students;
-    string line;
-    getline(file, line);
+    string line; getline(file, line);
     int target_col = 3 + week;
 
     while (getline(file, line)) {
@@ -130,8 +94,7 @@ slint::SharedVector<StudentAttendanceData> TeacherAttendanceManager::get_student
         vector<string> cols = parse_csv_line(line);
         if (cols.size() >= 2 && !cols[0].empty()) {
             StudentAttendanceData data;
-            data.id = slint::SharedString(cols[0]);
-            data.name = slint::SharedString(cols[1]);
+            data.id = slint::SharedString(cols[0]); data.name = slint::SharedString(cols[1]);
             data.present = (cols.size() > target_col && cols[target_col] == "1");
             students.push_back(data);
         }
@@ -162,9 +125,7 @@ bool TeacherAttendanceManager::save_attendance(const string& course_code, int we
     }
     ofstream outfile(filepath);
     for (const auto& row : csv_data) {
-        for (size_t i = 0; i < row.size(); ++i) {
-            outfile << row[i] << (i < row.size() - 1 ? "," : "");
-        }
+        for (size_t i = 0; i < row.size(); ++i) outfile << row[i] << (i < row.size() - 1 ? "," : "");
         outfile << "\n";
     }
     return true;

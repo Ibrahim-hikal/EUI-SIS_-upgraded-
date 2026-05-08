@@ -3,16 +3,12 @@
 
 #include <string>
 
-using namespace std;
-
 class Add_Student {
 public:
-    static void add_student(
-        const string& id,
-        const string& name,
-        const string& faculty,
-        const string& gpa
-    );
+    static std::string generate_student_id();
+
+    // Now accepts the password directly from the UI
+    static std::string add_student(const std::string& name, const std::string& faculty, const std::string& password);
 };
 
 #endif

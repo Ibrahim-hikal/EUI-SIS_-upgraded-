@@ -23,7 +23,9 @@
 #include "Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/header/Admin_Course_Withdrawal.h"
 #include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/header/Student_Attendance_Excuses.h"
 #include "Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/header/Admin_Attendance_Excuses.h"
-
+#include "Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h"
+#include "Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h"
+#include "Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h"
 using namespace std;
 
 std::unique_ptr<Request_Courses> global_request_manager;
@@ -40,9 +42,7 @@ int main() {
     string current_id = "";
     string current_email = "";
 
-    // 1. ADMIN REQUESTS REFRESH LOGIC
     auto refresh_admin_requests = [&]() {
-        // Fetch and format Withdrawals
         auto w_reqs = AdminWithdrawalManager::fetch();
         std::vector<WithdrawalRequest> slint_w_reqs;
         for (const auto &r: w_reqs) {
@@ -50,7 +50,6 @@ int main() {
         }
         ui->set_pending_withdrawals(std::make_shared<slint::VectorModel<WithdrawalRequest>>(slint_w_reqs));
 
-        // Fetch and format Excuses
         auto e_reqs = AdminExcuseManager::fetch();
         std::vector<ExcuseRequest> slint_e_reqs;
         for (const auto &r: e_reqs) {
@@ -59,7 +58,6 @@ int main() {
         ui->set_pending_excuses(std::make_shared<slint::VectorModel<ExcuseRequest>>(slint_e_reqs));
     };
 
-    // 2. ACADEMIC REQUEST CALLBACKS
     ui->on_submit_withdrawal_req([&](slint::SharedString code, slint::SharedString reason) {
         StudentWithdrawalManager::submit(current_id, std::string(code), std::string(reason));
         std::cout << "Withdrawal Submitted: " << code << std::endl;
@@ -78,16 +76,24 @@ int main() {
     ui->on_admin_handle_excuse(
         [&](slint::SharedString id, slint::SharedString course, slint::SharedString week, bool approved) {
             AdminExcuseManager::process(std::string(id), std::string(course), std::string(week), approved);
-            refresh_admin_requests(); // Refresh the table instantly!
+            refresh_admin_requests();
         });
+
     ui->on_admin_end_semester([&]() {
         Admin_Profile::get_instance().end_semester();
     });
+    ui->on_admin_check_teacher_email([&](slint::SharedString email) -> slint::SharedString {
+        return slint::SharedString(Assign_Course::get_teacher_name(string(email)));
+    });
 
+    ui->on_admin_check_assign_course([&](slint::SharedString code) -> slint::SharedString {
+        return slint::SharedString(Assign_Course::get_course_name(string(code)));
+    });
 
-    // =========================================================
-    // 2. LOGIN & UI LOGIC
-    // =========================================================
+    ui->on_admin_assign_course_submit([&](slint::SharedString email, slint::SharedString code, slint::SharedString l1, slint::SharedString l2, slint::SharedString t1, slint::SharedString t2) {
+        string success_msg = Assign_Course::assign_course(string(email), string(code), string(l1), string(l2), string(t1), string(t2));
+        ui->set_assign_course_status_message(slint::SharedString(success_msg));
+    });
 
     ui->on_check_credentials([&](const slint::SharedString &id, const slint::SharedString &pass, int role) {
         string string_id = string(id);
@@ -98,7 +104,6 @@ int main() {
             current_id = string_id;
 
             if (role == 1) {
-                // Student logic
                 auto &student = Student_Profile::get_instance();
                 student.load_profile(current_id);
 
@@ -125,14 +130,12 @@ int main() {
                 }
                 auto codes_model = std::make_shared<slint::VectorModel<slint::SharedString> >(codes_only);
 
-                // 3. Send the string list to the UI
                 ui->set_my_course_codes(codes_model);
                 studentScheduleManager.load_student_schedule(current_id);
                 studentScheduleManager.initUI(ui.operator->());
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
-                // LOAD PREVIOUS ENROLLMENTS
-                PreviousEnrollments pe("Data_on_Each_Student.csv"); // Change path to "Databases/..." if it is inside your databases folder
+                PreviousEnrollments pe("Data_on_Each_Student.csv");
                 pe.load_student_data(ui.operator->(), current_id);
 
                 auto refresh_request_tables = [&ui]() {
@@ -146,13 +149,11 @@ int main() {
                     auto eligible_courses = student_ptr->get_eligible_courses();
                     auto requested_courses = student_ptr->requestedCourses;
 
-                    // 1. Build Available Courses Model
                     for (const auto &c: eligible_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(c.code);
                         info.course_name = slint::SharedString(c.name);
 
-                        // Check if this course is already in the requested list
                         info.is_requested = false;
                         for (const auto &req: requested_courses) {
                             if (req.code == c.code) {
@@ -160,13 +161,11 @@ int main() {
                                 break;
                             }
                         }
-                        // Check if the student failed this in the past
                         info.is_failed = (student_ptr->failedCourses.find(c.code) != std::string::npos);
 
                         available_slint_list.push_back(info);
                     }
 
-                    // 2. Build Requested Courses Model (Tracks 0/5 count!)
                     for (const auto &req: requested_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(req.code);
@@ -174,16 +173,12 @@ int main() {
                         requested_slint_list.push_back(info);
                     }
 
-                    // 3. Send BOTH to Slint
                     ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo> >(available_slint_list));
                     ui->set_requested_courses(std::make_shared<slint::VectorModel<CourseInfo> >(requested_slint_list));
                 };
 
-                // Trigger once immediately so the UI populates on login
                 refresh_request_tables();
 
-                // --- UPDATED BUTTON CLICK CALLBACK ---
-                // --- NEW BUTTON CLICK CALLBACK WITH CONFLICT DETECTION ---
                 ui->on_request_course([&ui, refresh_request_tables](slint::SharedString course_code,
                                                                     slint::SharedString l_day,
                                                                     slint::SharedString l_slot,
@@ -198,27 +193,22 @@ int main() {
 
                         Student *student_ptr = global_request_manager->get_student();
 
-                        // 1. Check for time conflict FIRST
-                        if (student_ptr->
-                            has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
+                        if (student_ptr->has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
                             ui->set_status_message("Conflict: Time slot overlaps with an existing schedule.");
-                            return; // Stop here!
+                            return;
                         }
 
-                        // 2. Try to register (will fail if limit 5 reached)
                         bool success = global_request_manager->request_course(clean_code, string(l_day), string(l_slot), string(t_day), string(t_slot));
 
                         if (success) {
-                            ui->set_status_message(
-                                "Course " + slint::SharedString(clean_code) + " Requested Successfully!");
-                            refresh_request_tables(); // INSTANT UI UPDATE
+                            ui->set_status_message("Course " + slint::SharedString(clean_code) + " Requested Successfully!");
+                            refresh_request_tables();
                         } else {
                             ui->set_status_message("Request Failed (Limit 5 reached).");
                         }
                     }
                 });
             } else if (role == 2) {
-                // Teacher Logic
                 auto &teacher = Teacher_Profile::get_instance();
                 teacher.load_profile(current_id);
                 teacherScheduleManager.load_teacher_schedule(teacher.get_name());
@@ -242,7 +232,6 @@ int main() {
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());
                 teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
             } else if (role == 3) {
-                // Admin Logic
                 auto &admin = Admin_Profile::get_instance();
                 admin.load_profile(current_id);
 
@@ -255,9 +244,10 @@ int main() {
                 ui->set_user_profile_pic(img);
 
                 adminManager.initUI(ui.operator->());
-
-                // Now safely call the function we defined at the top!
                 refresh_admin_requests();
+
+                // ---> THE CLEAN REACTIVE ID SETTER! <---
+                ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
             }
 
             ui->set_active_panel(role);
@@ -273,12 +263,20 @@ int main() {
         }
     });
 
-    // Admin UI Callbacks
     ui->on_admin_next_student([&]() { adminManager.nextStudent(ui.operator->()); });
     ui->on_admin_previous_student([&]() { adminManager.prevStudent(ui.operator->()); });
     ui->on_admin_submit_decisions([&]() { adminManager.submitDecisions(ui.operator->()); });
 
-    // Profile Pic Callbacks
+    // ---> THE CLEAN REACTIVE SUBMIT BUTTON! <---
+    ui->on_admin_add_student_submit([&](slint::SharedString name, slint::SharedString fac , slint::SharedString pass) {
+        string success_string = Add_Student::add_student(string(name), string(fac) , string(pass));
+        ui->set_add_student_status_message(slint::SharedString(success_string));
+        ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
+    });
+    ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name , slint::SharedString pass) {
+        string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name) , string(pass));
+        ui->set_add_teacher_status_message(slint::SharedString(success_string));
+    });
     ui->on_change_picture([&]() {
         string source = ImageManager::select_image_dialog();
         if (source.empty()) return;
@@ -291,7 +289,6 @@ int main() {
         }
     });
 
-    // Logout Callback
     ui->on_logout([&]() {
         Student_Profile::get_instance().reset();
         Teacher_Profile::get_instance().reset();
@@ -303,13 +300,7 @@ int main() {
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
     });
-    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
-        // The Manager now handles BOTH the request database and the student database
-        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
 
-        // Refresh the UI display
-        refresh_admin_requests();
-    });
     ui->run();
     return 0;
 }
