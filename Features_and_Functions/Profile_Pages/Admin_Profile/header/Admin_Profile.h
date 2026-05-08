@@ -1,7 +1,7 @@
 #ifndef ADMIN_PROFILE_H
 #define ADMIN_PROFILE_H
 #include <string>
-
+using namespace std;
 class Admin_Profile {
 private:
     std::string name;
@@ -23,7 +23,7 @@ public:
     void reset();
 
     // New function for ending the semester
-    void end_semester();
+    string end_semester();
 
     std::string get_name() const { return name; }
     std::string get_email() const { return email; }

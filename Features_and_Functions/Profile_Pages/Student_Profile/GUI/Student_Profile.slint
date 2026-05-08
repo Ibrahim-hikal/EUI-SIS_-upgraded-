@@ -42,7 +42,9 @@ export component Student_Profile inherits Rectangle {
     in-out property <[CourseSlot]> student_schedule_data;
     in-out property <[CourseInfo]> passed_courses;
     in-out property <[CourseInfo]> failed_courses;
-
+    in property <string> enrollment_name: "";
+    in property <string> enrollment_id: "";
+    in property <string> enrollment_gpa: "";
 
     callback submit_withdrawal_req(string, string);
     callback submit_excuse_req(string, string, string);
@@ -347,6 +349,9 @@ export component Student_Profile inherits Rectangle {
                         ui-scale: root.ui-scale;
                         passed_courses: root.passed_courses;
                         failed_courses: root.failed_courses;
+                        enrollment_name: root.enrollment_name;
+                        enrollment_id: root.enrollment_id;
+                        enrollment_gpa: root.enrollment_gpa;
                 }
             }
         }

@@ -84,8 +84,9 @@ int main() {
             refresh_admin_requests();
         });
 
-    ui->on_admin_end_semester([&]() {
-        Admin_Profile::get_instance().end_semester();
+    ui->on_admin_end_semester([&]() -> slint::SharedString {
+        string status = Admin_Profile::get_instance().end_semester();
+        return slint::SharedString(status);
     });
     ui->on_admin_check_teacher_email([&](slint::SharedString email) -> slint::SharedString {
         return slint::SharedString(Assign_Course::get_teacher_name(string(email)));

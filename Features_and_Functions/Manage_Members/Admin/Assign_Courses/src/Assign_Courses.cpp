@@ -70,7 +70,7 @@ string Assign_Course::check_conflicts(const string& email, const string& code, c
     if (t1 != "None") active_slots.push_back(t1);
     if (t2 != "None") active_slots.push_back(t2);
 
-    // 1. Check for Duplicate Times
+    // 1. Check for Duplicate Times in the current form
     for (size_t i = 0; i < active_slots.size(); ++i) {
         for (size_t j = i + 1; j < active_slots.size(); ++j) {
             if (active_slots[i] == active_slots[j]) {
@@ -79,7 +79,7 @@ string Assign_Course::check_conflicts(const string& email, const string& code, c
         }
     }
 
-    // 2. Check Database Conflicts
+    // 2. Check Database Conflicts (GLOBAL OVERLAP CHECK)
     ifstream conflictFile(COURSES_DB);
     string line;
     if (conflictFile.is_open()) {
@@ -90,15 +90,21 @@ string Assign_Course::check_conflicts(const string& email, const string& code, c
             string cell; vector<string> cols;
             while(getline(ss, cell, ',')) cols.push_back(cell);
 
-            if (cols.size() >= 7 && robust_match(cols[4], t_name)) {
-                if (robust_match(cols[0], code)) continue; // Skip editing course
+            // We check ALL courses now, not just the current teacher's courses
+            if (cols.size() >= 7) {
+                if (robust_match(cols[0], code)) continue; // Skip the course we are currently editing
 
                 string existing_lecs = cols[5];
                 string existing_tuts = cols[6];
 
                 for (const string& slot : active_slots) {
                     if (existing_lecs.find(slot) != string::npos || existing_tuts.find(slot) != string::npos) {
-                        return "Teacher is already teaching " + clean_edges(cols[0]) + " on " + slot;
+                        if (robust_match(cols[4], t_name)) {
+                            return "Teacher is already teaching " + clean_edges(cols[0]) + " on " + slot;
+                        } else {
+                            // Another teacher is using this slot!
+                            return "Time Overlap! " + clean_edges(cols[0]) + " is already scheduled on " + slot;
+                        }
                     }
                 }
             }
@@ -127,10 +133,11 @@ string Assign_Course::assign_course(const string& email, const string& code, con
         if (t1 != "None") tut_str += t1;
         if (t2 != "None") { if (!tut_str.empty()) tut_str += " "; tut_str += t2; }
 
+        // 3. Update Teacher Database (GHOST TEACHER CLEANUP)
         ifstream fileIn(TEACHER_DB);
         vector<string> lines;
         bool updated = false;
-        string line; // <--- DECLARED HERE
+        string line;
 
         if (fileIn.is_open()) {
             while (getline(fileIn, line)) {
@@ -141,6 +148,7 @@ string Assign_Course::assign_course(const string& email, const string& code, con
                 getline(ss, name, ','); getline(ss, e, ','); getline(ss, courses);
 
                 if (robust_match(e, email)) {
+                    // NEW TEACHER: Add the course to their profile
                     if (courses == "\"\"" || clean_edges(courses).empty() || courses == "-1") {
                         courses = c_name;
                     } else if (courses.find(c_name) == string::npos) {
@@ -148,6 +156,22 @@ string Assign_Course::assign_course(const string& email, const string& code, con
                     }
                     line = name + "," + e + "," + courses;
                     updated = true;
+                } else {
+                    // OLD TEACHERS: Sweep and remove the course so it doesn't duplicate
+                    if (courses.find(c_name) != string::npos) {
+                        string new_courses = "";
+                        stringstream css(courses);
+                        string crs;
+                        while(getline(css, crs, '_')) {
+                            if (!robust_match(crs, c_name) && !clean_edges(crs).empty()) {
+                                if (!new_courses.empty()) new_courses += "_";
+                                new_courses += crs;
+                            }
+                        }
+                        if (new_courses.empty()) new_courses = "-1";
+                        line = name + "," + e + "," + new_courses;
+                        updated = true;
+                    }
                 }
                 lines.push_back(line);
             }
@@ -160,6 +184,7 @@ string Assign_Course::assign_course(const string& email, const string& code, con
             fileOut.close();
         }
 
+        // 4. Update Offered Courses Database
         ifstream fileInC(COURSES_DB);
         vector<string> c_lines;
         bool c_updated = false;

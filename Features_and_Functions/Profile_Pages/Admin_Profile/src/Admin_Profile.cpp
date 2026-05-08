@@ -24,7 +24,7 @@ void Admin_Profile::load_profile(const string &current_email) {
         getline(file, line);
         while (getline(file, line)) {
             if (line.empty()) continue;
-            if (line.back() == '\r') line.pop_back(); // Clean \r
+            if (line.back() == '\r') line.pop_back();
 
             stringstream ss(line);
             vector<string> cols;
@@ -39,12 +39,12 @@ void Admin_Profile::load_profile(const string &current_email) {
     }
 }
 
-void Admin_Profile::end_semester() {
+// ---> CHANGED FROM VOID TO STRING <---
+string Admin_Profile::end_semester() {
     string student_db = "Databases/Data_on_Each_Student.csv";
     ifstream file_in(student_db);
     if (!file_in.is_open()) {
-        cerr << "FILE ERROR: Could not open Databases/Data_on_Each_Student.csv" << endl;
-        return;
+        return "ERROR: Could not open Databases/Data_on_Each_Student.csv";
     }
 
     vector<string> lines;
@@ -56,7 +56,7 @@ void Admin_Profile::end_semester() {
     string line;
     while (getline(file_in, line)) {
         if (line.empty()) continue;
-        if (line.back() == '\r') line.pop_back(); // Fix the corruption bug!
+        if (line.back() == '\r') line.pop_back();
 
         stringstream ss(line);
         string cell;
@@ -71,7 +71,6 @@ void Admin_Profile::end_semester() {
         string reg_str = cols[4];
 
         if (reg_str != "-1" && !reg_str.empty()) {
-            // 1. Parse Registered Courses
             vector<string> current_reg;
             stringstream reg_ss(reg_str);
             string token;
@@ -81,7 +80,6 @@ void Admin_Profile::end_semester() {
                 current_reg.push_back((slash != string::npos) ? token.substr(0, slash) : token);
             }
 
-            // 2. Calculate baseline points from history
             double total_points = 0.0;
             int total_count = 0;
 
@@ -99,11 +97,8 @@ void Admin_Profile::end_semester() {
             string new_passed = (passed_str == "-1") ? "" : passed_str;
             string new_failed = (failed_str == "-1") ? "" : failed_str;
 
-            // 3. Process current registered courses with SAFETY SHIELD
             for (const string& course_code : current_reg) {
                 string grades_path = "";
-
-                // Anti-Crash Shield: Only search if the directory actually exists!
                 try {
                     if (std::filesystem::exists("Databases/Courses")) {
                         for (const auto& entry : std::filesystem::recursive_directory_iterator("Databases/Courses")) {
@@ -113,9 +108,7 @@ void Admin_Profile::end_semester() {
                             }
                         }
                     }
-                } catch (...) {
-                    // Ignore missing folders silently instead of crashing
-                }
+                } catch (...) {}
 
                 double mark = -1.0;
                 if (!grades_path.empty()) {
@@ -169,7 +162,6 @@ void Admin_Profile::end_semester() {
             cols[10] = gpa_ss.str();
         }
 
-        // ---> COMPLETE WIPE FOR NEW SEMESTER <---
         cols[4] = "-1"; // Clear Registered
         cols[5] = "-1"; // Clear Requested
         cols[6] = "";   // Clear Excuse Requests
@@ -184,11 +176,13 @@ void Admin_Profile::end_semester() {
     }
     file_in.close();
 
+    // ---> EXCEL LOCK CHECKER <---
     ofstream file_out(student_db, ios::trunc);
+    if (!file_out.is_open()) return "ERROR: Database locked! Close your CSV files in Excel and try again.";
+
     for (const auto& l : lines) file_out << l << "\n";
     file_out.close();
 
-    // ---> NUKE THE GLOBAL REQUEST DATABASES <---
     try {
         ofstream wOut("Databases/Course_Withdrawals.csv", ios::trunc);
         if (wOut.is_open()) wOut.close();
@@ -197,5 +191,5 @@ void Admin_Profile::end_semester() {
         if (eOut.is_open()) eOut.close();
     } catch (...) {}
 
-    cout << "Semester Ended Successfully! Databases cleared for the new term." << endl;
+    return "Semester Ended Successfully! Databases cleared for the new term.";
 }

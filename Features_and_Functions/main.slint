@@ -1,114 +1,105 @@
-import { ScrollView } from "std-widgets.slint";
-import { Login_Page } from "../Features_and_Functions/Login_Page/GUI/Login_page.slint";
-import { Student_Profile } from "../Features_and_Functions/Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
-import { Admin_Profile } from "../Features_and_Functions/Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
-import { Teacher_Profile } from "../Features_and_Functions/Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
-import { StudentAttendanceData , CourseInfo , StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
-import { Student_Course_Withdrawal } from "Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/GUI/Student_Course_Withdrawal.slint";
-import { Student_Attendance_Excuses } from "Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/GUI/Student_Attendance_Excuses.slint";
-import { Admin_Course_Withdrawal, WithdrawalRequest } from "Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
-import { Admin_Attendance_Excuses, ExcuseRequest } from "Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
-import { CourseSlot } from "../Features_and_Functions/Schedule/Student_Schedule/GUI/Student_Schedule.slint";
-// We only import the Structs here so C++ can see them. We DO NOT import the GUI components!
+import { Login_Page } from "Login_Page/GUI/Login_page.slint";
+import { Student_Profile } from "Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
+import { Teacher_Profile } from "Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
+import { Admin_Profile } from "Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
+import { CourseInfo, StudentAttendanceData, StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { WithdrawalRequest } from "Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
 import { ExcuseRequest } from "Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
+import { CourseSlot } from "Schedule/Student_Schedule/GUI/Student_Schedule.slint";
 
-export { WithdrawalRequest, ExcuseRequest, CourseSlot }
+// ---> THIS FIXES THE C++ INCOMPLETE TYPE ERRORS <---
+export { WithdrawalRequest, ExcuseRequest, CourseSlot, CourseInfo, StudentAttendanceData, StudentGradeData }
 
 export component Main_App inherits Window {
+    title: "EUI-SIS";
+    icon: @image-url("Login_Page/GUI/Uni-Logo.png");
+    width: 1024px; height: 768px;
+    property <float> global_scale: min(self.width / 1024px, self.height / 768px);
+
     in-out property <int> active_panel: 0;
+
+    // Login Properties
     in-out property <bool> login_error_state: false;
     in-out property <string> login_error_msg: "";
-    in-out property <string> user_name; in-out property <string> user_id;
-    in-out property <string> user_Faculty; in-out property <string> student_gpa; in-out property <string> user_email; in-out property <image> user_profile_pic;
-    in-out property <int> Logout_value: 0;
-    in-out property <string> admin_position;
+    callback check_credentials(string, string, int);
 
-    in property <[CourseInfo]> passed_courses;
-    in property <[CourseInfo]> failed_courses;
-    in-out property <[CourseInfo]> requested_courses;
+    // Global User Properties
+    in-out property <string> user_name; in-out property <string> user_id;
+    in-out property <string> user_Faculty; in-out property <string> student_gpa;
+    in-out property <string> user_email; in-out property <image> user_profile_pic;
+    callback change_picture();
+    in-out property <int> Logout_value: 0; callback logout;
+
+    // Student Properties
+    in-out property <[CourseInfo]> my_courses; in-out property <[CourseInfo]> available_courses;
+    in-out property <[CourseInfo]> requested_courses; in-out property <bool> request_submitted: false;
+    in-out property <string> status_message;
+    in-out property <int> student_active_tab: 0;
+    in-out property <[string]> my_course_codes;
+    in-out property <[CourseSlot]> student_schedule_data;
+    in-out property <[CourseInfo]> passed_courses; in-out property <[CourseInfo]> failed_courses;
+    callback request_course(string, string, string, string, string);
     in property <string> enrollment_name: "";
     in property <string> enrollment_id: "";
     in property <string> enrollment_gpa: "";
-    in-out property <bool> request_submitted: false;
-    in-out property <string> status_message;
-    callback request_course(string, string, string, string, string);
 
-    in-out property <[CourseInfo]> available_courses;
+    // ---> RESTORED TEACHER PROPERTIES <---
+    in-out property <[string]> teacher_profile_display_list;
     in-out property <[StudentAttendanceData]> students_data;
-    callback load_students(string, int); callback save_attendance([StudentAttendanceData], string, int);
-
-    in-out property <[CourseInfo]> my_courses; in-out property <[string]> teacher_profile_display_list;
     in-out property <[StudentGradeData]> grades_data;
-    callback load_grades(string); callback save_grades([StudentGradeData], string);
+    in-out property <[CourseSlot]> teacher_schedule_data;
+    callback load_students(string, int);
+    callback save_attendance([StudentAttendanceData], string, int);
+    callback load_grades(string);
+    callback save_grades([StudentGradeData], string);
 
-    in-out property <int> student_active_tab: 0;
+    // Admin Properties
     in-out property <int> admin_active_tab: 0;
-    // --- ACADEMIC REQUESTS PROPERTIES (Data & Signals only, no state tracking!) ---
+    in-out property <string> admin_position;
     in-out property <[WithdrawalRequest]> pending_withdrawals;
     in-out property <[ExcuseRequest]> pending_excuses;
-    in-out property <[string]> my_course_codes;
-    callback submit_withdrawal_req(string, string); callback submit_excuse_req(string, string, string);
+    callback admin_end_semester() -> string;
     callback admin_handle_withdrawal(string, string, bool);
     callback admin_handle_excuse(string, string, string, bool);
+    callback submit_withdrawal_req(string, string);
+    callback submit_excuse_req(string, string, string);
 
-    in-out property <[CourseSlot]> student_schedule_data;
-    in-out property <[CourseSlot]> teacher_schedule_data;
-
-    in-out property <string> student_id;
-    in-out property <string> student_name; in-out property <string> faculty;
+    // Accept/Refuse Course Request properties
+    in-out property <string> student_id; in-out property <string> student_name; in-out property <string> faculty;
     in-out property <bool> course1_accept_button_pressed: false; in-out property <bool> course2_accept_button_pressed: false;
-    in-out property <bool> course3_accept_button_pressed: false; in-out property <bool> course4_accept_button_pressed: false; in-out property <bool> course5_accept_button_pressed: false;
-    in-out property <bool> course1_decline_button_pressed: false;
-    in-out property <bool> course2_decline_button_pressed: false; in-out property <bool> course3_decline_button_pressed: false; in-out property <bool> course4_decline_button_pressed: false; in-out property <bool> course5_decline_button_pressed: false;
-    in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day;
-    in-out property <string> c1_t_slot;
-    in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot;
-    in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
-    in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day;
-    in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
-    in-out property <string> c4_code; in-out property <string> c4_name;
-    in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
-    in-out property <string> c5_code;
-    in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
-    in-out property <bool> Submit_Button_Pressed: false; in-out property <bool> show_warning: false; in-out property <bool> no_course_requests; in-out property <bool> is_next_student_available;
-    in-out property <bool> is_previous_student_available;
+    in-out property <bool> course3_accept_button_pressed: false; in-out property <bool> course4_accept_button_pressed: false;
+    in-out property <bool> course5_accept_button_pressed: false; in-out property <bool> course1_decline_button_pressed: false;
+    in-out property <bool> course2_decline_button_pressed: false; in-out property <bool> course3_decline_button_pressed: false;
+    in-out property <bool> course4_decline_button_pressed: false; in-out property <bool> course5_decline_button_pressed: false;
+    in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day; in-out property <string> c1_t_slot;
+    in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot; in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
+    in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day; in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
+    in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
+    in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
+    in-out property <bool> Submit_Button_Pressed: false; in-out property <bool> show_warning: false; in-out property <bool> no_course_requests: false;
+    in-out property <bool> is_next_student_available: false; in-out property <bool> is_previous_student_available;
+    callback admin_next_student(); callback admin_previous_student(); callback admin_submit_decisions();
 
-    out property <float> global_scale: min(self.width / 1024px, self.height / 768px);
-    callback admin_end_semester(); callback check_credentials(string, string, int);
-    callback change_picture(); callback logout(); callback admin_next_student(); callback admin_previous_student(); callback admin_submit_decisions();
+    // Assign Courses Properties
+    callback admin_check_teacher_email(string) -> string;
+    callback admin_check_assign_course(string) -> string;
+    callback admin_assign_course_submit(string, string, string, string, string, string);
+    in property <string> assign_course_status_message: "";
+    callback admin_validate_assign_schedule(string, string, string, string, string, string) -> string;
 
-    // ---> ADD STUDENT PROPERTIES <---
     in property <string> add_student_status_message: "";
     in property <string> next_student_id: "Loading...";
     callback admin_add_student_submit(string, string, string);
 
-    // ---> ADD TEACHER PROPERTIES <---
     in property <string> add_teacher_status_message: "";
     callback admin_add_teacher_submit(string, string, string);
 
-    callback admin_check_teacher_email(string) -> string;
-        callback admin_check_assign_course(string) -> string;
-        callback admin_assign_course_submit(string, string, string, string, string, string);
-        in property <string> assign_course_status_message: "";
-        callback admin_validate_assign_schedule(string, string, string, string, string, string) -> string;
-
-    min-height: 600px;
-    min-width: 1024px;
-    preferred-height: 768px;
-    preferred-width: 1024px;
-    max-height: 840px;
-    max-width: 1300px;
-    title: "EUI - SIS";
-    background: #f0f0f0;
-
     Rectangle {
-        width: 100%; height: 100%;
-
         if (active_panel == 0) : Login_Page {
-            ui-scale: root.global_scale;
-            Error_State <=> root.login_error_state; Error_Message <=> root.login_error_msg;
-            login_attempted(id, pass, role) => { root.check_credentials(id, pass, role); }
+            width: 100%; height: 100%; ui-scale: root.global_scale;
+            Error_State <=> root.login_error_state;
+            Error_Message <=> root.login_error_msg;
+            login_attempted(email, pass, type) => { root.check_credentials(email, pass, type); }
         }
 
         if (active_panel == 1) : Student_Profile {
@@ -119,91 +110,76 @@ export component Main_App inherits Window {
             my_courses <=> root.my_courses; available_courses <=> root.available_courses;
             requested_courses <=> root.requested_courses; request_submitted <=> root.request_submitted;
             status_message <=> root.status_message;
-
-            // The correct 5-parameter callback:
             request_course(code, ld, ls, td, ts) => { root.request_course(code, ld, ls, td, ts); }
             Logout_value <=> root.Logout_value; active_tab <=> root.student_active_tab;
             student_schedule_data <=> root.student_schedule_data;
-
-            // --- Academic Requests Wiring ---
             registered_course_codes <=> root.my_course_codes;
             submit_withdrawal_req(code, reason) => { root.submit_withdrawal_req(code, reason); }
             submit_excuse_req(code, week, reason) => { root.submit_excuse_req(code, week, reason); }
-
-            //--Previous Enrollments section--
-            passed_courses: root.passed_courses;
-            failed_courses: root.failed_courses;
-
-
+            passed_courses : root.passed_courses;
+            failed_courses : root.failed_courses;
+            enrollment_name: root.enrollment_name;
+            enrollment_id: root.enrollment_id;
+            enrollment_gpa: root.enrollment_gpa;
         }
 
+        // ---> RESTORED TEACHER PROFILE <---
         if (active_panel == 2) : Teacher_Profile {
             width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
-            user_name <=> root.user_name; user_email <=> root.user_email; user_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
-            teacher_display_list <=> root.teacher_profile_display_list; available_courses <=> root.available_courses;
-            students_data <=> root.students_data; load_students(course, week) => { root.load_students(course, week); } save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
-            grades_data <=> root.grades_data; load_grades(course) => { root.load_grades(course); } save_grades(data, course) => { root.save_grades(data, course); }
-            teacher_schedule_data <=> root.teacher_schedule_data;
+            user_name: root.user_name; user_email: root.user_email; user_profile_pic: root.user_profile_pic;
+            change_picture => { root.change_picture(); }
             Logout_value <=> root.Logout_value;
+
+            teacher_display_list <=> root.teacher_profile_display_list;
+            available_courses <=> root.available_courses;
+            students_data <=> root.students_data;
+            grades_data <=> root.grades_data;
+            teacher_schedule_data <=> root.teacher_schedule_data;
+
+            load_students(course, week) => { root.load_students(course, week); }
+            save_attendance(data, course, week) => { root.save_attendance(data, course, week); }
+            load_grades(course) => { root.load_grades(course); }
+            save_grades(data, course) => { root.save_grades(data, course); }
         }
 
         if (active_panel == 3) : Admin_Profile {
             width: 100%; height: 100%; ui-scale: root.global_scale; Logout => { root.logout(); }
-            User_name <=> root.user_name; User_email <=> root.user_email; User_profile_pic : root.user_profile_pic; change_picture => { root.change_picture(); }
-            admin_position <=> root.admin_position; active_tab <=> root.admin_active_tab;
-            student_id <=> root.student_id; student_name <=> root.student_name; faculty <=> root.faculty; Submit_Button_Pressed <=> root.Submit_Button_Pressed; show_warning <=> root.show_warning; no_course_requests <=> root.no_course_requests;
+            User_name: root.user_name; User_email: root.user_email; User_profile_pic: root.user_profile_pic;
+            admin_position: root.admin_position; change_picture => { root.change_picture(); }
+            active_tab <=> root.admin_active_tab;
+            pending_withdrawals <=> root.pending_withdrawals; pending_excuses <=> root.pending_excuses;
+            admin_handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); }
+            admin_handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); }
+
+            admin_end_semester => { return root.admin_end_semester(); }
+
+            student_id <=> root.student_id; student_name <=> root.student_name; faculty <=> root.faculty;
+            Submit_Button_Pressed <=> root.Submit_Button_Pressed; show_warning <=> root.show_warning; no_course_requests <=> root.no_course_requests;
             is_next_student_available <=> root.is_next_student_available; is_previous_student_available <=> root.is_previous_student_available;
-            course1_accept_button_pressed <=> root.course1_accept_button_pressed; course2_accept_button_pressed <=> root.course2_accept_button_pressed; course3_accept_button_pressed <=> root.course3_accept_button_pressed; course4_accept_button_pressed <=> root.course4_accept_button_pressed; course5_accept_button_pressed <=> root.course5_accept_button_pressed;
-            course1_decline_button_pressed <=> root.course1_decline_button_pressed; course2_decline_button_pressed <=> root.course2_decline_button_pressed; course3_decline_button_pressed <=> root.course3_decline_button_pressed; course4_decline_button_pressed <=> root.course4_decline_button_pressed; course5_decline_button_pressed <=> root.course5_decline_button_pressed;
+            course1_accept_button_pressed <=> root.course1_accept_button_pressed; course2_accept_button_pressed <=> root.course2_accept_button_pressed;
+            course3_accept_button_pressed <=> root.course3_accept_button_pressed; course4_accept_button_pressed <=> root.course4_accept_button_pressed;
+            course5_accept_button_pressed <=> root.course5_accept_button_pressed; course1_decline_button_pressed <=> root.course1_decline_button_pressed;
+            course2_decline_button_pressed <=> root.course2_decline_button_pressed; course3_decline_button_pressed <=> root.course3_decline_button_pressed;
+            course4_decline_button_pressed <=> root.course4_decline_button_pressed; course5_decline_button_pressed <=> root.course5_decline_button_pressed;
             c1_code <=> root.c1_code; c1_name <=> root.c1_name; c1_l_day <=> root.c1_l_day; c1_l_slot <=> root.c1_l_slot; c1_t_day <=> root.c1_t_day; c1_t_slot <=> root.c1_t_slot;
             c2_code <=> root.c2_code; c2_name <=> root.c2_name; c2_l_day <=> root.c2_l_day; c2_l_slot <=> root.c2_l_slot; c2_t_day <=> root.c2_t_day; c2_t_slot <=> root.c2_t_slot;
             c3_code <=> root.c3_code; c3_name <=> root.c3_name; c3_l_day <=> root.c3_l_day; c3_l_slot <=> root.c3_l_slot; c3_t_day <=> root.c3_t_day; c3_t_slot <=> root.c3_t_slot;
             c4_code <=> root.c4_code; c4_name <=> root.c4_name; c4_l_day <=> root.c4_l_day; c4_l_slot <=> root.c4_l_slot; c4_t_day <=> root.c4_t_day; c4_t_slot <=> root.c4_t_slot;
             c5_code <=> root.c5_code; c5_name <=> root.c5_name; c5_l_day <=> root.c5_l_day; c5_l_slot <=> root.c5_l_slot; c5_t_day <=> root.c5_t_day; c5_t_slot <=> root.c5_t_slot;
             admin_next_student => { root.admin_next_student(); } admin_previous_student => { root.admin_previous_student(); } admin_submit_decisions => { root.admin_submit_decisions(); }
-            Logout_value <=> root.Logout_value;
-            pending_withdrawals <=> root.pending_withdrawals; pending_excuses <=> root.pending_excuses;
-            admin_handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); }
-            admin_handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); }
-            admin_end_semester => { root.admin_end_semester();}
 
-            // ---> ADD STUDENT WIRES <---
+            check_teacher_email(email) => { return root.admin_check_teacher_email(email); }
+            check_assign_course(code) => { return root.admin_check_assign_course(code); }
+            assign_course_submit(email, code, l1, l2, t1, t2) => { root.admin_assign_course_submit(email, code, l1, l2, t1, t2); }
+            assign_course_status_message: root.assign_course_status_message;
+            validate_assign_schedule(email, code, l1, l2, t1, t2) => { return root.admin_validate_assign_schedule(email, code, l1, l2, t1, t2); }
+
             add_student_status_message: root.add_student_status_message;
             next_student_id: root.next_student_id;
             add_student_submit(name, fac, pass) => { root.admin_add_student_submit(name, fac, pass); }
 
-            // ---> ADD TEACHER WIRES <---
             add_teacher_status_message: root.add_teacher_status_message;
             add_teacher_submit(fn, ln, pass) => { root.admin_add_teacher_submit(fn, ln, pass); }
-
-            // ---> ASSIGN COURSES WIRES <---
-            assign_course_status_message: root.assign_course_status_message;
-            check_teacher_email(email) => { return root.admin_check_teacher_email(email); }
-            check_assign_course(code) => { return root.admin_check_assign_course(code); }
-            assign_course_submit(email, code, l1, l2, t1, t2) => { root.admin_assign_course_submit(email, code, l1, l2, t1, t2); }
-            validate_assign_schedule(email, code, l1, l2, t1, t2) => { return root.admin_validate_assign_schedule(email, code, l1, l2, t1, t2); }
-        }
-
-        if (active_panel == 1 && root.student_active_tab == 2) : Rectangle {
-            x: 270px * root.global_scale; width: parent.width - self.x; height: parent.height; background: white;
-            ScrollView {
-                VerticalLayout {
-                    padding: 40px * root.global_scale; spacing: 40px * root.global_scale; alignment: center;
-                    HorizontalLayout { alignment: center; Student_Course_Withdrawal { ui-scale: root.global_scale; submit_withdrawal(code, reason) => { root.submit_withdrawal_req(code, reason); } } }
-                    HorizontalLayout { alignment: center; Student_Attendance_Excuses { ui-scale: root.global_scale; submit_excuse(code, week, reason) => { root.submit_excuse_req(code, week, reason); } } }
-                }
-            }
-        }
-
-        if (active_panel == 3 && root.admin_active_tab == 1) : Rectangle {
-            x: 270px * root.global_scale; width: parent.width - self.x; height: parent.height; background: white;
-            ScrollView {
-                VerticalLayout {
-                    padding: 40px * root.global_scale; spacing: 40px * root.global_scale; alignment: center;
-                    HorizontalLayout { alignment: center; Admin_Course_Withdrawal { ui-scale: root.global_scale; requests <=> root.pending_withdrawals; handle_withdrawal(id, course, approved) => { root.admin_handle_withdrawal(id, course, approved); } } }
-                    HorizontalLayout { alignment: center; Admin_Attendance_Excuses { ui-scale: root.global_scale; requests <=> root.pending_excuses; handle_excuse(id, course, week, approved) => { root.admin_handle_excuse(id, course, week, approved); } } }
-                }
-            }
         }
     }
 }

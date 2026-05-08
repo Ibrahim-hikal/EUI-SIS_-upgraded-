@@ -6,7 +6,9 @@ export component Previous_Enrollments inherits Rectangle {
 
     in property <[CourseInfo]> passed_courses;
     in property <[CourseInfo]> failed_courses;
-
+    in property <string> enrollment_name: "";
+    in property <string> enrollment_id: "";
+    in property <string> enrollment_gpa: "";
     background: white;
 
     ScrollView {
