@@ -1,6 +1,8 @@
 #ifndef ADD_TEACHER_H
 #define ADD_TEACHER_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 
 using namespace std;

@@ -1,6 +1,8 @@
 #ifndef ADD_STUDENT_H
 #define ADD_STUDENT_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 
 class Add_Student {

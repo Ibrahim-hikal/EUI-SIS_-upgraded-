@@ -1,6 +1,8 @@
 #ifndef ACCEPT_AND_REFUSE_COURSES_H
 #define ACCEPT_AND_REFUSE_COURSES_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 #include <vector>
 #include <map>

@@ -62,7 +62,7 @@ int main() {
     auto ui = Main_App::create();
 
     // 2. Prepare the backend databases and managers
-    Login_Manager &db = Login_Manager::get_instance();
+    Login_Manager& db = Login_Manager::get_instance();
     TeacherGradesManager teacherGradesManager;
     AdminCourseManager adminManager("Databases/");
     TeacherAttendanceManager teacherAttendanceManager;
@@ -80,14 +80,14 @@ int main() {
     auto refresh_admin_requests = [&]() {
         auto w_reqs = AdminWithdrawalManager::fetch();
         std::vector<WithdrawalRequest> slint_w_reqs;
-        for (const auto &r: w_reqs) {
+        for (const auto& r : w_reqs) {
             slint_w_reqs.push_back({slint::SharedString(r.student_id), slint::SharedString(r.course_code), slint::SharedString(r.reason)});
         }
         ui->set_pending_withdrawals(std::make_shared<slint::VectorModel<WithdrawalRequest>>(slint_w_reqs));
 
         auto e_reqs = AdminExcuseManager::fetch();
         std::vector<ExcuseRequest> slint_e_reqs;
-        for (const auto &r: e_reqs) {
+        for (const auto& r : e_reqs) {
             slint_e_reqs.push_back({slint::SharedString(r.student_id), slint::SharedString(r.course_code), slint::SharedString(r.week), slint::SharedString(r.reason)});
         }
         ui->set_pending_excuses(std::make_shared<slint::VectorModel<ExcuseRequest>>(slint_e_reqs));
@@ -166,7 +166,7 @@ int main() {
 
             // Setup if it is a Student
             if (role == 1) {
-                auto &student = Student_Profile::get_instance();
+                auto& student = Student_Profile::get_instance();
                 ui->set_user_id(student.get_id().c_str());
                 ui->set_user_Faculty(student.get_faculty().c_str());
                 ui->set_student_gpa(student.get_gpa().c_str());
@@ -180,7 +180,7 @@ int main() {
                 ui->set_my_courses(std::make_shared<slint::VectorModel<CourseInfo>>(std_courses));
 
                 std::vector<slint::SharedString> codes_only;
-                for (const auto &course: std_courses) codes_only.push_back(course.course_code);
+                for (const auto& course : std_courses) codes_only.push_back(course.course_code);
                 ui->set_my_course_codes(std::make_shared<slint::VectorModel<slint::SharedString>>(codes_only));
 
                 // Build their schedule and past grades
@@ -204,12 +204,12 @@ int main() {
                     auto requested_courses = student_ptr->requestedCourses;
 
                     // Fill the "Available" list
-                    for (const auto &c: eligible_courses) {
+                    for (const auto& c : eligible_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(c.code);
                         info.course_name = slint::SharedString(c.name);
                         info.is_requested = false;
-                        for (const auto &req: requested_courses) {
+                        for (const auto& req : requested_courses) {
                             if (req.code == c.code) {
                                 info.is_requested = true;
                                 break;
@@ -220,7 +220,7 @@ int main() {
                     }
 
                     // Fill the "Already Requested" list
-                    for (const auto &req: requested_courses) {
+                    for (const auto& req : requested_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(req.code);
                         info.course_name = slint::SharedString(req.name);
@@ -240,7 +240,7 @@ int main() {
                         size_t underscore_pos = code_str.find_last_of('_');
                         string clean_code = (underscore_pos != string::npos) ? code_str.substr(0, underscore_pos) : code_str;
 
-                        Student *student_ptr = global_request_manager->get_student();
+                        Student* student_ptr = global_request_manager->get_student();
 
                         // Check if the time slot clashes with a course they already have
                         if (student_ptr->has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
@@ -261,7 +261,7 @@ int main() {
 
             // Setup if it is a Teacher
             } else if (role == 2) {
-                auto &teacher = Teacher_Profile::get_instance();
+                auto& teacher = Teacher_Profile::get_instance();
                 current_email = teacher.get_email();
                 ui->set_user_email(current_email.c_str());
 
@@ -270,7 +270,7 @@ int main() {
                 teacherScheduleManager.initUI(ui.operator->());
 
                 std::vector<slint::SharedString> display_list;
-                for (const auto &course_str: teacher.get_courses_taught()) {
+                for (const auto& course_str : teacher.get_courses_taught()) {
                     display_list.push_back(slint::SharedString(course_str));
                 }
                 ui->set_teacher_profile_display_list(std::make_shared<slint::VectorModel<slint::SharedString>>(display_list));
@@ -281,7 +281,7 @@ int main() {
 
             // Setup if it is an Admin
             } else if (role == 3) {
-                auto &admin = Admin_Profile::get_instance();
+                auto& admin = Admin_Profile::get_instance();
                 ui->set_user_email(admin.get_email().c_str());
                 ui->set_admin_position(admin.get_position().c_str());
 
@@ -309,14 +309,15 @@ int main() {
     ui->on_admin_previous_student([&]() { adminManager.prevStudent(ui.operator->()); });
     ui->on_admin_submit_decisions([&]() { adminManager.submitDecisions(ui.operator->()); });
 
-    ui->on_admin_add_student_submit([&](slint::SharedString name, slint::SharedString fac , slint::SharedString pass) {
-        string success_string = Add_Student::add_student(string(name), string(fac) , string(pass));
+    // Admin member-management callbacks.
+    ui->on_admin_add_student_submit([&](slint::SharedString name, slint::SharedString fac, slint::SharedString pass) {
+        string success_string = Add_Student::add_student(string(name), string(fac), string(pass));
         ui->set_add_student_status_message(slint::SharedString(success_string));
         ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
     });
 
-    ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name , slint::SharedString pass) {
-        string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name) , string(pass));
+    ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name, slint::SharedString pass) {
+        string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name), string(pass));
         ui->set_add_teacher_status_message(slint::SharedString(success_string));
     });
 

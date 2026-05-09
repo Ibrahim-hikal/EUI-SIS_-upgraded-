@@ -1,6 +1,8 @@
 #ifndef PROJECT_STUDENT_SCHEDULE_H
 #define PROJECT_STUDENT_SCHEDULE_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 #include <vector>
 #include "main.h"

@@ -1,4 +1,5 @@
 #include "../header/Student_Schedule_Manager.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <sstream>
 #include <iostream>

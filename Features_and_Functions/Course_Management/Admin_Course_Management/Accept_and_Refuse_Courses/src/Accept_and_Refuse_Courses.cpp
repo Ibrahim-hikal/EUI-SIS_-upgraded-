@@ -1,4 +1,5 @@
 #include <iostream>
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <sstream>
 #include "../header/Accept_and_Refuse_Courses.h"

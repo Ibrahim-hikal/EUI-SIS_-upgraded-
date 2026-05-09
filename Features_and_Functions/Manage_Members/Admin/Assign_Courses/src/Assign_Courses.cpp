@@ -1,4 +1,5 @@
 #include "../header/Assign_Courses.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <sstream>
 #include <vector>

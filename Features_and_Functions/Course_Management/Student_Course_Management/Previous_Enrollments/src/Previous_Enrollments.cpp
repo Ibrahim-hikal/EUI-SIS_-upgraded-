@@ -1,4 +1,5 @@
 #include "../header/Previous_Enrollments.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include "main.h"
 #include <fstream>
 #include <sstream>

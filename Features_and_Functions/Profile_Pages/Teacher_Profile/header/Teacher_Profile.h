@@ -8,11 +8,19 @@
 // ---> 6. INHERITANCE ("Teacher is a Profile") <---
 class Teacher_Profile : public IProfile {
 private:
+    // Teaching assignments shown in the teacher dashboard.
     std::vector<std::string> courses_taught;
+
+    // Singleton-only construction.
     Teacher_Profile() {}
+
 public:
     // ---> 7. DESIGN PATTERN 1: SINGLETON <---
-    static Teacher_Profile& get_instance() { static Teacher_Profile instance; return instance; }
+    static Teacher_Profile& get_instance() {
+        static Teacher_Profile instance;
+        return instance;
+    }
+
     Teacher_Profile(const Teacher_Profile&) = delete;
     Teacher_Profile& operator=(const Teacher_Profile&) = delete;
 

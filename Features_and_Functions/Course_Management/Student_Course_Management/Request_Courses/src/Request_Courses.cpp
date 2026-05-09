@@ -1,4 +1,5 @@
 #include "../header/Request_Courses.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <stack>
 #include <queue>
 #include <iostream>

@@ -8,14 +8,22 @@
 // ---> 6. INHERITANCE ("Student is a Profile") <---
 class Student_Profile : public IProfile {
 private:
+    // Core student profile fields loaded from persistence.
     std::string id;
     std::string faculty;
     std::string gpa;
     std::vector<std::string> registered_courses;
+
+    // Singleton-only construction.
     Student_Profile() {}
+
 public:
     // ---> 7. DESIGN PATTERN 1: SINGLETON <---
-    static Student_Profile& get_instance() { static Student_Profile instance; return instance; }
+    static Student_Profile& get_instance() {
+        static Student_Profile instance;
+        return instance;
+    }
+
     Student_Profile(const Student_Profile&) = delete;
     Student_Profile& operator=(const Student_Profile&) = delete;
 

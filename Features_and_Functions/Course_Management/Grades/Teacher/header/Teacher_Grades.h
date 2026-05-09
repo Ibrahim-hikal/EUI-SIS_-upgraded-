@@ -4,6 +4,8 @@
 
 #ifndef PROJECT_TEACHER_GRADES_H
 #define PROJECT_TEACHER_GRADES_H
+
+// Readability note: declarations are grouped for easier scanning.
 #include <string>
 #include <vector>
 #include "main.h"

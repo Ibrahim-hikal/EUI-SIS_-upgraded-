@@ -1,4 +1,5 @@
 #include "../header/Student_Attendance_Excuses.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <filesystem>
 void StudentExcuseManager::submit(const std::string& id, const std::string& course, const std::string& week, const std::string& reason) {

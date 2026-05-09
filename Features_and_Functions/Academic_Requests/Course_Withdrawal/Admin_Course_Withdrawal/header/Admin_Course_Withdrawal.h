@@ -7,6 +7,8 @@
 #ifndef ADMIN_COURSE_WITHDRAWAL_H
 #define ADMIN_COURSE_WITHDRAWAL_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 #include <vector>
 

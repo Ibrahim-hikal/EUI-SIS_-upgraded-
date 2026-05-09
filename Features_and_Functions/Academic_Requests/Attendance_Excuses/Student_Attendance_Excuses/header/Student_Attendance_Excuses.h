@@ -1,4 +1,6 @@
 #pragma once
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 class StudentExcuseManager {
 public:

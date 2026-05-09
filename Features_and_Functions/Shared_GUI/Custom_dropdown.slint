@@ -1,97 +1,225 @@
+/*
+ * FILE: Custom_dropdown.slint
+ * DESCRIPTION: Reusable custom dropdown/select component
+ *
+ * PURPOSE: Provides a fully-featured dropdown menu component that can be used
+ *          throughout the application (courses, students, departments, etc.)
+ *
+ * FEATURES:
+ *   - Shows/hides dropdown menu on button click
+ *   - Displays list of options from data model
+ *   - Handles user selection with callback
+ *   - Responsive scaling based on ui-scale parameter
+ *   - Hover effects for better UX
+ *   - ScrollView for long lists
+ *   - Properly positioned below button
+ *
+ * USAGE:
+ *   CustomDropdown {
+ *       model: ["Option1", "Option2", "Option3"];
+ *       current_value: "Select...";
+ *       ui-scale: 1.0;
+ *       selected(value) => {  handle selection  }
+ *   }
+ */
+
 import { ScrollView } from "std-widgets.slint";
 
+// ==========================================
+// CUSTOM DROPDOWN COMPONENT
+// ==========================================
+/*
+ * COMPONENT: CustomDropdown
+ * PURPOSE: A reusable dropdown/select menu component
+ *
+ * INPUT PROPERTIES (Read-only):
+ *   - model: Array of strings to display as options
+ *   - ui-scale: Scale factor for responsive UI (1.0 = normal size)
+ *
+ * BIDIRECTIONAL PROPERTIES (Read-write):
+ *   - current_value: Currently selected value (displays in button)
+ *
+ * INTERNAL PROPERTIES:
+ *   - is_open: Tracks whether dropdown menu is visible
+ *
+ * CALLBACKS:
+ *   - selected(value): Fired when user selects an option
+ *
+ * DIMENSIONS:
+ *   - Height: 45px (scaled by ui-scale)
+ *   - Width: 100% (fills parent container)
+ *   - Dropdown list height: min(160px, items * 40px)
+ */
 export component CustomDropdown inherits Rectangle {
+    // ==========================================
+    // INPUT PROPERTIES
+    // ==========================================
+    // Array of string options to display in the dropdown
     in property <[string]> model;
+
+    // Currently selected value (shows in the button)
     in-out property <string> current_value: "Select...";
+
+    // Scale factor for responsive/adaptive sizing (1.0 = normal, 0.8 = 80% smaller)
     in property <float> ui-scale: 1.0;
+
+    // ==========================================
+    // INTERNAL STATE
+    // ==========================================
+    // Tracks whether dropdown menu is open or closed
     property <bool> is_open: false;
+
+    // ==========================================
+    // CALLBACKS (Events sent to backend)
+    // ==========================================
+    // Fired when user selects an option
+    // Passes the selected item as a parameter
     callback selected(string);
-    height: 45px * ui-scale;
-    clip: false;
+
+    // ==========================================
+    // COMPONENT STYLING
+    // ==========================================
+    height: 45px * ui-scale;     // Button height
+    clip: false;                 // Allow dropdown to overflow container
+    // Z-index: dropdown gets priority (1000) when open, button on top (1) when closed
     z: is_open ? 1000 : 1;
 
-    // --- 1. The Main Button ---
+    // ==========================================
+    // 1. MAIN BUTTON (Always Visible)
+    // ==========================================
+    /*
+     * The clickable button that displays current selection
+     * Shows/hides the dropdown when clicked
+     */
     Rectangle {
         width: 100%;
         height: 100%;
-        background: #FFFFFF;
-        border-radius: 6px * ui-scale;
+        background: #FFFFFF;              // White background
+        border-radius: 6px * ui-scale;    // Rounded corners
         border-width: 2px;
+        // Border color changes on hover: blue when hover, gray otherwise
         border-color: drop_touch.has-hover ? #007bff : #727275;
 
         HorizontalLayout {
             padding-left: 15px * ui-scale;
             padding-right: 15px * ui-scale;
+
+            // Display the selected value
             Text {
                 text: root.current_value;
                 color: black;
                 vertical-alignment: center;
                 font-size: 16px * ui-scale;
-                font-weight: 600;
+                font-weight: 600;  // Bold text
             }
+
+            // Dropdown arrow (points up when open, down when closed)
             Text {
-                text: root.is_open ? "▲" : "▼";
+                text: root.is_open ? "▲" : "▼";  // Unicode arrow symbols
                 color: #555;
                 horizontal-alignment: right;
                 vertical-alignment: center;
             }
         }
 
+        // Click area for the button
         drop_touch := TouchArea {
+            // Toggle dropdown visibility on click
             clicked => { root.is_open = !root.is_open; }
         }
     }
 
-    // --- 2. The Invisible Shield ---
-    // Blocks clicks to other UI elements when open and closes the menu if clicked
+    // ==========================================
+    // 2. BACKDROP/SHIELD (Visible When Dropdown Open)
+    // ==========================================
+    /*
+     * This is an invisible (but huge) clickable area that:
+     *   - Sits behind the dropdown menu (Z index 900)
+     *   - Extends far beyond screen boundaries to catch all clicks
+     *   - Closes the dropdown if user clicks anywhere else
+     *
+     * This prevents dropdown from staying open when user clicks outside
+     */
     if is_open : TouchArea {
-        x: -5000px;
-        y: -5000px;
-        width: 10000px;
-        height: 10000px;
-        z: 900;
+        // Positioned way off-screen to cover everything
+        x: -5000px;           // Way left
+        y: -5000px;           // Way up
+        width: 10000px;       // Huge width
+        height: 10000px;      // Huge height
+        z: 900;               // Under dropdown (1100) but over button (1)
+
+        // Close dropdown if clicked anywhere on this shield
         clicked => { root.is_open = false; }
     }
 
-    // --- 3. The Floating List ---
+    // ==========================================
+    // 3. DROPDOWN MENU (Visible When Open)
+    // ==========================================
+    /*
+     * The floating menu that appears below the button
+     * Contains the scrollable list of options
+     */
     if is_open : Rectangle {
+        // ==========================================
+        // POSITIONING
+        // ==========================================
+        // Align left edge with button's left edge
         x: 0;
-        y: parent.height + 4px; // Pushes it exactly below the button
+        // Position directly below the button with small gap
+        y: parent.height + 4px;
+        // Match button width
         width: parent.width;
+        // Height: limited to show max 4 items, or fewer if not enough items
         height: Math.min(160px * ui-scale, root.model.length * 40px * ui-scale);
 
+        // ==========================================
+        // STYLING
+        // ==========================================
         background: white;
         border-radius: 6px * ui-scale;
         border-width: 2px;
-        border-color: #007bff;
+        border-color: #007bff;  // Blue border matches button hover color
+        clip: true;             // Hide content that extends beyond rounded corners
+        z: 1100;                // On top of everything (button 1, shield 900, dropdown 1100)
 
-        clip: true; // Keeps the rounded corners clean
-        z: 1100;
-
+        // ==========================================
+        // SCROLLABLE MENU CONTENT
+        // ==========================================
+        // Scrollable container for the option list
         ScrollView {
             width: 100%;
             height: 100%;
 
+            // Vertical list of options
             VerticalLayout {
-                spacing: 0;
-                alignment: start;
+                spacing: 0;              // No space between items
+                alignment: start;        // Align items to top
 
+                // Generate one item for each option in the model
                 for item in root.model : TouchArea {
+                    // Each item is 40px tall
                     height: 40px * ui-scale;
 
+                    // When user clicks an item:
                     clicked => {
+                        // 1. Update the button to show this selection
                         root.current_value = item;
+                        // 2. Close the dropdown menu
                         root.is_open = false;
+                        // 3. Fire callback to backend (so it knows selection changed)
                         root.selected(item);
                     }
 
+                    // Visual background for each item
                     Rectangle {
                         height: 100%;
+                        // Change background color on hover (light gray when hovering)
                         background: parent.has-hover ? #e9ecef : white;
 
+                        // Display the option text
                         Text {
-                            x: 15px * ui-scale;
-                            text: item;
+                            x: 15px * ui-scale;      // Indent from left edge
+                            text: item;              // Show the option value
                             color: black;
                             vertical-alignment: center;
                             font-size: 14px * ui-scale;

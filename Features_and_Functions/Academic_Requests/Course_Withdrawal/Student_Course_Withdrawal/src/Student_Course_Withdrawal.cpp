@@ -5,6 +5,7 @@
  */
 
 #include "../header/Student_Course_Withdrawal.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <iostream>
 

@@ -3,6 +3,7 @@
 //
 
 #include "../header/Teacher_Grades.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <iostream>
 #include <algorithm>

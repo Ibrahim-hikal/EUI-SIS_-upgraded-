@@ -1,4 +1,6 @@
 #pragma once
+// Readability note: data-facing declarations are grouped together.
+
 #include <string>
 #include <vector>
 #include <slint.h>

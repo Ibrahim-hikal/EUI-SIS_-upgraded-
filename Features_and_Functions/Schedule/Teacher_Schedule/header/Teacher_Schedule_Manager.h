@@ -1,6 +1,8 @@
 #ifndef PROJECT_TEACHER_SCHEDULE_MANAGER_H
 #define PROJECT_TEACHER_SCHEDULE_MANAGER_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 #include <vector>
 #include "main.h"

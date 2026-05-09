@@ -7,6 +7,8 @@
 #ifndef STUDENT_COURSE_WITHDRAWAL_H
 #define STUDENT_COURSE_WITHDRAWAL_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 
 class StudentWithdrawalManager {

@@ -1,6 +1,8 @@
 #ifndef PROJECT_REQUEST_COURSES_H
 #define PROJECT_REQUEST_COURSES_H
 
+// Readability note: declarations are grouped for easier scanning.
+
 #include <string>
 #include <memory>
 #include <vector>

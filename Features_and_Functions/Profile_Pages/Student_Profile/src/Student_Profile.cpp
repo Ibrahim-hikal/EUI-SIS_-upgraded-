@@ -1,4 +1,5 @@
 #include "../header/Student_Profile.h"
+// Readability pass: includes and declarations are kept visually grouped.
 #include <fstream>
 #include <sstream>
 #include <vector>

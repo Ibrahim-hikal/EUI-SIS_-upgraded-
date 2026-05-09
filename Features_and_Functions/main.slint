@@ -1,34 +1,66 @@
+/*
+ * FILE: main.slint
+ * DESCRIPTION: Main entry point for the university management system GUI
+ * This file controls the visual layout, data binding, and user interaction routing
+ * between the C++ backend and the Slint UI framework.
+ */
+
+// ==========================================
+// IMPORT STATEMENTS - UI COMPONENTS
+// ==========================================
 // Bring in the visual designs from other folders so we can build the main interface
 import { Login_Page } from "Login_Page/GUI/Login_page.slint";
 import { Student_Profile } from "Profile_Pages/Student_Profile/GUI/Student_Profile.slint";
 import { Teacher_Profile } from "Profile_Pages/Teacher_Profile/GUI/Teacher_Profile.slint";
 import { Admin_Profile } from "Profile_Pages/Admin_Profile/GUI/Admin_Profile.slint";
 
+// ==========================================
+// IMPORT STATEMENTS - DATA STRUCTURES
+// ==========================================
 // Bring in the data structures used for schedules, grades, and requests
 import { CourseInfo, StudentAttendanceData, StudentGradeData } from "Course_Management/Attendance/Shared/GUI/Shared_Structs.slint";
 import { WithdrawalRequest } from "Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/GUI/Admin_Course_Withdrawal.slint";
 import { ExcuseRequest } from "Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/GUI/Admin_Attendance_Excuses.slint";
 import { CourseSlot } from "Schedule/Student_Schedule/GUI/Student_Schedule.slint";
 
+// ==========================================
+// EXPORT STATEMENTS
+// ==========================================
 // Share these data structures so the C++ backend can read and write to them
 export { WithdrawalRequest, ExcuseRequest, CourseSlot, CourseInfo, StudentAttendanceData, StudentGradeData }
 
+// ==========================================
+// MAIN APPLICATION WINDOW COMPONENT
+// ==========================================
 export component Main_App inherits Window {
-    // Main window title and logo
+    // ==========================================
+    // WINDOW CONFIGURATION
+    // ==========================================
+    // Main window title and logo - displayed in the window title bar
     title: "University Management System";
     icon: @image-url("../EUI-logo.png");
 
-    // Window sizing limits. use preferred sizes so the user can stretch or shrink the window freely.
+    // Window sizing limits. Use preferred sizes so the user can stretch or shrink the window freely.
+    // Minimum dimensions ensure UI remains usable on smaller screens
     min-width: 800px;
     min-height: 600px;
+    // Preferred dimensions define the default window size on launch
     preferred-width: 1024px;
     preferred-height: 768px;
 
-    // This calculates a scale based on the window size so the text and boxes adapt smoothly
+    // ==========================================
+    // RESPONSIVE DESIGN SCALING
+    // ==========================================
+    // This calculates a scale factor based on the window size so the text and boxes adapt smoothly
+    // It compares the actual window dimensions to the preferred dimensions
     property <float> global_scale: min(self.width / 1024px, self.height / 768px);
 
-    // This variable tracks which screen is currently visible
-    // 0 is Login, 1 is Student, 2 is Teacher, 3 is Admin
+    // ==========================================
+    // SCREEN NAVIGATION
+    // ==========================================
+    // This variable tracks which screen is currently visible to the user
+    // Possible values: 0=Login, 1=Student Dashboard, 2=Teacher Dashboard, 3=Admin Dashboard
+    // The C++ backend updates this value when user logs in or switches roles
     in-out property <int> active_panel: 0;
 
     // ==========================================
@@ -101,11 +133,41 @@ export component Main_App inherits Window {
     in-out property <bool> course4_decline_button_pressed: false;
     in-out property <bool> course5_decline_button_pressed: false;
 
-    in-out property <string> c1_code; in-out property <string> c1_name; in-out property <string> c1_l_day; in-out property <string> c1_l_slot; in-out property <string> c1_t_day; in-out property <string> c1_t_slot;
-    in-out property <string> c2_code; in-out property <string> c2_name; in-out property <string> c2_l_day; in-out property <string> c2_l_slot; in-out property <string> c2_t_day; in-out property <string> c2_t_slot;
-    in-out property <string> c3_code; in-out property <string> c3_name; in-out property <string> c3_l_day; in-out property <string> c3_l_slot; in-out property <string> c3_t_day; in-out property <string> c3_t_slot;
-    in-out property <string> c4_code; in-out property <string> c4_name; in-out property <string> c4_l_day; in-out property <string> c4_l_slot; in-out property <string> c4_t_day; in-out property <string> c4_t_slot;
-    in-out property <string> c5_code; in-out property <string> c5_name; in-out property <string> c5_l_day; in-out property <string> c5_l_slot; in-out property <string> c5_t_day; in-out property <string> c5_t_slot;
+    // Course request fields per slot (split per line for readability)
+    in-out property <string> c1_code;
+    in-out property <string> c1_name;
+    in-out property <string> c1_l_day;
+    in-out property <string> c1_l_slot;
+    in-out property <string> c1_t_day;
+    in-out property <string> c1_t_slot;
+
+    in-out property <string> c2_code;
+    in-out property <string> c2_name;
+    in-out property <string> c2_l_day;
+    in-out property <string> c2_l_slot;
+    in-out property <string> c2_t_day;
+    in-out property <string> c2_t_slot;
+
+    in-out property <string> c3_code;
+    in-out property <string> c3_name;
+    in-out property <string> c3_l_day;
+    in-out property <string> c3_l_slot;
+    in-out property <string> c3_t_day;
+    in-out property <string> c3_t_slot;
+
+    in-out property <string> c4_code;
+    in-out property <string> c4_name;
+    in-out property <string> c4_l_day;
+    in-out property <string> c4_l_slot;
+    in-out property <string> c4_t_day;
+    in-out property <string> c4_t_slot;
+
+    in-out property <string> c5_code;
+    in-out property <string> c5_name;
+    in-out property <string> c5_l_day;
+    in-out property <string> c5_l_slot;
+    in-out property <string> c5_t_day;
+    in-out property <string> c5_t_slot;
 
     in-out property <bool> Submit_Button_Pressed: false;
     in-out property <bool> show_warning: false;
@@ -157,7 +219,8 @@ export component Main_App inherits Window {
 
         // Show the Login Screen if the panel is set to 0
         if (active_panel == 0) : Login_Page {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             ui-scale: root.global_scale;
 
             // Link the error messages to the shared variables
@@ -170,7 +233,8 @@ export component Main_App inherits Window {
 
         // Show the Student Dashboard if the panel is set to 1
         if (active_panel == 1) : Student_Profile {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             ui-scale: root.global_scale;
 
             // Link the visual profile text to the stored data
@@ -209,7 +273,8 @@ export component Main_App inherits Window {
 
         // Show the Teacher Dashboard if the panel is set to 2
         if (active_panel == 2) : Teacher_Profile {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             ui-scale: root.global_scale;
 
             // Link the teacher's profile text and picture
@@ -236,7 +301,8 @@ export component Main_App inherits Window {
 
         // Show the Administrator Dashboard if the panel is set to 3
         if (active_panel == 3) : Admin_Profile {
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             ui-scale: root.global_scale;
 
             // Link the admin's profile text and active tabs
@@ -272,11 +338,41 @@ export component Main_App inherits Window {
             course4_decline_button_pressed <=> root.course4_decline_button_pressed;
             course5_decline_button_pressed <=> root.course5_decline_button_pressed;
 
-            c1_code <=> root.c1_code; c1_name <=> root.c1_name; c1_l_day <=> root.c1_l_day; c1_l_slot <=> root.c1_l_slot; c1_t_day <=> root.c1_t_day; c1_t_slot <=> root.c1_t_slot;
-            c2_code <=> root.c2_code; c2_name <=> root.c2_name; c2_l_day <=> root.c2_l_day; c2_l_slot <=> root.c2_l_slot; c2_t_day <=> root.c2_t_day; c2_t_slot <=> root.c2_t_slot;
-            c3_code <=> root.c3_code; c3_name <=> root.c3_name; c3_l_day <=> root.c3_l_day; c3_l_slot <=> root.c3_l_slot; c3_t_day <=> root.c3_t_day; c3_t_slot <=> root.c3_t_slot;
-            c4_code <=> root.c4_code; c4_name <=> root.c4_name; c4_l_day <=> root.c4_l_day; c4_l_slot <=> root.c4_l_slot; c4_t_day <=> root.c4_t_day; c4_t_slot <=> root.c4_t_slot;
-            c5_code <=> root.c5_code; c5_name <=> root.c5_name; c5_l_day <=> root.c5_l_day; c5_l_slot <=> root.c5_l_slot; c5_t_day <=> root.c5_t_day; c5_t_slot <=> root.c5_t_slot;
+            // Bind each course-request field explicitly for maintainability
+            c1_code <=> root.c1_code;
+            c1_name <=> root.c1_name;
+            c1_l_day <=> root.c1_l_day;
+            c1_l_slot <=> root.c1_l_slot;
+            c1_t_day <=> root.c1_t_day;
+            c1_t_slot <=> root.c1_t_slot;
+
+            c2_code <=> root.c2_code;
+            c2_name <=> root.c2_name;
+            c2_l_day <=> root.c2_l_day;
+            c2_l_slot <=> root.c2_l_slot;
+            c2_t_day <=> root.c2_t_day;
+            c2_t_slot <=> root.c2_t_slot;
+
+            c3_code <=> root.c3_code;
+            c3_name <=> root.c3_name;
+            c3_l_day <=> root.c3_l_day;
+            c3_l_slot <=> root.c3_l_slot;
+            c3_t_day <=> root.c3_t_day;
+            c3_t_slot <=> root.c3_t_slot;
+
+            c4_code <=> root.c4_code;
+            c4_name <=> root.c4_name;
+            c4_l_day <=> root.c4_l_day;
+            c4_l_slot <=> root.c4_l_slot;
+            c4_t_day <=> root.c4_t_day;
+            c4_t_slot <=> root.c4_t_slot;
+
+            c5_code <=> root.c5_code;
+            c5_name <=> root.c5_name;
+            c5_l_day <=> root.c5_l_day;
+            c5_l_slot <=> root.c5_l_slot;
+            c5_t_day <=> root.c5_t_day;
+            c5_t_slot <=> root.c5_t_slot;
 
             // Link the status messages for adding users and assigning courses
             assign_course_status_message: root.assign_course_status_message;

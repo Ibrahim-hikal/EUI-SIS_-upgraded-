@@ -1,326 +1,517 @@
 /*
- * File: Login_page.slint
- * Description: The visual layout for the login screen. It collects the user's
- * login details and passes them to the backend for verification.
+ * FILE: Login_page.slint
+ * DESCRIPTION: Complete login screen GUI component for the university management system
+ *
+ * PURPOSE: Provides the visual interface for user authentication including:
+ *          - Portal selection (Student/Teacher/Admin)
+ *          - Credential input fields (ID/Email and Password)
+ *          - Password visibility toggle
+ *          - Error message display
+ *          - Responsive design with scaling
+ *
+ * FEATURES:
+ *   - Three portal tabs with visual feedback
+ *   - Dynamic field labels (ID vs Email based on portal)
+ *   - Password show/hide toggle with eye icon
+ *   - Error state handling with red borders and messages
+ *   - Smooth animations and hover effects
+ *   - Responsive scaling for different window sizes
+ *
+ * INTERACTIONS:
+ *   - Portal buttons: Clear input fields when clicked
+ *   - Login button: Triggers backend authentication
+ *   - Password toggle: Shows/hides password characters
+ *   - Input fields: Clear error state when user starts typing
+ *
+ * LAYOUT STRUCTURE:
+ *   1. University header banner
+ *   2. Portal selection buttons (Student/Teacher/Admin)
+ *   3. Credential input fields (ID/Email + Password)
+ *   4. Login button
+ *   5. Exit button and university logo
  */
 
+// ==========================================
+// LOGIN PAGE COMPONENT
+// ==========================================
+/*
+ * COMPONENT: Login_Page
+ * PURPOSE: Main login screen component that handles user authentication UI
+ *
+ * INHERITS: Rectangle (basic container with background and sizing)
+ *
+ * RESPONSIVE DESIGN:
+ *   - ui-scale: Scales all elements based on window size
+ *   - Min/max dimensions prevent UI from becoming unusable
+ *   - Preferred size defines the ideal layout
+ */
 export component Login_Page inherits Rectangle {
 
-    // Controls how much the screen elements shrink or grow when the window changes size
+    // ==========================================
+    // RESPONSIVE DESIGN PROPERTIES
+    // ==========================================
+    // Controls how much screen elements shrink/grow when window resizes
+    // 1.0 = normal size, 0.8 = 80% smaller, 1.2 = 20% larger
     in property <float> ui-scale: 1.0;
 
-    // Tracks which portal tab is currently active
+    // ==========================================
+    // PORTAL SELECTION STATE
+    // ==========================================
+    // Tracks which portal tab is currently active (for visual feedback)
     property <bool> Student_pressed: false;
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
 
-    // Toggles whether the password is shown as plain text or hidden as dots
+    // ==========================================
+    // PASSWORD VISIBILITY
+    // ==========================================
+    // Toggles whether password is shown as plain text or hidden as dots
     property <bool> show_password: false;
 
-    // Shared variables that connect the text boxes here directly to the backend code
-    in-out property <int> Selected_Login_Type: 1; // 1 for Student, 2 for Teacher, 3 for Admin
-    in-out property <string> id_email_input;
-    in-out property <string> password_input;
+    // ==========================================
+    // DATA BINDING PROPERTIES (Connected to Backend)
+    // ==========================================
+    // These variables connect directly to the C++ backend for data exchange
 
-    // Variables controlled by the backend to show error messages if the login fails
-    in-out property <bool> Error_State: false;
-    in-out property <string> Error_Message: "";
+    // Current selected portal: 1=Student, 2=Teacher, 3=Admin
+    in-out property <int> Selected_Login_Type: 1;
 
-    // The trigger that tells the backend to check the typed credentials
+    // User input fields (bidirectional - GUI updates backend, backend can clear)
+    in-out property <string> id_email_input;    // ID for students, Email for staff
+    in-out property <string> password_input;    // Password field
+
+    // ==========================================
+    // ERROR HANDLING PROPERTIES
+    // ==========================================
+    // Backend controls these to show login failure messages
+    in-out property <bool> Error_State: false;        // True when login failed
+    in-out property <string> Error_Message: "";       // Specific error message
+
+    // ==========================================
+    // CALLBACKS (Events sent to Backend)
+    // ==========================================
+    // Trigger that tells C++ backend to check the entered credentials
     callback login_attempted(string, string, int);
 
-    // Window sizing rules to allow smooth resizing while preventing the screen from breaking
-    min-height: 600px;
-    min-width: 1024px;
-    preferred-height: 768px;
-    preferred-width: 1024px;
-    max-height: 840px;
-    max-width: 1300px;
-    background: white;
+    // ==========================================
+    // WINDOW SIZING CONSTRAINTS
+    // ==========================================
+    // Prevent UI from becoming too small or too large
+    min-height: 600px;      // Minimum usable height
+    min-width: 1024px;      // Minimum usable width
+    preferred-height: 768px; // Ideal height
+    preferred-width: 1024px; // Ideal width
+    max-height: 840px;      // Maximum height (prevent excessive stretching)
+    max-width: 1300px;      // Maximum width
+    background: white;      // Clean white background
 
-    // The top banner displaying the university name
+    // ==========================================
+    // 1. UNIVERSITY HEADER BANNER
+    // ==========================================
+    /*
+     * Top banner displaying the university name and branding
+     * Centered horizontally, positioned near the top of the screen
+     * Provides visual identity and context for the login page
+     */
     Rectangle {
         width: 670px * root.ui-scale;
         height: 65px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        y: 100px * (root.height / 768px);
-        background: #abaeb3;
-        border-radius: 15px * root.ui-scale;
+        x: (parent.width - self.width) / 2;                    // Center horizontally
+        y: 100px * (root.height / 768px);                      // Position from top (scales with height)
+        background: #abaeb3;                                   // Gray background
+        border-radius: 15px * root.ui-scale;                   // Rounded corners
 
+        // Inner title container for better visual hierarchy
         Title := Rectangle {
             width: 640px * root.ui-scale;
             height: 55px * root.ui-scale;
-            x: (parent.width - self.width) / 2;
-            y: (parent.height - self.height) / 2;
-            background: #d0d2d6;
-            border-radius: 15px * root.ui-scale;
+            x: (parent.width - self.width) / 2;               // Center within outer rectangle
+            y: (parent.height - self.height) / 2;             // Center vertically
+            background: #d0d2d6;                               // Lighter gray background
+            border-radius: 15px * root.ui-scale;               // Rounded corners
+
+            // Main title text
             Text {
                 text: "Egypt University of Informatics Login Platform";
                 color: black;
-                font-weight: 700;
-                font-size: 28px * root.ui-scale;
+                font-weight: 700;                              // Bold text
+                font-size: 28px * root.ui-scale;               // Large, readable text
             }
         }
     }
 
-    // The selection menu to choose between Student, Teacher, or Admin portals
-    // Clicking these changes the active login type and clears any previously typed text
+    // ==========================================
+    // 2. PORTAL SELECTION MENU
+    // ==========================================
+    /*
+     * Three-button menu to select between Student, Teacher, or Admin portals
+     * Clicking a button changes the active portal and clears input fields
+     * Provides visual feedback with color changes and animations
+     */
     Login_Type := Rectangle {
         width: 950px * root.ui-scale;
-        height: 90px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        y: 200px * (root.height / 768px);
-        border-radius: 15px * root.ui-scale;
-        background: #d0d2d6;
+        height: 90px * root.ui_scale;
+        x: (parent.width - self.width) / 2;                    // Center horizontally
+        y: 200px * (root.height / 768px);                      // Position below header
+        border-radius: 15px * root.ui_scale;                   // Rounded corners
+        background: #d0d2d6;                                   // Light gray background
 
-        // Student Portal Button
+        // ==========================================
+        // STUDENT PORTAL BUTTON
+        // ==========================================
         Student_Button := Rectangle {
+            // Dynamic sizing: larger when selected or hovered
             width: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
             height: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
-            x: 60px * (parent.width / 1024px);
-            y: (parent.height - self.height) / 2;
+            x: 60px * (parent.width / 1024px);                // Left position (scales with width)
+            y: (parent.height - self.height) / 2;             // Center vertically
+            // Dynamic color: darker when pressed, blue when selected, gray when inactive
             background: Student_Touch.pressed ? #003d80 : (Selected_Login_Type == 1 ? #007bff : #586273);
-            border-radius: 15px * root.ui-scale;
-            animate width, height, background { duration: 150ms; }
+            border-radius: 15px * root.ui_scale;               // Rounded corners
+            animate width, height, background { duration: 150ms; } // Smooth size/color transitions
 
-            Text { text: "Student"; color: white; font-size: 30px * root.ui-scale; }
+            // Button label
+            Text {
+                text: "Student";
+                color: white;
+                font-size: 30px * root.ui_scale;
+            }
+
+            // Click handling
             Student_Touch := TouchArea {
                 clicked => {
-                    Selected_Login_Type = 1;
-                    Student_pressed = true;
-                    Teacher_pressed = false;
+                    Selected_Login_Type = 1;                   // Set to Student portal
+                    Student_pressed = true;                    // Update visual state
+                    Teacher_pressed = false;                   // Clear other states
                     Admin_pressed = false;
-                    user_text.text = "";
+                    user_text.text = "";                       // Clear input fields
                     pass_text.text = "";
                 }
             }
         }
 
-        // Teacher Portal Button
+        // ==========================================
+        // TEACHER PORTAL BUTTON
+        // ==========================================
         Teacher_Button := Rectangle {
-            width: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
-            height: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
-            x: 400px * (parent.width / 1024px);
-            y: (parent.height - self.height) / 2;
+            // Dynamic sizing: larger when selected or hovered
+            width: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 240px * root.ui_scale : 230px * root.ui_scale;
+            height: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 65px * root.ui_scale : 60px * root.ui-scale;
+            x: 400px * (parent.width / 1024px);               // Center position
+            y: (parent.height - self.height) / 2;             // Center vertically
+            // Dynamic color: darker when pressed, blue when selected, gray when inactive
             background: Teacher_Touch.pressed ? #003d80 : (Selected_Login_Type == 2 ? #007bff : #586273);
-            border-radius: 15px * root.ui-scale;
-            animate width, height, background { duration: 150ms; }
+            border-radius: 15px * root.ui_scale;               // Rounded corners
+            animate width, height, background { duration: 150ms; } // Smooth transitions
 
-            Text { text: "Teacher"; color: white; font-size: 30px * root.ui-scale; }
+            // Button label
+            Text {
+                text: "Teacher";
+                color: white;
+                font-size: 30px * root.ui_scale;
+            }
+
+            // Click handling
             Teacher_Touch := TouchArea {
                 clicked => {
-                    Selected_Login_Type = 2;
-                    Student_pressed = false;
-                    Teacher_pressed = true;
+                    Selected_Login_Type = 2;                   // Set to Teacher portal
+                    Student_pressed = false;                   // Clear other states
+                    Teacher_pressed = true;                    // Update visual state
                     Admin_pressed = false;
-                    user_text.text = "";
+                    user_text.text = "";                       // Clear input fields
                     pass_text.text = "";
                 }
             }
         }
 
-        // Admin Portal Button
+        // ==========================================
+        // ADMIN PORTAL BUTTON
+        // ==========================================
         Admin_Button := Rectangle {
-            width: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
-            height: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
-            x: 730px * (parent.width / 1024px);
-            y: (parent.height - self.height) / 2;
+            // Dynamic sizing: larger when selected or hovered
+            width: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 240px * root.ui_scale : 230px * root.ui_scale;
+            height: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 65px * root.ui_scale : 60px * root.ui_scale;
+            x: 730px * (parent.width / 1024px);               // Right position
+            y: (parent.height - self.height) / 2;             // Center vertically
+            // Dynamic color: darker when pressed, blue when selected, gray when inactive
             background: Admin_Touch.pressed ? #003d80 : (Selected_Login_Type == 3 ? #007bff : #586273);
-            border-radius: 15px * root.ui-scale;
-            animate width, height, background { duration: 150ms; }
+            border-radius: 15px * root.ui_scale;               // Rounded corners
+            animate width, height, background { duration: 150ms; } // Smooth transitions
 
-            Text { text: "Admin"; color: white; font-size: 30px * root.ui-scale; }
+            // Button label
+            Text {
+                text: "Admin";
+                color: white;
+                font-size: 30px * root.ui_scale;
+            }
+
+            // Click handling
             Admin_Touch := TouchArea {
                 clicked => {
-                    Selected_Login_Type = 3;
-                    Student_pressed = false;
+                    Selected_Login_Type = 3;                   // Set to Admin portal
+                    Student_pressed = false;                   // Clear other states
                     Teacher_pressed = false;
-                    Admin_pressed = true;
-                    user_text.text = "";
+                    Admin_pressed = true;                      // Update visual state
+                    user_text.text = "";                       // Clear input fields
                     pass_text.text = "";
                 }
             }
         }
+
+        // Focus management for keyboard navigation
         focus_anchor := FocusScope { }
     }
 
-    // The main area where the user types their credentials
+    // ==========================================
+    // 3. CREDENTIAL INPUT FIELDS
+    // ==========================================
+    /*
+     * Main input area containing ID/Email and password fields
+     * Features dynamic labels, error states, and password visibility toggle
+     */
     Username_Input := Rectangle {
         width: 950px * root.ui-scale;
         height: 280px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        y: 320px * (parent.height / 768px);
-        background: #e9ebf0;
-        border-radius: 15px * root.ui-scale;
+        x: (parent.width - self.width) / 2;                    // Center horizontally
+        y: 320px * (parent.height / 768px);                    // Position below portal buttons
+        background: #e9ebf0;                                   // Light gray background
+        border-radius: 15px * root.ui_scale;                   // Rounded corners
 
-        // Identification Field
+        // ==========================================
+        // IDENTIFICATION FIELD (ID or Email)
+        // ==========================================
         ID_Email := Rectangle {
-            width: 880px * root.ui-scale; height: 80px * root.ui-scale;
-            x: (parent.width - self.width) / 2; y: 30px * root.ui-scale;
-            background: #d0d2d6;
-            border-radius: 15px * root.ui-scale;
+            width: 880px * root.ui_scale;
+            height: 80px * root.ui_scale;
+            x: (parent.width - self.width) / 2;               // Center horizontally
+            y: 30px * root.ui_scale;                           // Top position
+            background: #d0d2d6;                               // Medium gray background
+            border-radius: 15px * root.ui_scale;               // Rounded corners
 
-            // Dynamically changes the label to "ID:" for students or "Email:" for staff
+            // Dynamic label that changes based on selected portal
             Username_Label := Text {
-                text: Selected_Login_Type == 1 ? "ID:" : "Email:";
-                color: black; font-size: 30px * root.ui-scale; font-weight: 700;
-                x: 40px * root.ui-scale; vertical-alignment: center; height: 100%;
+                text: Selected_Login_Type == 1 ? "ID:" : "Email:"; // "ID:" for students, "Email:" for staff
+                color: black;
+                font-size: 30px * root.ui_scale;
+                font-weight: 700;                              // Bold text
+                x: 40px * root.ui_scale;                       // Left margin
+                vertical-alignment: center;                    // Center vertically
+                height: 100%;                                  // Full height
             }
 
+            // Input field container with error state handling
             User_Input_Container := Rectangle {
-                width: 640px * root.ui-scale; height: 60px * root.ui-scale;
-                x: 210px * root.ui-scale; y: (parent.height - self.height) / 2;
-                background: white;
-                border-radius: 10px * root.ui-scale;
+                width: 640px * root.ui_scale;
+                height: 60px * root.ui_scale;
+                x: 210px * root.ui_scale;                      // Right of label
+                y: (parent.height - self.height) / 2;          // Center vertically
+                background: white;                             // White background
+                border-radius: 10px * root.ui_scale;           // Rounded corners
 
-                // Highlights the box red if there is a login error
-                border-width: user_text.has-focus ? 2px : 0px;
-                border-color: root.Error_State ? red : #007bff;
+                // Dynamic border: blue when focused, red when error
+                border-width: user_text.has-focus ? 2px : 0px; // Show border only when focused
+                border-color: root.Error_State ? red : #007bff; // Red for errors, blue for normal
 
-                // Faint placeholder text shown when the box is empty
+                // Placeholder text shown when field is empty and not focused
                 if (user_text.text == "" && !user_text.has-focus) : Text {
                     text: Selected_Login_Type == 1 ? "Enter your ID" : "Enter your Email";
-                    color: #aaa; x: 15px;
-                    vertical-alignment: center;
-                    height: 100%;
-                    font-size: 18px * root.ui-scale;
+                    color: #aaa;                               // Light gray placeholder color
+                    x: 15px;                                   // Left padding
+                    vertical-alignment: center;                // Center vertically
+                    height: 100%;                              // Full height
+                    font-size: 18px * root.ui-scale;           // Smaller than input text
                 }
 
+                // Actual text input field
                 user_text := TextInput {
-                    width: 100%; height: 100%; x: 15px;
-                    vertical-alignment: center;
-                    font-size: 22px * root.ui-scale;
-                    color: black;
+                    width: 100%;
+                    height: 100%;
+                    x: 15px;                                   // Left padding
+                    vertical-alignment: center;                // Center text vertically
+                    font-size: 22px * root.ui_scale;           // Large, readable text
+                    color: black;                              // Black text
 
-                    // Directly links the typed text to the backend variable
+                    // Bidirectional binding to backend variable
                     text <=> id_email_input;
 
-                    // Automatically clear the red error message as soon as the user starts typing again
+                    // Clear error state when user starts typing
                     edited => {
                         if (root.Error_State) {
-                            root.Error_State = false;
-                            root.Error_Message = "";
+                            root.Error_State = false;           // Clear error flag
+                            root.Error_Message = "";            // Clear error message
                         }
                     }
                 }
             }
         }
 
-        // Password Field
+        // ==========================================
+        // PASSWORD FIELD
+        // ==========================================
         Password_Field := Rectangle {
-            width: 880px * root.ui-scale; height: 80px * root.ui-scale;
-            x: (parent.width - self.width) / 2; y: 170px * root.ui-scale;
-            background: #d0d2d6; border-radius: 15px * root.ui-scale;
+            width: 880px * root.ui_scale;
+            height: 80px * root.ui_scale;
+            x: (parent.width - self.width) / 2;               // Center horizontally
+            y: 170px * root.ui_scale;                          // Below ID field
+            background: #d0d2d6;                               // Medium gray background
+            border-radius: 15px * root.ui_scale;               // Rounded corners
 
+            // Password label
             Text {
                 text: "Password:";
-                color: black; font-size: 30px * root.ui-scale; font-weight: 700;
-                x: 40px * root.ui-scale; vertical-alignment: center; height: 100%;
+                color: black;
+                font-size: 30px * root.ui_scale;
+                font-weight: 700;                              // Bold text
+                x: 40px * root.ui_scale;                       // Left margin
+                vertical-alignment: center;                    // Center vertically
+                height: 100%;                                  // Full height
             }
 
+            // Password input container
             Pass_Input_Container := Rectangle {
-                width: 640px * root.ui-scale;
-                height: 60px * root.ui-scale;
-                x: 210px * root.ui-scale;
-                y: (parent.height - self.height) / 2;
-                background: white; border-radius: 10px * root.ui-scale;
-                border-width: pass_text.has-focus ? 2px : 0px;
-                border-color: root.Error_State ? red : #007bff;
+                width: 640px * root.ui_scale;
+                height: 60px * root.ui_scale;
+                x: 210px * root.ui_scale;                      // Right of label
+                y: (parent.height - self.height) / 2;          // Center vertically
+                background: white;                             // White background
+                border-radius: 10px * root.ui_scale;           // Rounded corners
+                border-width: pass_text.has-focus ? 2px : 0px; // Show border when focused
+                border-color: root.Error_State ? red : #007bff; // Red for errors, blue for normal
 
+                // Placeholder text for password field
                 if (pass_text.text == "" && !pass_text.has-focus) : Text {
                     text: "Enter your Password";
-                    font-size: 18px * root.ui-scale;
-                    color: #aaa; x: 15px; vertical-alignment: center; height: 100%;
+                    font-size: 18px * root.ui_scale;           // Smaller placeholder text
+                    color: #aaa;                               // Light gray
+                    x: 15px;                                   // Left padding
+                    vertical-alignment: center;                // Center vertically
+                    height: 100%;                              // Full height
                 }
 
+                // Password text input field
                 pass_text := TextInput {
-                    width: 100%; height: 100%; x: 15px;
-                    vertical-alignment: center;
-                    font-size: 22px * root.ui-scale;
-                    color: black;
+                    width: 100%;
+                    height: 100%;
+                    x: 15px;                                   // Left padding
+                    vertical-alignment: center;                // Center text vertically
+                    font-size: 22px * root.ui_scale;           // Large, readable text
+                    color: black;                              // Black text
 
-                    // Changes the input to hide or show characters based on the eye icon
+                    // Dynamic input type: show text or hide as dots
                     input-type: root.show_password ? text : password;
+                    // Bidirectional binding to backend variable
                     text <=> password_input;
 
+                    // Clear error state when user starts typing
                     edited => {
                         if (root.Error_State) {
-                            root.Error_State = false;
-                            root.Error_Message = "";
+                            root.Error_State = false;           // Clear error flag
+                            root.Error_Message = "";            // Clear error message
                         }
                     }
                 }
 
-                // Visibility Toggle Icon
+                // ==========================================
+                // PASSWORD VISIBILITY TOGGLE ICON
+                // ==========================================
                 Image {
-                    x: parent.width - 65px;
-                    width: 25px * root.ui-scale;
-                    height: 25px * root.ui-scale;
+                    x: parent.width - 65px;                    // Position near right edge
+                    width: 25px * root.ui_scale;               // Small icon size
+                    height: 25px * root.ui_scale;
 
-                    // Switch between "Eye" and "Eye-Off" icons
+                    // Dynamic icon: eye-open when visible, eye-closed when hidden
                     source: root.show_password ? @image-url("eye-show.svg") : @image-url("eye-hide.svg");
 
-                    // Toggles the visibility of the password when clicked
+                    // Click handler to toggle password visibility
                     TouchArea {
-                        clicked => { root.show_password = !root.show_password; }
+                        clicked => {
+                            root.show_password = !root.show_password; // Toggle visibility flag
+                        }
                     }
                 }
 
-                // Displays the specific rejection reason from the backend
+                // ==========================================
+                // ERROR MESSAGE DISPLAY
+                // ==========================================
+                // Shows specific login failure reasons below password field
                 Error_Message_Display := Text {
-                    text: root.Error_State ? root.Error_Message : "";
-                    color: red;
-                    font-size: 16px * root.ui-scale;
-                    font-weight: 700;
-                    x: 60px * root.ui-scale;
-                    y: 75px * root.ui-scale;
+                    text: root.Error_State ? root.Error_Message : ""; // Show message only when error
+                    color: red;                               // Red error text
+                    font-size: 16px * root.ui_scale;         // Smaller error text
+                    font-weight: 700;                        // Bold error text
+                    x: 60px * root.ui_scale;                 // Indent from left
+                    y: 75px * root.ui_scale;                 // Position below input field
                 }
             }
         }
     }
 
-    // The main button that fires the login attempt trigger with the current inputs
+    // ==========================================
+    // 4. LOGIN BUTTON
+    // ==========================================
+    /*
+     * Main action button that triggers authentication
+     * Sends current input values to backend for verification
+     * Features hover animations and visual feedback
+     */
     Login_Button := Rectangle {
-        width: Login_touch.has-hover ? 210px * root.ui-scale : 200px * root.ui-scale;
-        height: Login_touch.has-hover ? 65px * root.ui-scale : 60px * root.ui-scale;
-        x: (parent.width - self.width) / 2;
-        y: 620px * (parent.height / 768px);
+        // Dynamic sizing: larger when hovered
+        width: Login_touch.has-hover ? 210px * root.ui_scale : 200px * root.ui_scale;
+        height: Login_touch.has-hover ? 65px * root.ui_scale : 60px * root.ui_scale;
+        x: (parent.width - self.width) / 2;                    // Center horizontally
+        y: 620px * (parent.height / 768px);                    // Position near bottom
+        // Dynamic color: darker when pressed, blue otherwise
         background: Login_touch.pressed ? #003d80 : #007bff;
-        border-radius: 15px * root.ui-scale;
+        border-radius: 15px * root.ui_scale;                   // Rounded corners
+        // Smooth animations for size and color changes
         animate width, height, background { duration: 150ms; easing: ease-in; }
 
+        // Button label
         Text {
             text: "Login";
-            color: white;
-            font-size: 30px * root.ui-scale;
+            color: white;                                     // White text on blue background
+            font-size: 30px * root.ui_scale;                  // Large, readable text
         }
 
+        // Click handler that triggers authentication
         Login_touch := TouchArea {
             clicked => {
+                // Send current input values to backend for verification
                 login_attempted(id_email_input, password_input, Selected_Login_Type);
             }
         }
     }
 
-    // Top right exit button
+    // ==========================================
+    // 5. HEADER ELEMENTS (Exit Button & Logo)
+    // ==========================================
+    /*
+     * Top-right exit button and top-left university logo
+     * Provide window controls and branding
+     */
+
+    // Exit button in top-right corner
     Exit_Button := Image {
-        width: 30px * root.ui-scale;
-        height: 30px * root.ui-scale;
+        width: 30px * root.ui_scale;
+        height: 30px * root.ui_scale;
+        // Dynamic color: red when hovered, black otherwise
         colorize: Exit_touch.has-hover ? red : black;
-        x: parent.width - self.width - 20px;
-        y: 20px;
-        source: @image-url("Exit-icon.svg");
+        x: parent.width - self.width - 20px;                  // Top-right position
+        y: 20px;                                              // Top margin
+        source: @image-url("Exit-icon.svg");                  // Exit icon file
+
+        // Click handler (currently empty - could close window or go back)
         Exit_touch := TouchArea {
-            clicked => { }
+            clicked => { }                                    // Placeholder for exit functionality
         }
     }
 
-    // Top left university branding
+    // University logo in top-left corner
     University_Logo := Image {
-        width: 200px * root.ui-scale;
-        height: 60px * root.ui-scale;
-        x: 20px;
-        y: 20px;
-        source: @image-url("Uni-Logo.png");
+        width: 200px * root.ui_scale;
+        height: 60px * root.ui_scale;
+        x: 20px;                                              // Left margin
+        y: 20px;                                              // Top margin
+        source: @image-url("Uni-Logo.png");                   // University logo file
     }
 }
