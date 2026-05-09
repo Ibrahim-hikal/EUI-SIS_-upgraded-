@@ -20,6 +20,18 @@ public:
     string tutorialDay;
     string lectureTime;
     string tutorialTime;
+
+    // --- OPERATOR OVERLOADING ---
+    // Overload == to easily compare courses by their code
+    bool operator==(const Course& other) const {
+        return this->code == other.code;
+    }
+
+    // Overload << to easily print a course's details to the console/streams
+    friend ostream& operator<<(ostream& os, const Course& c) {
+        os << "[" << c.code << "] " << c.name;
+        return os;
+    }
 };
 
 // ==========================================
