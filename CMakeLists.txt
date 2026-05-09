@@ -57,6 +57,7 @@ Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h
 
 Features_and_Functions/Manage_Members/Admin/Assign_Courses/src/Assign_Courses.cpp
 Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h
+        Features_and_Functions/Profile_Pages/IProfile.h
 
 )
 

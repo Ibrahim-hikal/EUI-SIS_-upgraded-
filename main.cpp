@@ -1,10 +1,19 @@
+/*
+ * File: main.cpp
+ * Description: The core brain of the application. It launches the visual interface
+ * and listens for user actions (like clicking login or changing a profile picture).
+ * When an action happens, it calls the correct C++ backend function to do the real work.
+ */
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+
 #include "Features_and_Functions/Login_Page/header/Login_Page.h"
+#include "Features_and_Functions/Profile_Pages/IProfile.h"
 #include "Features_and_Functions/Profile_Pages/Student_Profile/header/Student_Profile.h"
 #include "Features_and_Functions/Profile_Pages/Teacher_Profile/header/Teacher_Profile.h"
 #include "Features_and_Functions/Profile_Pages/ImageManager.h"
@@ -26,25 +35,49 @@
 #include "Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h"
 #include "Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h"
 #include "Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h"
+
 using namespace std;
 
+// Pointer to help track the current student's course requests
 std::unique_ptr<Request_Courses> global_request_manager;
 
+/*
+ * Helper Tool: ProfileFactory
+ * Instead of manually writing out "if student, use this; if teacher, use that"
+ * every time, this helper tool simply asks for the user's role number (1, 2, or 3)
+ * and automatically hands us the correct profile data back.
+ */
+class ProfileFactory {
+public:
+    static IProfile& get_profile(int role_type) {
+        if (role_type == 1) return Student_Profile::get_instance();
+        if (role_type == 2) return Teacher_Profile::get_instance();
+        if (role_type == 3) return Admin_Profile::get_instance();
+        throw std::invalid_argument("Error: Could not identify the user role.");
+    }
+};
+
 int main() {
+    // 1. Create the visual app window
     auto ui = Main_App::create();
+
+    // 2. Prepare the backend databases and managers
     Login_Manager &db = Login_Manager::get_instance();
     TeacherGradesManager teacherGradesManager;
-
     AdminCourseManager adminManager("Databases/");
     TeacherAttendanceManager teacherAttendanceManager;
     TeacherScheduleManager teacherScheduleManager;
     StudentScheduleManager studentScheduleManager;
+
+    // Variables to remember who is currently logged in
     string current_id = "";
     string current_email = "";
 
-    // 1. ADMIN REQUESTS REFRESH LOGIC
+    /*
+     * Custom task that grabs the newest requests from students (like dropping
+     * a course or sending an absence excuse) and pushes them to the Admin screen.
+     */
     auto refresh_admin_requests = [&]() {
-        // Fetch and format Withdrawals
         auto w_reqs = AdminWithdrawalManager::fetch();
         std::vector<WithdrawalRequest> slint_w_reqs;
         for (const auto &r: w_reqs) {
@@ -52,7 +85,6 @@ int main() {
         }
         ui->set_pending_withdrawals(std::make_shared<slint::VectorModel<WithdrawalRequest>>(slint_w_reqs));
 
-        // Fetch and format Excuses
         auto e_reqs = AdminExcuseManager::fetch();
         std::vector<ExcuseRequest> slint_e_reqs;
         for (const auto &r: e_reqs) {
@@ -61,7 +93,11 @@ int main() {
         ui->set_pending_excuses(std::make_shared<slint::VectorModel<ExcuseRequest>>(slint_e_reqs));
     };
 
-    // 2. ACADEMIC REQUEST CALLBACKS
+    // ------------------------------------------------------------------------
+    // User Interface Button Links
+    // Whenever a user clicks a button in Slint, these run the matching C++ code
+    // ------------------------------------------------------------------------
+
     ui->on_submit_withdrawal_req([&](slint::SharedString code, slint::SharedString reason) {
         StudentWithdrawalManager::submit(current_id, std::string(code), std::string(reason));
         std::cout << "Withdrawal Submitted: " << code << std::endl;
@@ -73,21 +109,19 @@ int main() {
     });
 
     ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
-        // The Manager now handles BOTH the request database and the student database
         AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
+        refresh_admin_requests(); // Update the screen immediately
+    });
+
+    ui->on_admin_handle_excuse([&](slint::SharedString id, slint::SharedString course, slint::SharedString week, bool approved) {
+        AdminExcuseManager::process(std::string(id), std::string(course), std::string(week), approved);
         refresh_admin_requests();
     });
 
-    ui->on_admin_handle_excuse(
-        [&](slint::SharedString id, slint::SharedString course, slint::SharedString week, bool approved) {
-            AdminExcuseManager::process(std::string(id), std::string(course), std::string(week), approved);
-            refresh_admin_requests();
-        });
-
     ui->on_admin_end_semester([&]() -> slint::SharedString {
-        string status = Admin_Profile::get_instance().end_semester();
-        return slint::SharedString(status);
+        return slint::SharedString(Admin_Profile::get_instance().end_semester());
     });
+
     ui->on_admin_check_teacher_email([&](slint::SharedString email) -> slint::SharedString {
         return slint::SharedString(Assign_Course::get_teacher_name(string(email)));
     });
@@ -101,52 +135,63 @@ int main() {
         ui->set_assign_course_status_message(slint::SharedString(success_msg));
     });
 
+    // ------------------------------------------------------------------------
+    // Master Login and Setup
+    // Checks passwords and builds the user's dashboard based on who they are
+    // ------------------------------------------------------------------------
+
     ui->on_check_credentials([&](const slint::SharedString &id, const slint::SharedString &pass, int role) {
         string string_id = string(id);
+
+        // Ask the database if the password is correct
         Login_Status status = db.login(string_id, string(pass), static_cast<User_Role>(role));
 
         if (status == Login_Status::SUCCESS) {
-            ui->set_login_error_state(false);
             current_id = string_id;
+            ui->set_login_error_state(false);
+            ui->set_active_panel(role); // Swap the screen to Student, Teacher, or Admin
 
+            // Get the specific profile data for whoever just logged in
+            IProfile& active_profile = ProfileFactory::get_profile(role);
+            active_profile.load_profile(current_id);
+
+            // Print their name safely to the developer console
+            std::cout << "LOGIN SUCCESS: " << active_profile << std::endl;
+
+            // Show their name and picture on the screen
+            ui->set_user_name(slint::SharedString(active_profile.get_name()));
+            string pfp_path = ImageManager::get_user_pfp_path(current_id);
+            auto img = slint::Image::load_from_path(pfp_path.c_str());
+            ui->set_user_profile_pic(img);
+
+            // Setup if it is a Student
             if (role == 1) {
-                // Student logic
                 auto &student = Student_Profile::get_instance();
-                student.load_profile(current_id);
-
-                ui->set_user_name(student.get_name().c_str());
                 ui->set_user_id(student.get_id().c_str());
                 ui->set_user_Faculty(student.get_faculty().c_str());
                 ui->set_student_gpa(student.get_gpa().c_str());
                 ui->set_user_email(student.get_email().c_str());
 
-                string pfp_path = ImageManager::get_user_pfp_path(current_id);
-                auto img = slint::Image::load_from_path(pfp_path.c_str());
-                ui->set_user_profile_pic(img);
-
+                // Find the courses the student is taking
                 RegisteredCoursesManager rc_manager(current_id);
                 auto courses_vec = rc_manager.get_registered_courses_with_attendance();
                 std::vector<CourseInfo> std_courses;
                 for (int i = 0; i < courses_vec.size(); ++i) std_courses.push_back(courses_vec[i]);
-                auto courses_model = std::make_shared<slint::VectorModel<CourseInfo> >(std_courses);
-                ui->set_my_courses(courses_model);
+                ui->set_my_courses(std::make_shared<slint::VectorModel<CourseInfo>>(std_courses));
 
                 std::vector<slint::SharedString> codes_only;
-                for (const auto &course: std_courses) {
-                    codes_only.push_back(course.course_code);
-                }
-                auto codes_model = std::make_shared<slint::VectorModel<slint::SharedString> >(codes_only);
+                for (const auto &course: std_courses) codes_only.push_back(course.course_code);
+                ui->set_my_course_codes(std::make_shared<slint::VectorModel<slint::SharedString>>(codes_only));
 
-                // 3. Send the string list to the UI
-                ui->set_my_course_codes(codes_model);
+                // Build their schedule and past grades
                 studentScheduleManager.load_student_schedule(current_id);
                 studentScheduleManager.initUI(ui.operator->());
                 global_request_manager = std::make_unique<Request_Courses>(current_id);
 
-                // LOAD PREVIOUS ENROLLMENTS (FIXED)
                 PreviousEnrollmentsManager pe(current_id);
                 pe.load_student_data(ui.operator->());
 
+                // Task to update the list of courses they can request to join
                 auto refresh_request_tables = [&ui]() {
                     if (!global_request_manager) return;
                     Student *student_ptr = global_request_manager->get_student();
@@ -158,13 +203,11 @@ int main() {
                     auto eligible_courses = student_ptr->get_eligible_courses();
                     auto requested_courses = student_ptr->requestedCourses;
 
-                    // 1. Build Available Courses Model
+                    // Fill the "Available" list
                     for (const auto &c: eligible_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(c.code);
                         info.course_name = slint::SharedString(c.name);
-
-                        // Check if this course is already in the requested list
                         info.is_requested = false;
                         for (const auto &req: requested_courses) {
                             if (req.code == c.code) {
@@ -172,13 +215,11 @@ int main() {
                                 break;
                             }
                         }
-                        // Check if the student failed this in the past
                         info.is_failed = (student_ptr->failedCourses.find(c.code) != std::string::npos);
-
                         available_slint_list.push_back(info);
                     }
 
-                    // 2. Build Requested Courses Model (Tracks 0/5 count!)
+                    // Fill the "Already Requested" list
                     for (const auto &req: requested_courses) {
                         CourseInfo info;
                         info.course_code = slint::SharedString(req.code);
@@ -186,94 +227,72 @@ int main() {
                         requested_slint_list.push_back(info);
                     }
 
-                    // 3. Send BOTH to Slint
-                    ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo> >(available_slint_list));
-                    ui->set_requested_courses(std::make_shared<slint::VectorModel<CourseInfo> >(requested_slint_list));
+                    ui->set_available_courses(std::make_shared<slint::VectorModel<CourseInfo>>(available_slint_list));
+                    ui->set_requested_courses(std::make_shared<slint::VectorModel<CourseInfo>>(requested_slint_list));
                 };
 
-                // Trigger once immediately so the UI populates on login
                 refresh_request_tables();
 
-                // --- UPDATED BUTTON CLICK CALLBACK ---
-                // --- NEW BUTTON CLICK CALLBACK WITH CONFLICT DETECTION ---
-                ui->on_request_course([&ui, refresh_request_tables](slint::SharedString course_code,
-                                                                    slint::SharedString l_day,
-                                                                    slint::SharedString l_slot,
-                                                                    slint::SharedString t_day,
-                                                                    slint::SharedString t_slot) {
+                // Button to request joining a course
+                ui->on_request_course([&ui, refresh_request_tables](slint::SharedString course_code, slint::SharedString l_day, slint::SharedString l_slot, slint::SharedString t_day, slint::SharedString t_slot) {
                     if (global_request_manager) {
                         string code_str = string(course_code);
                         size_t underscore_pos = code_str.find_last_of('_');
-                        string clean_code = (underscore_pos != string::npos)
-                                                ? code_str.substr(0, underscore_pos)
-                                                : code_str;
+                        string clean_code = (underscore_pos != string::npos) ? code_str.substr(0, underscore_pos) : code_str;
 
                         Student *student_ptr = global_request_manager->get_student();
 
-                        // 1. Check for time conflict FIRST
-                        if (student_ptr->
-                            has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
+                        // Check if the time slot clashes with a course they already have
+                        if (student_ptr->has_time_conflict(string(l_day), string(l_slot), string(t_day), string(t_slot))) {
                             ui->set_status_message("Conflict: Time slot overlaps with an existing schedule.");
                             return;
                         }
 
-                        // 2. Try to register (will fail if limit 5 reached)
+                        // Save the request
                         bool success = global_request_manager->request_course(clean_code, string(l_day), string(l_slot), string(t_day), string(t_slot));
-
                         if (success) {
-                            ui->set_status_message(
-                                "Course " + slint::SharedString(clean_code) + " Requested Successfully!");
-                            refresh_request_tables(); // INSTANT UI UPDATE
+                            ui->set_status_message("Course " + slint::SharedString(clean_code) + " Requested Successfully!");
+                            refresh_request_tables();
                         } else {
                             ui->set_status_message("Request Failed (Limit 5 reached).");
                         }
                     }
                 });
+
+            // Setup if it is a Teacher
             } else if (role == 2) {
-                // Teacher Logic
                 auto &teacher = Teacher_Profile::get_instance();
-                teacher.load_profile(current_id);
+                current_email = teacher.get_email();
+                ui->set_user_email(current_email.c_str());
+
+                // Find the classes they teach and build their schedule
                 teacherScheduleManager.load_teacher_schedule(teacher.get_name());
                 teacherScheduleManager.initUI(ui.operator->());
-                current_email = teacher.get_email();
-
-                string pfp_path = ImageManager::get_user_pfp_path(current_id);
-                auto img = slint::Image::load_from_path(pfp_path.c_str());
-                ui->set_user_profile_pic(img);
-
-                ui->set_user_name(teacher.get_name().c_str());
-                ui->set_user_email(current_email.c_str());
 
                 std::vector<slint::SharedString> display_list;
                 for (const auto &course_str: teacher.get_courses_taught()) {
                     display_list.push_back(slint::SharedString(course_str));
                 }
-                auto display_model = std::make_shared<slint::VectorModel<slint::SharedString> >(display_list);
-                ui->set_teacher_profile_display_list(display_model);
+                ui->set_teacher_profile_display_list(std::make_shared<slint::VectorModel<slint::SharedString>>(display_list));
 
+                // Start the Attendance and Grading dashboards
                 teacherAttendanceManager.initUI(ui.operator->(), teacher.get_name());
                 teacherGradesManager.initUI(ui.operator->(), teacher.get_name());
-            } else if (role == 3) {
-                // Admin Logic
-                auto &admin = Admin_Profile::get_instance();
-                admin.load_profile(current_id);
 
-                ui->set_user_name(admin.get_name().c_str());
+            // Setup if it is an Admin
+            } else if (role == 3) {
+                auto &admin = Admin_Profile::get_instance();
                 ui->set_user_email(admin.get_email().c_str());
                 ui->set_admin_position(admin.get_position().c_str());
-
-                string pfp_path = ImageManager::get_user_pfp_path(current_id);
-                auto img = slint::Image::load_from_path(pfp_path.c_str());
-                ui->set_user_profile_pic(img);
 
                 adminManager.initUI(ui.operator->());
                 refresh_admin_requests();
 
-                // ---> THE CLEAN REACTIVE ID SETTER! <---
+                // Show a preview of what the next generated Student ID will look like
                 ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
             }
 
-            ui->set_active_panel(role);
+        // Show an error on the screen if the password or ID was wrong
         } else {
             ui->set_login_error_state(true);
             if (status == Login_Status::PASSWORD_INCORRECT) {
@@ -286,52 +305,54 @@ int main() {
         }
     });
 
-    // Admin UI Callbacks
     ui->on_admin_next_student([&]() { adminManager.nextStudent(ui.operator->()); });
     ui->on_admin_previous_student([&]() { adminManager.prevStudent(ui.operator->()); });
     ui->on_admin_submit_decisions([&]() { adminManager.submitDecisions(ui.operator->()); });
 
-    // ---> THE CLEAN REACTIVE SUBMIT BUTTON! <---
     ui->on_admin_add_student_submit([&](slint::SharedString name, slint::SharedString fac , slint::SharedString pass) {
         string success_string = Add_Student::add_student(string(name), string(fac) , string(pass));
         ui->set_add_student_status_message(slint::SharedString(success_string));
         ui->set_next_student_id(slint::SharedString(Add_Student::generate_student_id()));
     });
+
     ui->on_admin_add_teacher_submit([&](slint::SharedString first_name, slint::SharedString last_name , slint::SharedString pass) {
         string success_string = Add_Teacher::add_teacher(string(first_name), string(last_name) , string(pass));
         ui->set_add_teacher_status_message(slint::SharedString(success_string));
     });
+
+    // ------------------------------------------------------------------------
+    // General Settings (Profile Images & Logout)
+    // ------------------------------------------------------------------------
+
+    // Let the user select an image from their PC and save it to the system
     ui->on_change_picture([&]() {
         string source = ImageManager::select_image_dialog();
         if (source.empty()) return;
-        string new_path = ImageManager::save_profile_picture(source, current_id);
 
+        string new_path = ImageManager::save_profile_picture(source, current_id);
         if (!new_path.empty()) {
-            ui->set_user_profile_pic(slint::Image());
+            ui->set_user_profile_pic(slint::Image()); // Remove the old image
             auto fresh_img = slint::Image::load_from_path(new_path.c_str());
-            ui->set_user_profile_pic(fresh_img);
+            ui->set_user_profile_pic(fresh_img); // Show the new image
         }
     });
 
-    // Logout Callback
+    // Safely wipe out all active data and kick the user back to the login page
     ui->on_logout([&]() {
         Student_Profile::get_instance().reset();
         Teacher_Profile::get_instance().reset();
         Admin_Profile::get_instance().reset();
+
         current_id = "";
         ui->set_user_name("");
         ui->set_user_id("");
         ui->set_user_profile_pic(slint::Image());
+
         ui->set_active_panel(0);
         ui->set_login_error_state(false);
     });
-    ui->on_admin_handle_withdrawal([&](slint::SharedString id, slint::SharedString course, bool approved) {
-        // The Manager now handles BOTH the request database and the student database
-        AdminWithdrawalManager::process(std::string(id), std::string(course), approved);
 
-        // Refresh the UI display
-        refresh_admin_requests();
-    });
+    // Keeps the visual application running until the user clicks the 'X' to close it
     ui->run();
     return 0;
 }

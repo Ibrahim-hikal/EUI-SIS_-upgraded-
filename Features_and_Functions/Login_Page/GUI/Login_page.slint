@@ -1,23 +1,35 @@
+/*
+ * File: Login_page.slint
+ * Description: The visual layout for the login screen. It collects the user's
+ * login details and passes them to the backend for verification.
+ */
+
 export component Login_Page inherits Rectangle {
 
-    //properties
+    // Controls how much the screen elements shrink or grow when the window changes size
     in property <float> ui-scale: 1.0;
+
+    // Tracks which portal tab is currently active
     property <bool> Student_pressed: false;
     property <bool> Teacher_pressed: false;
     property <bool> Admin_pressed: false;
+
+    // Toggles whether the password is shown as plain text or hidden as dots
     property <bool> show_password: false;
-    
-    //in-out properties to link with backend logic
+
+    // Shared variables that connect the text boxes here directly to the backend code
     in-out property <int> Selected_Login_Type: 1; // 1 for Student, 2 for Teacher, 3 for Admin
     in-out property <string> id_email_input;
     in-out property <string> password_input;
+
+    // Variables controlled by the backend to show error messages if the login fails
     in-out property <bool> Error_State: false;
     in-out property <string> Error_Message: "";
 
-    //callbacks to trigger backend functions on login attempt
+    // The trigger that tells the backend to check the typed credentials
     callback login_attempted(string, string, int);
 
-
+    // Window sizing rules to allow smooth resizing while preventing the screen from breaking
     min-height: 600px;
     min-width: 1024px;
     preferred-height: 768px;
@@ -26,9 +38,7 @@ export component Login_Page inherits Rectangle {
     max-width: 1300px;
     background: white;
 
-
-
-    // --- TITLE SECTION ---
+    // The top banner displaying the university name
     Rectangle {
         width: 670px * root.ui-scale;
         height: 65px * root.ui-scale;
@@ -53,7 +63,8 @@ export component Login_Page inherits Rectangle {
         }
     }
 
-    // --- TAB BUTTONS SECTION ---
+    // The selection menu to choose between Student, Teacher, or Admin portals
+    // Clicking these changes the active login type and clears any previously typed text
     Login_Type := Rectangle {
         width: 950px * root.ui-scale;
         height: 90px * root.ui-scale;
@@ -62,7 +73,7 @@ export component Login_Page inherits Rectangle {
         border-radius: 15px * root.ui-scale;
         background: #d0d2d6;
 
-        // Student Button
+        // Student Portal Button
         Student_Button := Rectangle {
             width: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
             height: (Selected_Login_Type == 1 || Student_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
@@ -74,17 +85,18 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Student"; color: white; font-size: 30px * root.ui-scale; }
             Student_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 1;
-                             Student_pressed = true;
-                             Teacher_pressed = false;
-                             Admin_pressed = false;
-                             user_text.text = ""; // Clear the username field when switching to Student
-                             pass_text.text = ""; // Clear the password field when switching to Student
-                             }
+                clicked => {
+                    Selected_Login_Type = 1;
+                    Student_pressed = true;
+                    Teacher_pressed = false;
+                    Admin_pressed = false;
+                    user_text.text = "";
+                    pass_text.text = "";
+                }
             }
         }
 
-        // Teacher Button
+        // Teacher Portal Button
         Teacher_Button := Rectangle {
             width: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
             height: (Selected_Login_Type == 2 || Teacher_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
@@ -96,18 +108,18 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Teacher"; color: white; font-size: 30px * root.ui-scale; }
             Teacher_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 2;
-                             Student_pressed = false;
-                             Teacher_pressed = true;
-                             Admin_pressed = false;
-                                user_text.text = ""; // Clear the username field when switching to Teacher
-                                pass_text.text = ""; // Clear the password field when switching to Teacher
-
-                            }
+                clicked => {
+                    Selected_Login_Type = 2;
+                    Student_pressed = false;
+                    Teacher_pressed = true;
+                    Admin_pressed = false;
+                    user_text.text = "";
+                    pass_text.text = "";
+                }
             }
         }
 
-        // Admin Button
+        // Admin Portal Button
         Admin_Button := Rectangle {
             width: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 240px * root.ui-scale : 230px * root.ui-scale;
             height: (Selected_Login_Type == 3 || Admin_Touch.has-hover) ? 65px * root.ui-scale : 60px * root.ui-scale;
@@ -119,19 +131,20 @@ export component Login_Page inherits Rectangle {
 
             Text { text: "Admin"; color: white; font-size: 30px * root.ui-scale; }
             Admin_Touch := TouchArea {
-                clicked => { Selected_Login_Type = 3;
-                            Student_pressed = false;
-                            Teacher_pressed = false;
-                            Admin_pressed = true;
-                            user_text.text = ""; // Clear the username field when switching to Admin
-                            pass_text.text = ""; // Clear the password field when switching to Admin
+                clicked => {
+                    Selected_Login_Type = 3;
+                    Student_pressed = false;
+                    Teacher_pressed = false;
+                    Admin_pressed = true;
+                    user_text.text = "";
+                    pass_text.text = "";
                 }
             }
         }
         focus_anchor := FocusScope { }
-}
+    }
 
-    // --- INPUT FIELDS SECTION ---
+    // The main area where the user types their credentials
     Username_Input := Rectangle {
         width: 950px * root.ui-scale;
         height: 280px * root.ui-scale;
@@ -140,13 +153,14 @@ export component Login_Page inherits Rectangle {
         background: #e9ebf0;
         border-radius: 15px * root.ui-scale;
 
-        // ID / Email Field
+        // Identification Field
         ID_Email := Rectangle {
             width: 880px * root.ui-scale; height: 80px * root.ui-scale;
             x: (parent.width - self.width) / 2; y: 30px * root.ui-scale;
             background: #d0d2d6;
             border-radius: 15px * root.ui-scale;
 
+            // Dynamically changes the label to "ID:" for students or "Email:" for staff
             Username_Label := Text {
                 text: Selected_Login_Type == 1 ? "ID:" : "Email:";
                 color: black; font-size: 30px * root.ui-scale; font-weight: 700;
@@ -158,10 +172,12 @@ export component Login_Page inherits Rectangle {
                 x: 210px * root.ui-scale; y: (parent.height - self.height) / 2;
                 background: white;
                 border-radius: 10px * root.ui-scale;
+
+                // Highlights the box red if there is a login error
                 border-width: user_text.has-focus ? 2px : 0px;
                 border-color: root.Error_State ? red : #007bff;
 
-                // Placeholder
+                // Faint placeholder text shown when the box is empty
                 if (user_text.text == "" && !user_text.has-focus) : Text {
                     text: Selected_Login_Type == 1 ? "Enter your ID" : "Enter your Email";
                     color: #aaa; x: 15px;
@@ -175,9 +191,12 @@ export component Login_Page inherits Rectangle {
                     vertical-alignment: center;
                     font-size: 22px * root.ui-scale;
                     color: black;
-                    text <=> id_email_input; // Two-way binding with backend property
+
+                    // Directly links the typed text to the backend variable
+                    text <=> id_email_input;
+
+                    // Automatically clear the red error message as soon as the user starts typing again
                     edited => {
-                        // Clear error state when user starts editing
                         if (root.Error_State) {
                             root.Error_State = false;
                             root.Error_Message = "";
@@ -219,79 +238,89 @@ export component Login_Page inherits Rectangle {
                     vertical-alignment: center;
                     font-size: 22px * root.ui-scale;
                     color: black;
+
+                    // Changes the input to hide or show characters based on the eye icon
                     input-type: root.show_password ? text : password;
-                    text <=> password_input; // Two-way binding with backend property
+                    text <=> password_input;
+
                     edited => {
-                        // Clear error state when user starts editing
                         if (root.Error_State) {
                             root.Error_State = false;
                             root.Error_Message = "";
                         }
                     }
                 }
+
+                // Visibility Toggle Icon
                 Image {
-                        x: parent.width - 65px; // Positioned at the right end
-                        width: 25px * root.ui-scale;
-                        height: 25px * root.ui-scale;
+                    x: parent.width - 65px;
+                    width: 25px * root.ui-scale;
+                    height: 25px * root.ui-scale;
 
+                    // Switch between "Eye" and "Eye-Off" icons
+                    source: root.show_password ? @image-url("eye-show.svg") : @image-url("eye-hide.svg");
 
-                        // Switch between "Eye" and "Eye-Off" SVGs
-                        source: root.show_password ? @image-url("eye-show.svg") : @image-url("eye-hide.svg");
-
-                        TouchArea {
-                            clicked => { root.show_password = !root.show_password; }
-                        }
+                    // Toggles the visibility of the password when clicked
+                    TouchArea {
+                        clicked => { root.show_password = !root.show_password; }
                     }
+                }
+
+                // Displays the specific rejection reason from the backend
                 Error_Message_Display := Text {
                     text: root.Error_State ? root.Error_Message : "";
                     color: red;
                     font-size: 16px * root.ui-scale;
                     font-weight: 700;
                     x: 60px * root.ui-scale;
-                    y: 75px * root.ui-scale; // Positioned below the password field
-                    }
+                    y: 75px * root.ui-scale;
+                }
             }
         }
     }
-        Login_Button := Rectangle {
-            width: Login_touch.has-hover ? 210px * root.ui-scale :200px * root.ui-scale;
-            height: Login_touch.has-hover ? 65px * root.ui-scale :60px * root.ui-scale;
-            x: (parent.width - self.width) / 2;
-            y: 620px * (parent.height / 768px);
-            background: Login_touch.pressed? #003d80 : #007bff;
-            border-radius: 15px * root.ui-scale;
-            animate width, height, background { duration: 150ms; easing: ease-in; }
-                 
-            
-            Text { text: "Login";
-                   color: white;
-                   font-size: 30px * root.ui-scale;
-                 }
-            Login_touch:= TouchArea {
-                clicked => { login_attempted(id_email_input,password_input,Selected_Login_Type);
 
-                }
+    // The main button that fires the login attempt trigger with the current inputs
+    Login_Button := Rectangle {
+        width: Login_touch.has-hover ? 210px * root.ui-scale : 200px * root.ui-scale;
+        height: Login_touch.has-hover ? 65px * root.ui-scale : 60px * root.ui-scale;
+        x: (parent.width - self.width) / 2;
+        y: 620px * (parent.height / 768px);
+        background: Login_touch.pressed ? #003d80 : #007bff;
+        border-radius: 15px * root.ui-scale;
+        animate width, height, background { duration: 150ms; easing: ease-in; }
 
-            }
-
+        Text {
+            text: "Login";
+            color: white;
+            font-size: 30px * root.ui-scale;
         }
-        Exit_Button := Image {
-            width: 30px * root.ui-scale;
-            height: 30px * root.ui-scale;
-            colorize: Exit_touch.has-hover ? red : black;
-            x: parent.width - self.width - 20px;
-            y: 20px;
-            source: @image-url("Exit-icon.svg");
-            Exit_touch:=TouchArea {
-                clicked => { }
-            }
 
+        Login_touch := TouchArea {
+            clicked => {
+                login_attempted(id_email_input, password_input, Selected_Login_Type);
+            }
+        }
     }
-    University_Logo := Image{
-                width: 200px * root.ui-scale;
-                height: 60px * root.ui-scale;
-                x: 20px;
-                y: 20px;
-                source: @image-url("Uni-Logo.png");
-                }
+
+    // Top right exit button
+    Exit_Button := Image {
+        width: 30px * root.ui-scale;
+        height: 30px * root.ui-scale;
+        colorize: Exit_touch.has-hover ? red : black;
+        x: parent.width - self.width - 20px;
+        y: 20px;
+        source: @image-url("Exit-icon.svg");
+        Exit_touch := TouchArea {
+            clicked => { }
+        }
+    }
+
+    // Top left university branding
+    University_Logo := Image {
+        width: 200px * root.ui-scale;
+        height: 60px * root.ui-scale;
+        x: 20px;
+        y: 20px;
+        source: @image-url("Uni-Logo.png");
+    }
 }

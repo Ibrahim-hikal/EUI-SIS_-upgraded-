@@ -1,81 +1,92 @@
 #include "../header/Student_Profile.h"
 #include <fstream>
 #include <sstream>
-#include <iostream>
+#include <vector>
+#include <algorithm>
+
+#define STUDENT_DB "Databases/Data_on_Each_Student.csv"
+#define LOGIN_DB "Databases/Login_Credentials.csv"
 
 using namespace std;
 
-Student_Profile& Student_Profile::get_instance() {
-    static Student_Profile instance;
-    return instance;
+// ---> 1. BULLETPROOF MATCHER (Ignores spaces, \r, and caps) <---
+static inline bool robust_match(string a, string b) {
+    a.erase(remove_if(a.begin(), a.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), a.end());
+    b.erase(remove_if(b.begin(), b.end(), [](unsigned char c){ return isspace(c) || c == '\r' || c == '\n'; }), b.end());
+    transform(a.begin(), a.end(), a.begin(), [](unsigned char c){ return tolower(c); });
+    transform(b.begin(), b.end(), b.begin(), [](unsigned char c){ return tolower(c); });
+    return a == b;
 }
 
-// Robust parser to handle CSV fields that contain quotes and extra commas
-vector<string> parse_csv_line(const string& line) {
-    vector<string> result;
-    string current;
-    bool in_quotes = false;
-
-    for (size_t i = 0; i < line.length(); ++i) {
-        char c = line[i];
-        if (c == '"') {
-            in_quotes = !in_quotes;
-        } else if (c == ',' && !in_quotes) {
-            result.push_back(current);
-            current.clear();
-        } else {
-            current += c;
-        }
-    }
-    result.push_back(current);
-    return result;
+// ---> 2. EDGE CLEANER (Removes invisible CSV characters) <---
+static inline string clean_edges(const string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n\"");
+    if (string::npos == first) return "";
+    size_t last = str.find_last_not_of(" \t\r\n\"");
+    return str.substr(first, (last - first + 1));
 }
 
-void Student_Profile::load_profile(const string& target_id) {
-    ifstream file(STUDENT_DB);
+void Student_Profile::reset() {
+    this->name = "";
+    this->email = "";
+    this->id = "";
+    this->faculty = "";
+    this->gpa = "";
+    this->registered_courses.clear();
+}
 
-    if (!file.is_open()) {
-        // Push error text to the UI so you know it failed
-        this->name = "DATABASE ERROR";
-        this->id = "FILE NOT FOUND";
-        this->faculty = "N/A";
-        this->gpa = "N/A";
-        return;
-    }
+void Student_Profile::load_profile(const string &current_email) {
+    reset();
 
-    cout << "SUCCESS: File opened successfully!" << endl;
+    // ---> 3. LOAD LOGIN DATA (Name, ID, Email) <---
+    ifstream login_file(LOGIN_DB);
+    string line, cell;
+    if (login_file.is_open()) {
+        getline(login_file, line);
+        while (getline(login_file, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            vector<string> cols;
+            while (getline(ss, cell, ',')) cols.push_back(clean_edges(cell));
 
-    string line;
-    getline(file, line); // Skip the Header row
-
-    bool found = false;
-
-    while (getline(file, line)) {
-        if (line.empty()) continue;
-
-        vector<string> cols = parse_csv_line(line);
-
-        // Take a quick peek at the first ID in the row for debugging
-        if (!cols.empty()) {
-            cout << "   -> Scanning CSV row, found ID: [" << cols[0] << "]" << endl;
+            // Check BOTH Email (cols[0]) and ID (cols[4]) just in case!
+            if (cols.size() >= 5 && (robust_match(cols[0], current_email) || robust_match(cols[4], current_email))) {
+                this->email = cols[0]; // Lock in the official email
+                this->name = cols[3];
+                this->id = cols[4];
+                break;
+            }
         }
+        login_file.close();
+    }
 
-        // Based on your DB format: ID(0), Name(1), ... Faculty(9), GPA(10)
-        if (cols.size() >= 10 && cols[0] == target_id) {
-            this->id = cols[0];
-            this->name = cols[1];
-            this->faculty = cols[9];
-            this->gpa = cols[10];
+    // ---> 4. LOAD ACADEMIC DATA (Faculty, GPA, Courses) <---
+    ifstream student_file(STUDENT_DB);
+    if (student_file.is_open()) {
+        getline(student_file, line);
+        while (getline(student_file, line)) {
+            if (line.empty()) continue;
+            stringstream ss(line);
+            vector<string> cols;
+            while (getline(ss, cell, ',')) cols.push_back(clean_edges(cell));
 
-            cout << "MATCH FOUND! Loaded data for: " << this->name << endl;
-            found = true;
-            break;
+            if (cols.size() >= 11 && robust_match(cols[0], this->id)) {
+                this->faculty = cols[9];
+                this->gpa = cols[10];
+                string reg_str = cols[4];
+                if (reg_str != "-1" && !reg_str.empty()) {
+                    stringstream reg_ss(reg_str);
+                    string token;
+                    while (getline(reg_ss, token, '_')) {
+                        if (!token.empty()) {
+                            size_t slash = token.find('\\');
+                            registered_courses.push_back((slash != string::npos) ? token.substr(0, slash) : token);
+                        }
+                    }
+                }
+                break;
+            }
         }
+        student_file.close();
     }
-    file.close();
-
-    if (!found) {
-        cout << "ERROR: File was read, but ID [" << target_id << "] was not found inside." << endl;
-    }
-    cout << "============================================\n" << endl;
 }

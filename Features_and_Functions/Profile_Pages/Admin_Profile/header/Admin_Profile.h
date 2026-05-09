@@ -1,32 +1,26 @@
 #ifndef ADMIN_PROFILE_H
 #define ADMIN_PROFILE_H
+
 #include <string>
-using namespace std;
-class Admin_Profile {
+#include "../../IProfile.h" // Links the Abstract Base Class
+
+// ---> 6. INHERITANCE ("Admin is a Profile") <---
+class Admin_Profile : public IProfile {
 private:
-    std::string name;
-    std::string email;
     std::string position;
-
-    Admin_Profile() = default;
-
+    Admin_Profile() {}
 public:
-    static Admin_Profile& get_instance() {
-        static Admin_Profile instance;
-        return instance;
-    }
+    // ---> 7. DESIGN PATTERN 1: SINGLETON <---
+    static Admin_Profile& get_instance() { static Admin_Profile instance; return instance; }
+    Admin_Profile(const Admin_Profile&) = delete;
+    Admin_Profile& operator=(const Admin_Profile&) = delete;
 
-    Admin_Profile(Admin_Profile const&) = delete;
-    void operator=(Admin_Profile const&) = delete;
+    // ---> RUNTIME POLYMORPHISM (Overriding) <---
+    void load_profile(const std::string& current_email) override;
+    void reset() override;
+    std::string get_role() const override { return "Admin"; }
 
-    void load_profile(const std::string &current_email);
-    void reset();
-
-    // New function for ending the semester
-    string end_semester();
-
-    std::string get_name() const { return name; }
-    std::string get_email() const { return email; }
+    std::string end_semester();
     std::string get_position() const { return position; }
 };
-#endif //ADMIN_PROFILE_H
+#endif
