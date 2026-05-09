@@ -9,9 +9,18 @@ set(CMAKE_CXX_STANDARD 20)
 # 2. Find the package locally
 find_package(Slint REQUIRED)
 
-# 2. Define the app and ALL source files
-add_executable(main_app
+set(ICON_RC_PATH "${CMAKE_BINARY_DIR}/app_icon.rc")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/logo.ico")
+    file(WRITE "${ICON_RC_PATH}" "IDI_ICON1 ICON \"${CMAKE_CURRENT_SOURCE_DIR}/logo.ico\"\n")
+else()
+    # If logo.ico isn't found, create an empty file so CMake doesn't crash
+    file(WRITE "${ICON_RC_PATH}" "")
+endif()
+
+# 3. Define the app and ALL source files
+add_executable(EUI_SIS
         main.cpp
+        ${ICON_RC_PATH}
         Features_and_Functions/Login_Page/src/Login_page.cpp
         Features_and_Functions/Login_Page/header/Login_Page.h
         Features_and_Functions/Profile_Pages/Admin_Profile/header/Admin_Profile.h
@@ -36,38 +45,28 @@ add_executable(main_app
         Features_and_Functions/Profile_Pages/ImageManager.h
         Features_and_Functions/Course_Management/Attendance/Teacher/header/Teacher_Attendance.h
         Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
-        Features_and_Functions/Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/src/Accept_and_Refuse_Courses.cpp
         Features_and_Functions/Course_Management/Shared/Student.cpp
         Features_and_Functions/Course_Management/Shared/Student.h
         Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/src/Student_Course_Withdrawal.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/src/Admin_Course_Withdrawal.cpp
-        Features_and_Functions/Academic_Requests/Attendance_Excuses/Student_Attendance_Excuses/src/Student_Attendance_Excuses.cpp
-        Features_and_Functions/Academic_Requests/Attendance_Excuses/Admin_Attendance_Excuses/src/Admin_Attendance_Excuses.cpp
         Features_and_Functions/Schedule/Student_Schedule/header/Student_Schedule_Manager.h
         Features_and_Functions/Schedule/Student_Schedule/src/Student_Schedule_Manager.cpp
         Features_and_Functions/Schedule/Teacher_Schedule/src/Teacher_Schedule_Manager.cpp
         Features_and_Functions/Schedule/Teacher_Schedule/header/Teacher_Schedule_Manager.h
-
-
-Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
-Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
-
-Features_and_Functions/Manage_Members/Admin/Add_Teachers/src/Add_Teachers.cpp
-Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h
-
-Features_and_Functions/Manage_Members/Admin/Assign_Courses/src/Assign_Courses.cpp
-Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h
+        Features_and_Functions/Manage_Members/Admin/Add_Students/src/Add_Students.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Students/header/Add_Students.h
+        Features_and_Functions/Manage_Members/Admin/Add_Teachers/src/Add_Teachers.cpp
+        Features_and_Functions/Manage_Members/Admin/Add_Teachers/header/Add_Teachers.h
+        Features_and_Functions/Manage_Members/Admin/Assign_Courses/src/Assign_Courses.cpp
+        Features_and_Functions/Manage_Members/Admin/Assign_Courses/header/Assign_Courses.h
         Features_and_Functions/Profile_Pages/IProfile.h
-
 )
 
-# 3. Add Slint files
-slint_target_sources(main_app
+# 4. Add Slint files
+slint_target_sources(EUI_SIS
         Features_and_Functions/main.slint
-
-
 )
 
-# 4. Link everything
-target_link_libraries(main_app PRIVATE Slint::Slint)
+# 5. Link everything
+target_link_libraries(EUI_SIS PRIVATE Slint::Slint)
