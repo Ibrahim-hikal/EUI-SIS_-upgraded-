@@ -38,6 +38,7 @@ add_executable(main_app
         Features_and_Functions/Course_Management/Attendance/Teacher/src/Teacher_Attendance.cpp
         Features_and_Functions/Course_Management/Admin_Course_Management/Accept_and_Refuse_Courses/src/Accept_and_Refuse_Courses.cpp
         Features_and_Functions/Course_Management/Shared/Student.cpp
+        Features_and_Functions/Course_Management/Shared/Student.h
         Features_and_Functions/Course_Management/Grades/Teacher/src/Teacher_Grades.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Student_Course_Withdrawal/src/Student_Course_Withdrawal.cpp
         Features_and_Functions/Academic_Requests/Course_Withdrawal/Admin_Course_Withdrawal/src/Admin_Course_Withdrawal.cpp
