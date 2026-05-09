@@ -2,24 +2,34 @@ import { ScrollView } from "std-widgets.slint";
 import { StudentGradeData } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 import { CourseInfo } from "../../../Attendance/Shared/GUI/Shared_Structs.slint";
 
-
-// Custom dropdown to replace ComboBox, allowing explicit color styling
+/*
+ * HELPER COMPONENT: CustomComboBox
+ * A dropdown menu used to select which course the teacher is grading.
+ */
 component CustomComboBox inherits Rectangle {
-    in property <[CourseInfo]> model; // <-- Changed to [CourseInfo]
+    // The list of courses the teacher is assigned to
+    in property <[CourseInfo]> model;
+
+    // The currently selected course
     in-out property <string> current-value;
     in property <float> ui-scale: 1.0;
+
+    // The trigger that fires when the teacher clicks a course in the list
     callback selected(string);
 
+    // Tracks if the dropdown list is currently visible or hidden
     property <bool> is_open: false;
 
     width: 250px * root.ui-scale;
     height: 40px * root.ui-scale;
 
-    // Main selector box
+    // The main box that stays visible all the time
     Rectangle {
         width: 100%;
         height: 100%;
         background: #FFFFFF;
+
+        // Turns the border blue if the teacher hovers over it
         border-color: CourseSelectorTouchArea.has-hover? #007bff: #707070;
         border-width: 2px;
         border-radius: 4px * root.ui-scale;
@@ -32,7 +42,7 @@ component CustomComboBox inherits Rectangle {
             font-weight: 600;
         }
 
-        // Dropdown arrow indicator
+        // The little arrow indicator on the right side of the box
         Text {
             text: "v";
             color: black;
@@ -41,14 +51,15 @@ component CustomComboBox inherits Rectangle {
             x: parent.width - 20px * root.ui-scale;
         }
 
+        // Toggles the dropdown list open or closed when clicked
         CourseSelectorTouchArea:= TouchArea{
             clicked => { root.is_open = !root.is_open; }
         }
     }
 
-    // The dropdown list
+    // The actual list of options that appears when the menu is open
     if root.is_open: Rectangle {
-        y: root.height + 2px;
+        y: root.height + 2px; // Positions the list exactly below the main box
         width: 100%;
         background: #FFFFFF;
         border-color: #007bff;
@@ -58,10 +69,12 @@ component CustomComboBox inherits Rectangle {
         VerticalLayout {
             for item in root.model: Rectangle {
                 height: 40px * root.ui-scale;
+
+                // Highlights the row light gray if the teacher hovers over it
                 background: item_touch.has-hover ? #e0e0e0 : #FFFFFF;
 
                 Text {
-                    text: item.course_code; // <-- Extract the string here
+                    text: item.course_code;
                     color: black;
                     vertical-alignment: center;
                     x: 15px * root.ui-scale;
@@ -69,9 +82,10 @@ component CustomComboBox inherits Rectangle {
 
                 item_touch := TouchArea {
                     clicked => {
-                        root.current-value = item.course_code; // <-- Extract the string here
+                        // Updates the main box text, closes the list, and triggers the callback
+                        root.current-value = item.course_code;
                         root.is_open = false;
-                        root.selected(item.course_code); // <-- Extract the string here
+                        root.selected(item.course_code);
                     }
                 }
             }
@@ -79,14 +93,21 @@ component CustomComboBox inherits Rectangle {
     }
 }
 
-// Custom input box replacing LineEdit to allow color modification
+/*
+ * HELPER COMPONENT: GradeInput
+ * The input boxes where the teacher types the numbers for the grades.
+ */
 component GradeInput inherits Rectangle {
     in property <string> text;
     in property <float> ui-scale: 1.0;
+
+    // Trigger that sends the newly typed number back to the main data table
     callback edited(string);
 
     background: #FFFFFF;
-    border-color: GradeInputTouchArea.has-hover? #007bff: #707070;
+
+    // Highlights the border blue when the text box is actively being typed in
+    border-color: input.has-focus ? #007bff : #707070;
     border-width: 2px;
     border-radius: 4px * root.ui-scale;
 
@@ -94,24 +115,32 @@ component GradeInput inherits Rectangle {
         width: 100%;
         height: 100%;
         text: root.text;
-        color: black; // explicitly styling text color to black
-        single-line: true;
+        color: black;
+        single-line: true; // Prevents the user from creating multiple lines of text
         vertical-alignment: center;
         horizontal-alignment: center;
-        edited => { root.edited(self.text); }
 
-        GradeInputTouchArea:= TouchArea{ }
+        // Updates the data structure as soon as the teacher types a number
+        edited => { root.edited(self.text); }
     }
 }
 
+/*
+ * MAIN COMPONENT: Teacher_Grades_Panel
+ * The main screen layout that holds the course selector and the student grade table.
+ */
 export component Teacher_Grades_Panel inherits Rectangle {
     in-out property <float> ui-scale: 1.0;
+
+    // The lists of data passed in from the C++ backend
     in property <[CourseInfo]> available_courses;
     in-out property <[StudentGradeData]> grades_data;
 
-     out property <string> selected_course: "";
-     callback load_grades(string);
-     callback save_grades([StudentGradeData], string);
+    out property <string> selected_course: "";
+
+    // Callbacks to ask the C++ backend to fetch new data or save edited data
+    callback load_grades(string);
+    callback save_grades([StudentGradeData], string);
 
     background: white;
 
@@ -121,29 +150,36 @@ export component Teacher_Grades_Panel inherits Rectangle {
 
         Text { text: "Manage Course Grades"; color:black; font-size: 24px * root.ui-scale; font-weight: 700; }
 
+        // The Dropdown Menu Row
         HorizontalLayout {
             spacing: 20px * root.ui-scale;
             height: 40px * root.ui-scale;
-            z: 100; // Brings the custom dropdown forward so its overlay isn't hidden by the ScrollView below
+
+            // Ensures the dropdown list overlaps the table below it rather than hiding behind it
+            z: 100;
 
             CustomComboBox {
                 model: available_courses;
                 current-value: root.selected_course;
                 ui-scale: root.ui-scale;
                 selected(val) => {
+                    // When a course is picked, tell the backend to load its gradebook
                     root.selected_course = val;
                     root.load_grades(val);
                 }
             }
         }
 
+        // The Main Gradebook Table
         ScrollView {
             z: 0;
             VerticalLayout {
                 spacing: 10px * root.ui-scale;
-                alignment: start; // <-- FIX 1: Pins all student rows to the top
 
-                // Header row
+                // Aligns all student rows to the top of the scrollable area
+                alignment: start;
+
+                // Header Row (Titles for the columns)
                 HorizontalLayout {
                     padding: 10px * root.ui-scale;
                     spacing: 10px * root.ui-scale;
@@ -161,13 +197,16 @@ export component Teacher_Grades_Panel inherits Rectangle {
                     Text { text: "GPA"; width: 70px * root.ui-scale; font-weight: 700; color: #555; }
                 }
 
+                // Generates a new row for every student enrolled in the selected course
                 for student in grades_data: Rectangle {
                     height: 50px * root.ui-scale;
                     background: #f4f6f9; border-radius: 8px * root.ui-scale;
+
                     HorizontalLayout {
                         padding: 10px * root.ui-scale;
                         spacing: 10px * root.ui-scale;
 
+                        // Displays the student ID, followed by input boxes for every grade category
                         Text { text: student.id; color:black; width: 100px * root.ui-scale; vertical-alignment: center; font-weight: 600; }
                         GradeInput { text: student.quiz1; width: 70px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.quiz1 = val; } }
                         GradeInput { text: student.quiz2; width: 70px * root.ui-scale; ui-scale: root.ui-scale; edited(val) => { student.quiz2 = val; } }
@@ -184,10 +223,14 @@ export component Teacher_Grades_Panel inherits Rectangle {
             }
         }
 
+        // The Submit Grades Button Row
         HorizontalLayout {
             alignment: center;
-            height: 80px * root.ui-scale; // <-- FIX 2: Fixed height stops the layout from shifting on hover
+
+            // Fixed height keeps the layout stable when the button animates on hover
+            height: 80px * root.ui-scale;
             padding-top: 10px * root.ui-scale;
+
             Submit_Button := Rectangle {
                 width: Submit_Button_Touch.has-hover ? 210px * root.ui-scale : 200px * root.ui-scale;
                 height: Submit_Button_Touch.has-hover ? 65px * root.ui-scale : 60px * root.ui-scale;
@@ -196,7 +239,9 @@ export component Teacher_Grades_Panel inherits Rectangle {
                 animate width, height, background { duration: 150ms; easing: ease-in; }
 
                 Text { text: "Submit Grades"; color: black; font-size: 22px * root.ui-scale; }
+
                 Submit_Button_Touch := TouchArea {
+                    // Sends all the newly typed numbers to the backend to be permanently saved
                     clicked => { root.save_grades(root.grades_data, root.selected_course); }
                 }
             }
