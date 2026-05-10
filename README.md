@@ -1,9 +1,10 @@
-# EUI-SIS Upgraded
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/Ibrahim-hikal/EUI-SIS_-upgraded-)
+![EUI Logo](https://i.postimg.cc/9M987s3c/EUI-logo.png)
+# EUI-SIS-GUI
+
 
 ## Overview
 
-EUI-SIS Upgraded is a comprehensive Student Information System (SIS) built as a desktop application for Egypt University of Informatics. Developed with C++ and the modern Slint UI framework, this application provides a robust platform for managing all core academic operations. It features three distinct user portals—Student, Teacher, and Administrator—each with a tailored dashboard and functionalities designed to streamline university processes, from course registration and attendance tracking to grade management and end-of-semester processing.
+EUI-SIS-GUI is a comprehensive Student Information System (SIS) built as a desktop application for Egypt University of Informatics. Developed with C++ and the modern Slint UI framework, this application provides a robust platform for managing all core academic operations. It features three distinct user portals—Student, Teacher, and Administrator—each with a tailored dashboard and functionalities designed to streamline university processes, from course registration and attendance tracking to grade management and end-of-semester processing.
 
 ## Key Features
 
@@ -60,8 +61,8 @@ The repository includes a batch script to automate the build process on Windows.
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/Ibrahim-hikal/EUI-SIS_-upgraded-.git
-    cd EUI-SIS_-upgraded-
+    git clone https://github.com/Ibrahim-hikal/EUI-SIS-GUI.git
+    cd EUI-SIS-GUI
     ```
 
 2.  **Verify Slint Installation:**
@@ -83,3 +84,7 @@ The repository includes a batch script to automate the build process on Windows.
 
 5.  **Run the Application:**
     Double-click `EUI_SIS.exe` to start the application.
+
+
+   # DeepWiki for this project:
+[![DeepWiki Index for this project](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/Ibrahim-hikal/EUI-SIS_-upgraded-)
