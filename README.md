@@ -2,7 +2,7 @@
 # EUI-SIS-GUI
 
 
-## Overview
+## Overview 
 
 EUI-SIS-GUI is a comprehensive Student Information System (SIS) built as a desktop application for Egypt University of Informatics. Developed with C++ and the modern Slint UI framework, this application provides a robust platform for managing all core academic operations. It features three distinct user portals—Student, Teacher, and Administrator—each with a tailored dashboard and functionalities designed to streamline university processes, from course registration and attendance tracking to grade management and end-of-semester processing.
 
