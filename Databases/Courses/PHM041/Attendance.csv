@@ -1,5 +1,6 @@
 ID,Name,Registered Lecture Slot,Registered Tutorial Slot,Week 1,Week 2,Week 3,Week 4,Week 5,Week 6,Week 7,Week 8,Week 9,Week 10,Week 11,Week 12,Week 13
 24-422209,Omar Ahmed,Thursday 11:00-13:00,Tuesday 11:00-13:00,0,1,1,1,1,1,1,1,1,1,1,1,1
 24-101229,Ahmed Samy,Thursday 11:00-13:00,Thursday 09:00-11:00,1,1,1,1,1,1,1,-1,-1,1,1,1,1
-26-101001,test student,Tuesday 14:00-16:00,Wednesday 14:00-16:00,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-26-101002,Ahmed Omar,Monday 09:00-11:00,Tuesday 11:00-13:00,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+26-101001,test student,Tuesday 14:00-16:00,Wednesday 14:00-16:00,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+26-101002,Ahmed Omar,Monday 09:00-11:00,Tuesday 11:00-13:00,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
+24-101229,Ahmed Samy,Sunday 09:00-11:00,Monday 11:00-13:00,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1

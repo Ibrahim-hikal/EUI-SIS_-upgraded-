@@ -92,8 +92,8 @@ std::string ImageManager::select_image_dialog() {
 
     // Dialog behavior flags
     ofn.Flags = OFN_PATHMUSTEXIST |             // Path must exist (prevents typing invalid paths)
-                OFN_FILEMUSTEXIST |             // File must exist (must select existing file)
-                OFN_NOCHANGEDIR |               // Don't change app's current directory
+                OFN_FILEMUSTEXIST |             // File must exist (must select an existing file)
+                OFN_NOCHANGEDIR |               // Don't change the app's current directory
                 OFN_NODEREFERENCELINKS;         // Don't follow shortcut links
 
     // ==========================================

@@ -1,6 +1,6 @@
 Name,Email,Courses_Taught
 Ahmed Mahmoud,ahmed.mahmoud@eui.edu.eg,Innovation I_General Chemistry
-Mohamed Ahmed,mohamed.ahmed@eui.edu.eg,Calculus I_Calculus II_Multivariate Calculus_Electrical Engineering Fundamentals I
+Mohamed Ahmed,mohamed.ahmed@eui.edu.eg,Calculus I_Multivariate Calculus_Electrical Engineering Fundamentals I
 Mohamed Ali,mohamed.ali@eui.edu.eg,Modern Mechanics
 Hadeer Momen,hadeer.momen@eui.edu.eg,English Language
 Fatma Ahmed,fatma.ahmed@eui.edu.eg,Intro To Computer Programming
@@ -11,3 +11,4 @@ Islam Tawkeel,islam.tawkeel@eui.edu.eg,Signals And Systems
 Ahmed Naser,ahmed.naser@eui.edu.eg,
 Ahmed Mohamed,ahmed.mohamed@eui.edu.eg,""
 teacher ,teacher.@eui.edu.eg,""
+Testing Teacher,testing.teacher@eui.edu.eg,Calculus II

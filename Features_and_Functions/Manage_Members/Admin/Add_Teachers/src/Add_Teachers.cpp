@@ -11,7 +11,6 @@
 
 using namespace std;
 
-// ---> NEW SAFE APPEND FUNCTION <---
 // This guarantees the new entry is ALWAYS on a new row!
 void safe_append_to_db(const string& filename, const string& text) {
     bool add_newline = false;
